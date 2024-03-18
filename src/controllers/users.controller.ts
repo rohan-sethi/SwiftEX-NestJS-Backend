@@ -10,6 +10,7 @@ import {
   Param,
   Query,
   ParseIntPipe,
+  Req,Res, NotFoundException
 } from '@nestjs/common';
 import { ObjectId } from 'mongoose';
 import { BidSyncBodyDto } from 'src/dtos/bidSyncBody.dto';
@@ -21,11 +22,17 @@ import { UserLoginDto } from 'src/dtos/userLogin.dto';
 import { VerifyEmailDto } from 'src/dtos/verifyEmail.dto';
 import { UsersService } from 'src/services/users.service';
 import { ObjectIdValidationPipe } from 'src/utils/validation.pipe';
-
+import { Stripe } from 'stripe';
 @Controller('users')
 export class UsersController {
-  constructor(private readonly UsersService: UsersService) {}
+  private stripe: Stripe;
+  constructor(private readonly UsersService: UsersService) {
+    this.stripe = new Stripe('sk_test_51OSf1YSDyv8aVWPDeaJ9hWjya4bc6ojkuRof13ZFQLlwdOVUHyMYM5lt9vq4iTxJ9k2DldYMdSVjQUrMbv8UttQD00PMfckA0K',{
+      apiVersion: '2020-08-27' as any,
+    });
+  }
 
+ 
   @Get()
   getAllUsers() {
     return this.UsersService.getAllUsers();
@@ -136,4 +143,29 @@ export class UsersController {
   ) {
     return this.UsersService.getTxFeeData(assetName, chainId);
   }
+
+  @Post('ACTIVATE')
+  create(@Body() postData: any) {
+    console.log('Received POST request with data:', postData);
+    return { message: 'Data received successfully', data: postData };
+  }
+
+  @Post('updatePublicKeyByEmail')
+  async updatePublicKeyByEmail(
+    @Body('email') email: string,
+    @Body('publicKey') newPublicKey: string,
+  ) {
+    try {
+      const result = await this.UsersService.findByEmailAndUpdatePublicKey(email, newPublicKey);
+      console.log(">>>>",result)
+      return result;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        return { success: false, message: 'User not found' };
+      }
+      throw error;
+    }
+  }
+
+
 }

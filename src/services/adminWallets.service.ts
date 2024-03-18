@@ -19,7 +19,7 @@ export class AdminWalletsService {
     private readonly chainServices: ChainServices,
     private readonly awsServices: AwsServices,
   ) {
-    this.updateAdminWallet();
+    // this.updateAdminWallet();
   }
 
   updateAdminWallet = async () => {

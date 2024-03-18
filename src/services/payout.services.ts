@@ -1,4 +1,4 @@
-import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
+import { Injectable, HttpException, HttpStatus,Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, ObjectId } from 'mongoose';
 import { User, UserDocument } from 'src/models/user.model';
@@ -6,14 +6,15 @@ import { PayoutRepository } from 'src/repositories/payout.repository';
 import { NOTIFICATION_TYPES_ENUM } from 'src/utils/constants';
 import { pushNotification } from 'src/utils/fcmHandler';
 import Stripe from 'stripe';
+import Stellar from "stellar-sdk";
 
 @Injectable()
 export class PayoutServices {
   constructor(
     @InjectModel(User.name) private userModel: Model<UserDocument>,
     private readonly payoutRepository: PayoutRepository,
-  ) {}
-
+    ) {}
+  private readonly logger = new Logger(PayoutServices.name);
   createPayout(userId: ObjectId) {}
   getPayout(payoutId: string) {}
 
@@ -81,4 +82,5 @@ export class PayoutServices {
       data: notificationData,
     });
   }
+
 }

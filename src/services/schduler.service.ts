@@ -27,6 +27,6 @@ export class TasksService {
   /// Update admin wallets every day
   @Cron('0 0 0 * * *')
   udpateAdminWallets() {
-    this.adminWalletsService.updateAdminWallet();
+    // this.adminWalletsService.updateAdminWallet();
   }
 }

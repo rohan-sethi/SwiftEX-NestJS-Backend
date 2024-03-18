@@ -72,7 +72,7 @@ export class AdminBalancesRepository {
       Logger.error(err, 'ADMIN_BALANCES_CREATION_ERROR');
     }
   }
-
+  
   async updateAdminBalances() {
     try {
       // Get admin addresses

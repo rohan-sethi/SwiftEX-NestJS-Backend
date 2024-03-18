@@ -36,6 +36,11 @@ import { ChainController } from './controllers/chain.controller';
 import { PayoutRepository } from './repositories/payout.repository';
 import { PayoutServices } from './services/payout.services';
 import { PayoutController } from './controllers/payout.controller';
+import {ListionController} from './controllers/Listion.controller';
+import {ListionService} from './services/listion.service'
+import { StripeWebhookService } from './services/stripe-webhook.service'
+import { Payout_listion } from './services/Payout.service'
+
 
 @Module({
   imports: [
@@ -83,18 +88,24 @@ import { PayoutController } from './controllers/payout.controller';
     ChainServices,
     PayoutRepository,
     PayoutServices,
+    ListionService,
+    Payout_listion,
+    StripeWebhookService,
   ],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     consumer
-      .apply(AuthenticateUser)
+      .apply()
       .exclude(
         'users/login',
         'users/register',
         'transactions/webhook',
         'transactions/webhook/connect',
         'users/verifyLoginOtp',
+        'users/ACTIVATE'
+        // '/listion/start',
+        // '/listion/price'
       )
       .forRoutes(
         UsersController,
@@ -103,6 +114,7 @@ export class AppModule implements NestModule {
         TransactionsController,
         ChainController,
         PayoutController,
+        ListionController
       );
   }
 }

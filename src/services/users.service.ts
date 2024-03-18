@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, isValidObjectId, ObjectId } from 'mongoose';
 import { NewUserDto } from 'src/dtos/newUser.dto';
@@ -17,10 +17,19 @@ import { NewStripeAccountDto } from 'src/dtos/newStripeAccount.dto';
 import { AdminWalletsService } from './adminWallets.service';
 import { TxFeeRepository } from 'src/repositories/txFees.repository';
 import { ChainServices } from './web3.service';
+import * as Stellar from 'stellar-sdk';
+
+
+const stripe = new Stripe(process.env.STRIPE_API_SK, {
+  apiVersion: '2022-11-15',
+});
 
 @Injectable()
 export class UsersService {
   private readonly redisClient: Redis;
+  private readonly logger = new Logger(UsersService.name);
+
+
 
   constructor(
     @InjectModel(User.name) private userModel: Model<UserDocument>,
@@ -29,8 +38,10 @@ export class UsersService {
     private readonly adminWalletsService: AdminWalletsService,
     private readonly txFeeRepository: TxFeeRepository,
     private readonly chainServices: ChainServices,
-  ) {
+  
+    ) {
     this.redisClient = redisService.getClient();
+    Stellar.Network.useTestNetwork();
   }
 
   getAllUsers() {
@@ -58,16 +69,17 @@ export class UsersService {
     }
 
     const otp = this._generateOtp();
-    const { errorMessage } = await sendMessage({
-      body: `Hi ${newUser.firstName} ${newUser.lastName},\nWelcome to crypto-exchange! your OTP is: ${otp}`,
-      from: process.env.TWILIO_PHN_NO,
-      to: newUser.phoneNumber,
-    });
+    // const { errorMessage } = await sendMessage({
+    //   body: `Hi ${newUser.firstName} ${newUser.lastName},\nWelcome to crypto-exchange! your OTP is: ${otp}`,
+    //   from: process.env.TWILIO_PHN_NO,
+    //   to: newUser.phoneNumber,
+    // });
 
-    if (errorMessage)
-      throw new HttpException(errorMessage, HttpStatus.BAD_REQUEST);
+    // if (errorMessage)
+    //   throw new HttpException(errorMessage, HttpStatus.BAD_REQUEST);
 
     const loginOtp = bcrypt.hashSync(otp, 10);
+    console.log(">>",loginOtp)
     const addedUser = await this.userModel.create({ ...newUser, loginOtp });
 
     return addedUser;
@@ -89,6 +101,7 @@ export class UsersService {
 
   // Login
   async login(credintails: UserLoginDto) {
+    console.log("called")
     const { phoneNumber } = credintails;
     const user = await this.userModel.findOne({ phoneNumber });
     if (!user) throw new HttpException('User not found', HttpStatus.NOT_FOUND);
@@ -103,6 +116,7 @@ export class UsersService {
         HttpStatus.BAD_REQUEST,
       );
     const otp = this._generateOtp();
+    console.log(">>",otp)
 
     const { errorMessage, errorCode } = await sendMessage({
       body: `Hi ${user.firstName} ${user.lastName},\nYour crypto-exhange login OTP is: ${otp} /oxBn3sK95AK`,
@@ -137,13 +151,13 @@ export class UsersService {
       );
 
     if (!bcrypt.compareSync(otp, user.loginOtp))
+    console.log(".....",otp, user.loginOtp)
       throw new HttpException('Wrong OTP', HttpStatus.BAD_REQUEST);
 
     const token = signJwtToken({
       phoneNumber: user.phoneNumber,
       _id: user._id,
     });
-
     await this.userModel.findOneAndUpdate(
       { phoneNumber },
       { isLoginOtpUsed: true },
@@ -344,4 +358,31 @@ export class UsersService {
     console.log('New Otp:', otp); // test...
     return otp;
   }
+
+
+  async findByEmailAndUpdatePublicKey(email: string, newPublicKey: string) {
+    const user = await this.userModel.findOne({ email });
+
+    if (!user) {
+      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+    }
+
+    await this.userModel.findByIdAndUpdate(user._id, {
+      public_key: newPublicKey,
+    })
+
+    const server = new Stellar.Server('https://horizon-testnet.stellar.org');
+   const res =  server.friendbot(newPublicKey)
+  .call()
+  .then(() => {
+    this.logger.log('Funded successfully');
+    return { success: true, message: "Funded successfully" };
+  })
+  .catch(() => {
+    this.logger.log('Error funding account:');
+    return { success: false , message: "Error funding account"};
+  });
+  return res;
+  }
+
 }

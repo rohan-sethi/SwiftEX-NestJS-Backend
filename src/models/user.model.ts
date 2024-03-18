@@ -53,6 +53,12 @@ export class User {
 
   @Prop()
   fcmRegTokens?: string[];
+
+  @Prop({ required: false, unique: true })
+  public_key: string;
+
+  @Prop({ required: false, unique: true })
+  secret_key: string;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
