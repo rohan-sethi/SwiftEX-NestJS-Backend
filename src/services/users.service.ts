@@ -69,17 +69,17 @@ export class UsersService {
     }
 
     const otp = this._generateOtp();
-    // const { errorMessage } = await sendMessage({
-    //   body: `Hi ${newUser.firstName} ${newUser.lastName},\nWelcome to crypto-exchange! your OTP is: ${otp}`,
-    //   from: process.env.TWILIO_PHN_NO,
-    //   to: newUser.phoneNumber,
-    // });
+    const { errorMessage } = await this.emailService.sendEmail(
+          newUser.email,
+          'One Time Passcode from SwiftEx.',
+          `Hi ${newUser.firstName},\nYour email verification OTP is ${otp}\nRegards,`,
+        );
 
-    // if (errorMessage)
-    //   throw new HttpException(errorMessage, HttpStatus.BAD_REQUEST);
+    if (errorMessage)
+      throw new HttpException(errorMessage, HttpStatus.BAD_REQUEST);
 
     const loginOtp = bcrypt.hashSync(otp, 10);
-    console.log(">>",loginOtp)
+    console.log(">>",loginOtp);
     const addedUser = await this.userModel.create({ ...newUser, loginOtp });
 
     return addedUser;

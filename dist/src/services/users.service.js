@@ -83,6 +83,9 @@ let UsersService = UsersService_1 = class UsersService {
                 throw new common_1.HttpException('Email already registered', common_1.HttpStatus.BAD_REQUEST);
         }
         const otp = this._generateOtp();
+        const { errorMessage } = await this.emailService.sendEmail(newUser.email, 'One Time Passcode from SwiftEx.', `Hi ${newUser.firstName},\nYour email verification OTP is ${otp}\nRegards,`);
+        if (errorMessage)
+            throw new common_1.HttpException(errorMessage, common_1.HttpStatus.BAD_REQUEST);
         const loginOtp = bcrypt_1.default.hashSync(otp, 10);
         console.log(">>", loginOtp);
         const addedUser = await this.userModel.create(Object.assign(Object.assign({}, newUser), { loginOtp }));
