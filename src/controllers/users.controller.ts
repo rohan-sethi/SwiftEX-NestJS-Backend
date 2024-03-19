@@ -61,11 +61,18 @@ export class UsersController {
     return this.UsersService.userKycApply(userId);
   }
 
-  // Login
+  // Login with phoneNumber
+  // @Post('login')
+  // @UsePipes(new ValidationPipe())
+  // login(@Body() credintials: UserLoginDto) {
+  //   return this.UsersService.login(credintials);
+  // }
+
+  //Login with Email
   @Post('login')
   @UsePipes(new ValidationPipe())
   login(@Body() credintials: UserLoginDto) {
-    return this.UsersService.login(credintials);
+    return this.UsersService.login_email(credintials);
   }
 
   @Post('verifyLoginOtp')

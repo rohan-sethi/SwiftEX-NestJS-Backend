@@ -57,7 +57,18 @@ import { Payout_listion } from './services/Payout.service'
     ]),
     MailerModule.forRootAsync({
       useFactory: () => ({
-        transport: process.env.SMTP_URL,
+        // transport: process.env.SMTP_URL
+          transport: {
+            host: 'smtpout.secureserver.net',
+            port: 465,
+            secure: true,
+            auth: {
+              user: process.env.EMAIL_ADD,
+              pass: process.env.EMAIL_PASS,
+            },
+            tls: { rejectUnauthorized: false }
+          },
+
       }),
     }),
   ],
@@ -96,7 +107,7 @@ import { Payout_listion } from './services/Payout.service'
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     consumer
-      .apply()
+      .apply(AuthenticateUser)
       .exclude(
         'users/login',
         'users/register',
