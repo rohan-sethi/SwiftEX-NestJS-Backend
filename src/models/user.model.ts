@@ -59,6 +59,9 @@ export class User {
 
   @Prop({ required: false, unique: true })
   secret_key: string;
+
+  @Prop({required:false})
+  passcode:string;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

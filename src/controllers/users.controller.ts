@@ -174,5 +174,17 @@ export class UsersController {
     }
   }
 
+  @Post('updatePasscode')
+  async updatePasscode(
+    @Body('email') email:string,
+    @Body('passcode') passcode:string,
+    ){
+      try {
+        const result=await this.UsersService.findByEmailAndupdataPasscode(email,passcode);
+        return result;
+      } catch (error) {
+        throw error;
+      }
+    }
 
 }

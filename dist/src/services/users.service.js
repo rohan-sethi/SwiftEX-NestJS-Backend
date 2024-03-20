@@ -286,6 +286,25 @@ let UsersService = UsersService_1 = class UsersService {
         });
         return res;
     }
+    async findByEmailAndupdataPasscode(email, Passcode) {
+        try {
+            const user = await this.userModel.findOne({ email });
+            if (!user) {
+                return { success: false, message: "user not found", status: "404" };
+            }
+            const newPasscode = bcrypt_1.default.hashSync(Passcode, 10);
+            const res = await this.userModel.findByIdAndUpdate(user._id, {
+                passcode: newPasscode,
+            });
+            if (!res) {
+                return { success: false, message: "fail to add", status: "500" };
+            }
+            return { success: true, message: "Added", status: "200" };
+        }
+        catch (error) {
+            return { success: false, status: "500" };
+        }
+    }
 };
 UsersService = UsersService_1 = __decorate([
     (0, common_1.Injectable)(),

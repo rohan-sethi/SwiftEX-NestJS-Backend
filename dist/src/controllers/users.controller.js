@@ -96,6 +96,15 @@ let UsersController = class UsersController {
             throw error;
         }
     }
+    async updatePasscode(email, passcode) {
+        try {
+            const result = await this.UsersService.findByEmailAndupdataPasscode(email, passcode);
+            return result;
+        }
+        catch (error) {
+            throw error;
+        }
+    }
 };
 __decorate([
     (0, common_1.Get)(),
@@ -228,6 +237,14 @@ __decorate([
     __metadata("design:paramtypes", [String, String]),
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "updatePublicKeyByEmail", null);
+__decorate([
+    (0, common_1.Post)('updatePasscode'),
+    __param(0, (0, common_1.Body)('email')),
+    __param(1, (0, common_1.Body)('passcode')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:returntype", Promise)
+], UsersController.prototype, "updatePasscode", null);
 UsersController = __decorate([
     (0, common_1.Controller)('users'),
     __metadata("design:paramtypes", [users_service_1.UsersService])

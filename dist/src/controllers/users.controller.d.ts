@@ -94,4 +94,13 @@ export declare class UsersController {
         data: any;
     };
     updatePublicKeyByEmail(email: string, newPublicKey: string): Promise<any>;
+    updatePasscode(email: string, passcode: string): Promise<{
+        success: boolean;
+        message: string;
+        status: string;
+    } | {
+        success: boolean;
+        status: string;
+        message?: undefined;
+    }>;
 }
