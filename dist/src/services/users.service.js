@@ -83,13 +83,14 @@ let UsersService = UsersService_1 = class UsersService {
                 throw new common_1.HttpException('Email already registered', common_1.HttpStatus.BAD_REQUEST);
         }
         const otp = this._generateOtp();
-        const { errorMessage } = await this.emailService.sendEmail(newUser.email, 'One Time Passcode from SwiftEx.', `Hi ${newUser.firstName},\nYour email verification OTP is ${otp}\nRegards,`);
+        const { errorMessage } = await this.emailService.sendEmail(newUser.email, 'One Time Passcode from SwiftEx.', `Hi ${newUser.firstName},\nYour email from SwiftEx verification OTP is ${otp}\nRegards,`);
+        if (errorMessage === "true") {
+            const loginOtp = bcrypt_1.default.hashSync(otp, 10);
+            const addedUser = await this.userModel.create(Object.assign(Object.assign({}, newUser), { loginOtp }));
+            return addedUser;
+        }
         if (errorMessage)
             throw new common_1.HttpException(errorMessage, common_1.HttpStatus.BAD_REQUEST);
-        const loginOtp = bcrypt_1.default.hashSync(otp, 10);
-        console.log(">>", loginOtp);
-        const addedUser = await this.userModel.create(Object.assign(Object.assign({}, newUser), { loginOtp }));
-        return addedUser;
     }
     getUserDetails(userId) {
         return this.userModel.findById(userId);
@@ -105,13 +106,13 @@ let UsersService = UsersService_1 = class UsersService {
         const { email } = credintails;
         const user = await this.userModel.findOne({ email });
         if (!user)
-            throw new common_1.HttpException('User not found', common_1.HttpStatus.NOT_FOUND);
+            throw new common_1.HttpException({ errorMessage: 'User not found' }, common_1.HttpStatus.NOT_FOUND);
         const { loginOtpUpdatedAt } = user;
         const otpLockTime = 30000 - (new Date().getTime() - loginOtpUpdatedAt);
         if (otpLockTime >= 0)
             throw new common_1.HttpException(`Cannot generate login OTP in next ${Math.floor(otpLockTime / 1000)} sec.`, common_1.HttpStatus.BAD_REQUEST);
         const otp = this._generateOtp();
-        const { errorMessage, errorCode } = await await this.emailService.sendEmail(email, 'One Time Passcode from SwiftEx.', `Hi ${user.firstName},\nYour email verification OTP is ${otp}\nRegards,`);
+        const { errorMessage, errorCode } = await await this.emailService.sendEmail(email, 'One Time Passcode from SwiftEx.', `Hi ${user.firstName},\nYour email from SwiftEx for verification OTP is ${otp}\nRegards,`);
         const loginOtp = bcrypt_1.default.hashSync(otp, 10);
         await this.userModel.findOneAndUpdate({ email }, {
             loginOtp,

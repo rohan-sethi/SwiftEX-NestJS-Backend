@@ -24,7 +24,7 @@ let EmailService = class EmailService {
                 subject,
                 text,
             });
-            return { errorCode: 200, errorMessage: 'Otp Send successfully' };
+            return { errorCode: 200, errorMessage: 'true' };
         }
         catch (err) {
             return { errorCode: 500, errorMessage: 'Otp not Send.' };

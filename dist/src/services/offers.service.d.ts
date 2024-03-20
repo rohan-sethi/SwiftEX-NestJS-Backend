@@ -56,21 +56,21 @@ export declare class OffersService {
     }>;
     getOfferDetails(offerId: ObjectId, userId: ObjectId): Promise<{
         offerBids: any[];
-        pricePerUnit: number;
-        currencyName: string;
         _id: import("mongoose").Schema.Types.ObjectId;
-        status: string;
+        chainId: number;
         amount: number;
         assetName: string;
+        pricePerUnit: number;
         issuer: import("mongoose").Schema.Types.ObjectId;
         bids?: import("mongoose").LeanDocument<import("mongoose").Schema.Types.ObjectId>[];
         winnerBid?: import("mongoose").Schema.Types.ObjectId;
         totalPrice: number;
         appFee: number;
+        currencyName: string;
         chainName: string;
-        chainId: number;
         failureReason?: string;
         blockchainTxHash: string;
+        status: string;
     }>;
     acceptABid(userId: ObjectId, bidId: ObjectId, offerId: ObjectId): Promise<{
         success: boolean;

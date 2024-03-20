@@ -48,6 +48,60 @@ export class UsersService {
     return this.userModel.find();
   }
 
+// Register new User
+// async register(newUser: NewUserDto) {
+//   console.log("===-=-=-=-=-=-=")
+//   const userExist = await this.userModel.findOne({
+//     phoneNumber: newUser.phoneNumber,
+//   });
+//   if (userExist)
+//     throw new HttpException(
+//       'Email already registered',
+//       HttpStatus.BAD_REQUEST,
+//     );
+
+//   if (newUser.email) {
+//     const emailExist = await this.userModel.findOne({ email: newUser.email });
+//     if (emailExist)
+//       throw new HttpException(
+//         'Email already registered',
+//         HttpStatus.BAD_REQUEST,
+//       );
+//   }
+
+//   const otp = this._generateOtp();
+//   // const { errorMessage } = await sendMessage({
+//   //   body: `Hi ${newUser.firstName} ${newUser.lastName},\nWelcome to crypto-exchange! your OTP is: ${otp}`,
+//   //   from: process.env.TWILIO_PHN_NO,
+//   //   to: newUser.phoneNumber,
+//   // });
+
+//   // if (errorMessage)
+//   //   throw new HttpException(errorMessage, HttpStatus.BAD_REQUEST);
+
+// try{
+//   console.log("-=-=-=-=-=",newUser)
+//   const loginOtp = bcrypt.hashSync(otp, 10);
+//   const addedUser = await this.userModel.create({ ...newUser, loginOtp });
+
+//   const { errorMessage, errorCode } = await await this.emailService.sendEmail(
+//     newUser.email,
+//     'One Time Passcode from SwiftEx.',
+//     `Hi ${newUser.firstName},\nYour email from SwiftEx verification OTP is ${otp}\nRegards,`,
+//   );
+  
+//   if (errorMessage)
+//   throw new HttpException(errorMessage, HttpStatus.BAD_REQUEST);
+
+  
+
+//   return addedUser;
+// }catch(err)
+// {
+//   console.log(err)
+// }
+// }
+
   // Register new User
   async register(newUser: NewUserDto) {
     const userExist = await this.userModel.findOne({
@@ -70,20 +124,28 @@ export class UsersService {
 
     const otp = this._generateOtp();
     const { errorMessage } = await this.emailService.sendEmail(
-          newUser.email,
-          'One Time Passcode from SwiftEx.',
-          `Hi ${newUser.firstName},\nYour email verification OTP is ${otp}\nRegards,`,
-        );
+      newUser.email,
+      'One Time Passcode from SwiftEx.',
+      `Hi ${newUser.firstName},\nYour email from SwiftEx verification OTP is ${otp}\nRegards,`,
+    );
 
+    if(errorMessage==="true")
+    {
+      const loginOtp = bcrypt.hashSync(otp, 10);
+      const addedUser = await this.userModel.create({ ...newUser, loginOtp });
+      return addedUser;
+    }
     if (errorMessage)
       throw new HttpException(errorMessage, HttpStatus.BAD_REQUEST);
 
-    const loginOtp = bcrypt.hashSync(otp, 10);
-    console.log(">>",loginOtp);
-    const addedUser = await this.userModel.create({ ...newUser, loginOtp });
-
-    return addedUser;
   }
+
+
+
+
+
+
+
 
   // Get user Details
   getUserDetails(userId) {
@@ -169,7 +231,7 @@ export class UsersService {
    async login_email(credintails: UserLoginDto) {
     const { email } = credintails;
     const user = await this.userModel.findOne({ email });
-    if (!user) throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+    if (!user) throw new HttpException({errorMessage:'User not found'}, HttpStatus.NOT_FOUND);
 
     const { loginOtpUpdatedAt } = user;
     const otpLockTime = 30000 - (new Date().getTime() - loginOtpUpdatedAt);
@@ -184,7 +246,7 @@ export class UsersService {
     const { errorMessage, errorCode } = await await this.emailService.sendEmail(
           email,
           'One Time Passcode from SwiftEx.',
-          `Hi ${user.firstName},\nYour email verification OTP is ${otp}\nRegards,`,
+           `Hi ${user.firstName},\nYour email from SwiftEx for verification OTP is ${otp}\nRegards,`,
         );
         const loginOtp = bcrypt.hashSync(otp, 10);
         await this.userModel.findOneAndUpdate(
@@ -226,6 +288,53 @@ export class UsersService {
   }
 
   // Stripe Account
+  // async createStripeAccount(
+  //   userId: ObjectId,
+  //   accountBody: NewStripeAccountDto,
+  // ) {
+  //   const user = await this.userModel.findOne({ _id: userId });
+  //   if (!user) throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+
+  //   const stripe = new Stripe(process.env.STRIPE_API_SK, {
+  //     apiVersion: '2022-11-15',
+  //   });
+
+  //   if (user.stripeAccountId) {
+  //     throw new HttpException(
+  //       'Already have a bank account',
+  //       HttpStatus.BAD_REQUEST,
+  //     );
+
+  //     // // Bellow give the ERROR: "400: You cannot add cards or bank accounts for payouts and top-ups away from the dashboard."
+  //     // const externalAccountToken = await stripe.tokens.create({
+  //     //   bank_account: accountBody,
+  //     // });
+  //     // await stripe.accounts.createExternalAccount(user.stripeAccountId, {
+  //     //   external_account: externalAccountToken.id,
+  //     // });
+  //   }
+
+  //   const accountDefaults = {
+  //     object: 'bank_account',
+  //     account_holder_name: `${user.firstName} ${user.lastName}`,
+  //     account_holder_type: 'individual',
+  //   };
+
+  //   const newAccount = await stripe.accounts.create({
+  //     type: 'standard',
+  //     country: accountBody.country,
+  //     default_currency: accountBody.currency,
+  //     external_account: { ...accountBody, ...accountDefaults },
+  //     email: user.email,
+  //   });
+  //   await this.userModel.findByIdAndUpdate(userId, {
+  //     stripeAccountId: newAccount.id,
+  //   });
+
+  //   return { success: true, message: 'Bank account added successfully' };
+  // }
+
+
   async createStripeAccount(
     userId: ObjectId,
     accountBody: NewStripeAccountDto,
@@ -271,6 +380,7 @@ export class UsersService {
 
     return { success: true, message: 'Bank account added successfully' };
   }
+
 
   async getStripeAccount(userId: ObjectId) {
     const user = await this.userModel.findOne({ _id: userId });
