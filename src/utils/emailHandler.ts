@@ -13,7 +13,8 @@ export class EmailService {
         subject,
         text,
       });
-      return { errorCode: 200, errorMessage: 'true' }  
+      
+      return { errorCode: 200, errorMessage: 'Otp Send successfully' ,status:"200"}  
     }
     catch(err)
     {

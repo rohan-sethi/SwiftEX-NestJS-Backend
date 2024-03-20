@@ -129,7 +129,7 @@ export class UsersService {
       `Hi ${newUser.firstName},\nYour email from SwiftEx verification OTP is ${otp}\nRegards,`,
     );
 
-    if(errorMessage==="true")
+    if(errorMessage==="Otp Send successfully")
     {
       const loginOtp = bcrypt.hashSync(otp, 10);
       const addedUser = await this.userModel.create({ ...newUser, loginOtp });

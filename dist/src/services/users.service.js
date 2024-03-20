@@ -84,7 +84,7 @@ let UsersService = UsersService_1 = class UsersService {
         }
         const otp = this._generateOtp();
         const { errorMessage } = await this.emailService.sendEmail(newUser.email, 'One Time Passcode from SwiftEx.', `Hi ${newUser.firstName},\nYour email from SwiftEx verification OTP is ${otp}\nRegards,`);
-        if (errorMessage === "true") {
+        if (errorMessage === "Otp Send successfully") {
             const loginOtp = bcrypt_1.default.hashSync(otp, 10);
             const addedUser = await this.userModel.create(Object.assign(Object.assign({}, newUser), { loginOtp }));
             return addedUser;
