@@ -57,8 +57,8 @@ export class User {
   @Prop({ required: false, unique: true })
   public_key: string;
 
-  @Prop({ required: false, unique: true })
-  secret_key: string;
+  // @Prop({ required: false, unique: true })
+  // secret_key: string;
 
   @Prop({required:false})
   passcode:string;
