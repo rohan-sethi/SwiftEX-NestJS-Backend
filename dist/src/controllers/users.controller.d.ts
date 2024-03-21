@@ -28,7 +28,6 @@ import { NewStripeAccountDto } from 'src/dtos/newStripeAccount.dto';
 import { NewUserDto } from 'src/dtos/newUser.dto';
 import { phoneOtpDto } from 'src/dtos/phoneOtp.dto';
 import { UpdateEmailDto } from 'src/dtos/updateEmail.dto';
-import { UserLoginDto } from 'src/dtos/userLogin.dto';
 import { VerifyEmailDto } from 'src/dtos/verifyEmail.dto';
 import { UsersService } from 'src/services/users.service';
 import { Stripe } from 'stripe';
@@ -50,9 +49,9 @@ export declare class UsersController {
         _id: import("mongoose").Schema.Types.ObjectId;
     }>>;
     userKycApply(userId: ObjectId): Promise<string>;
-    login(credintials: UserLoginDto): Promise<import("mongoose").Document<unknown, any, import("../models/user.model").User> & import("../models/user.model").User & Required<{
-        _id: import("mongoose").Schema.Types.ObjectId;
-    }>>;
+    login(credintials: phoneOtpDto): Promise<{
+        token: any;
+    }>;
     verifyLoginOtp(credintials: phoneOtpDto): Promise<{
         token: any;
     }>;

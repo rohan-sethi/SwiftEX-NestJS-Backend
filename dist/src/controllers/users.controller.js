@@ -19,7 +19,6 @@ const newStripeAccount_dto_1 = require("../dtos/newStripeAccount.dto");
 const newUser_dto_1 = require("../dtos/newUser.dto");
 const phoneOtp_dto_1 = require("../dtos/phoneOtp.dto");
 const updateEmail_dto_1 = require("../dtos/updateEmail.dto");
-const userLogin_dto_1 = require("../dtos/userLogin.dto");
 const verifyEmail_dto_1 = require("../dtos/verifyEmail.dto");
 const users_service_1 = require("../services/users.service");
 const validation_pipe_1 = require("../utils/validation.pipe");
@@ -139,7 +138,7 @@ __decorate([
     (0, common_1.UsePipes)(new common_1.ValidationPipe()),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [userLogin_dto_1.UserLoginDto]),
+    __metadata("design:paramtypes", [phoneOtp_dto_1.phoneOtpDto]),
     __metadata("design:returntype", void 0)
 ], UsersController.prototype, "login", null);
 __decorate([

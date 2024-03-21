@@ -71,7 +71,7 @@ export class UsersController {
   //Login with Email
   @Post('login')
   @UsePipes(new ValidationPipe())
-  login(@Body() credintials: UserLoginDto) {
+  login(@Body() credintials: phoneOtpDto) {
     return this.UsersService.login_email(credintials);
   }
 

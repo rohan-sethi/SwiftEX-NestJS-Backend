@@ -149,7 +149,7 @@ export class UsersService {
 
   // Get user Details
   getUserDetails(userId) {
-    return this.userModel.findById(userId);
+    return this.userModel.findById(userId).select('-passcode');
   }
 
   // Apply for KYC
@@ -207,7 +207,7 @@ export class UsersService {
   //  async login_email(credintails: UserLoginDto) {
   //   try{
   //     console.log("called")
-    // const { email } = credintails;
+  //   const { email } = credintails;
   //   const user = await this.userModel.findOne({ email });
   //   if (!user) throw new HttpException('User not found', HttpStatus.NOT_FOUND);
 
@@ -228,40 +228,40 @@ export class UsersService {
   ////////////////////////////////////////////////////////
 
 
-   async login_email(credintails: UserLoginDto) {
-    const { email } = credintails;
-    const user = await this.userModel.findOne({ email });
-    if (!user) throw new HttpException({errorMessage:'User not found'}, HttpStatus.NOT_FOUND);
+  //  async login_email(credintails: UserLoginDto) {
+  //   const { email } = credintails;
+  //   const user = await this.userModel.findOne({ email });
+  //   if (!user) throw new HttpException({errorMessage:'User not found'}, HttpStatus.NOT_FOUND);
 
-    const { loginOtpUpdatedAt } = user;
-    const otpLockTime = 30000 - (new Date().getTime() - loginOtpUpdatedAt);
-    if (otpLockTime >= 0)
-      throw new HttpException(
-        `Cannot generate login OTP in next ${Math.floor(
-          otpLockTime / 1000,
-        )} sec.`,
-        HttpStatus.BAD_REQUEST,
-      );
-    const otp = this._generateOtp();
-    const { errorMessage, errorCode } = await await this.emailService.sendEmail(
-          email,
-          'One Time Passcode from SwiftEx.',
-           `Hi ${user.firstName},\nYour email from SwiftEx for verification OTP is ${otp}\nRegards,`,
-        );
-        const loginOtp = bcrypt.hashSync(otp, 10);
-        await this.userModel.findOneAndUpdate(
-          { email },
-          {
-            loginOtp,
-            loginOtpUpdatedAt: new Date().getTime(),
-            isLoginOtpUsed: false,
-          },
-        );
+  //   const { loginOtpUpdatedAt } = user;
+  //   const otpLockTime = 30000 - (new Date().getTime() - loginOtpUpdatedAt);
+  //   if (otpLockTime >= 0)
+  //     throw new HttpException(
+  //       `Cannot generate login OTP in next ${Math.floor(
+  //         otpLockTime / 1000,
+  //       )} sec.`,
+  //       HttpStatus.BAD_REQUEST,
+  //     );
+  //   const otp = this._generateOtp();
+  //   const { errorMessage, errorCode } = await await this.emailService.sendEmail(
+  //         email,
+  //         'One Time Passcode from SwiftEx.',
+  //          `Hi ${user.firstName},\nYour email from SwiftEx for verification OTP is ${otp}\nRegards,`,
+  //       );
+  //       const loginOtp = bcrypt.hashSync(otp, 10);
+  //       await this.userModel.findOneAndUpdate(
+  //         { email },
+  //         {
+  //           loginOtp,
+  //           loginOtpUpdatedAt: new Date().getTime(),
+  //           isLoginOtpUsed: false,
+  //         },
+  //       );
         
-    if (errorMessage)
-      throw new HttpException(errorMessage, errorCode);
-    return user;
-  }
+  //   if (errorMessage)
+  //     throw new HttpException(errorMessage, errorCode);
+  //   return user;
+  // }
 
   async verifyLoginOtp(phoneOtp: phoneOtpDto) {
     const { email, otp } = phoneOtp;
@@ -574,5 +574,26 @@ export class UsersService {
       return { success: false, status: "500" };
     }
   }
+
+  async login_email(phoneOtp: phoneOtpDto) {
+    const { email, otp } = phoneOtp;
+    const user = await this.userModel.findOne({ email });
+    if (!user)
+      throw new HttpException('Invalid credintials', HttpStatus.BAD_REQUEST);
+    if (!bcrypt.compareSync(otp, user.passcode))
+      throw new HttpException('Worng User Data', HttpStatus.BAD_REQUEST);
+    const token = signJwtToken({
+      phoneNumber: user.phoneNumber,
+      _id: user._id,
+    });
+    await this.userModel.findOneAndUpdate(
+      { email },
+      { isLoginOtpUsed: true },
+    );
+
+    return { token };
+  }
+
+
 
 }
