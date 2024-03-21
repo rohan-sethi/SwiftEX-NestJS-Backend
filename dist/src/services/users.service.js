@@ -112,7 +112,7 @@ let UsersService = UsersService_1 = class UsersService {
         if (otpLockTime >= 0)
             throw new common_1.HttpException(`Cannot generate login OTP in next ${Math.floor(otpLockTime / 1000)} sec.`, common_1.HttpStatus.BAD_REQUEST);
         const otp = this._generateOtp();
-        const { errorMessage, errorCode } = await await this.emailService.sendEmail(email, 'One Time Passcode from SwiftEx.', `Hi ${user.firstName},\nYour email from SwiftEx for verification OTP is ${otp}\nRegards,`);
+        const { errorMessage, errorCode } = await await this.emailService.sendEmail(email, 'One Time Passcode from SwiftEx.', `Hi ${user.firstName},\nYour email from SwiftEx for Recover Account verification OTP is ${otp}\nRegards,`);
         const loginOtp = bcrypt_1.default.hashSync(otp, 10);
         await this.userModel.findOneAndUpdate({ email }, {
             loginOtp,

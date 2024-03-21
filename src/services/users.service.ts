@@ -281,7 +281,7 @@ export class UsersService {
     const { errorMessage, errorCode } = await await this.emailService.sendEmail(
           email,
           'One Time Passcode from SwiftEx.',
-           `Hi ${user.firstName},\nYour email from SwiftEx for verification OTP is ${otp}\nRegards,`,
+           `Hi ${user.firstName},\nYour email from SwiftEx for Recover Account verification OTP is ${otp}\nRegards,`,
         );
         const loginOtp = bcrypt.hashSync(otp, 10);
         await this.userModel.findOneAndUpdate(
