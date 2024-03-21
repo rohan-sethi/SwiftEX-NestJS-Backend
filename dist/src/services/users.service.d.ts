@@ -24,6 +24,7 @@
 /// <reference types="mongoose/types/inferschematype" />
 import { Model, ObjectId } from 'mongoose';
 import { NewUserDto } from 'src/dtos/newUser.dto';
+import { UserLoginDto } from 'src/dtos/userLogin.dto';
 import { User, UserDocument } from 'src/models/user.model';
 import Stripe from 'stripe';
 import { phoneOtpDto } from 'src/dtos/phoneOtp.dto';
@@ -62,6 +63,9 @@ export declare class UsersService {
         _id: import("mongoose").Schema.Types.ObjectId;
     }>>;
     userKycApply(userId: any): Promise<string>;
+    forgot_email(credintails: UserLoginDto): Promise<import("mongoose").Document<unknown, any, User> & User & Required<{
+        _id: import("mongoose").Schema.Types.ObjectId;
+    }>>;
     verifyLoginOtp(phoneOtp: phoneOtpDto): Promise<{
         token: any;
     }>;

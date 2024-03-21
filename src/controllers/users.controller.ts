@@ -75,6 +75,12 @@ export class UsersController {
     return this.UsersService.login_email(credintials);
   }
 
+   @Post('forgot_passcode')
+  forgot_passcode(@Body() credintials: UserLoginDto) {
+    return this.UsersService.forgot_email(credintials);
+  }
+
+
   @Post('verifyLoginOtp')
   @UsePipes(new ValidationPipe())
   verifyLoginOtp(@Body() credintials: phoneOtpDto) {

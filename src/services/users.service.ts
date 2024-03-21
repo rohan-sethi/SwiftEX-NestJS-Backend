@@ -263,6 +263,41 @@ export class UsersService {
   //   return user;
   // }
 
+  async forgot_email(credintails: UserLoginDto) {
+    const { email } = credintails;
+    const user = await this.userModel.findOne({ email });
+    if (!user) throw new HttpException({errorMessage:'User not found'}, HttpStatus.NOT_FOUND);
+
+    const { loginOtpUpdatedAt } = user;
+    const otpLockTime = 30000 - (new Date().getTime() - loginOtpUpdatedAt);
+    if (otpLockTime >= 0)
+      throw new HttpException(
+        `Cannot generate login OTP in next ${Math.floor(
+          otpLockTime / 1000,
+        )} sec.`,
+        HttpStatus.BAD_REQUEST,
+      );
+    const otp = this._generateOtp();
+    const { errorMessage, errorCode } = await await this.emailService.sendEmail(
+          email,
+          'One Time Passcode from SwiftEx.',
+           `Hi ${user.firstName},\nYour email from SwiftEx for verification OTP is ${otp}\nRegards,`,
+        );
+        const loginOtp = bcrypt.hashSync(otp, 10);
+        await this.userModel.findOneAndUpdate(
+          { email },
+          {
+            loginOtp,
+            loginOtpUpdatedAt: new Date().getTime(),
+            isLoginOtpUsed: false,
+          },
+        );
+        
+    if (errorMessage)
+      throw new HttpException(errorMessage, errorCode);
+    return user;
+  }
+
   async verifyLoginOtp(phoneOtp: phoneOtpDto) {
     const { email, otp } = phoneOtp;
     const user = await this.userModel.findOne({ email });

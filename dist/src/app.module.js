@@ -50,7 +50,7 @@ let AppModule = class AppModule {
     configure(consumer) {
         consumer
             .apply(auth_middleware_1.AuthenticateUser)
-            .exclude('users/login', 'users/register', 'transactions/webhook', 'transactions/webhook/connect', 'users/verifyLoginOtp', 'users/ACTIVATE')
+            .exclude('users/login', 'users/register', 'transactions/webhook', 'transactions/webhook/connect', 'users/verifyLoginOtp', 'users/ACTIVATE', 'users/forgot_passcode')
             .forRoutes(users_controller_1.UsersController, offers_controller_1.OffersController, bids_controller_1.BidsController, transactions_controller_1.TransactionsController, chain_controller_1.ChainController, payout_controller_1.PayoutController, Listion_controller_1.ListionController);
     }
 };

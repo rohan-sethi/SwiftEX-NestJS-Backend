@@ -114,7 +114,8 @@ export class AppModule implements NestModule {
         'transactions/webhook',
         'transactions/webhook/connect',
         'users/verifyLoginOtp',
-        'users/ACTIVATE'
+        'users/ACTIVATE',
+        'users/forgot_passcode'
         // '/listion/start',
         // '/listion/price'
       )

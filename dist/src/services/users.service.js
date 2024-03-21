@@ -102,6 +102,27 @@ let UsersService = UsersService_1 = class UsersService {
         await this.userModel.updateOne({ _id: userId }, { isVerified: true });
         return 'success';
     }
+    async forgot_email(credintails) {
+        const { email } = credintails;
+        const user = await this.userModel.findOne({ email });
+        if (!user)
+            throw new common_1.HttpException({ errorMessage: 'User not found' }, common_1.HttpStatus.NOT_FOUND);
+        const { loginOtpUpdatedAt } = user;
+        const otpLockTime = 30000 - (new Date().getTime() - loginOtpUpdatedAt);
+        if (otpLockTime >= 0)
+            throw new common_1.HttpException(`Cannot generate login OTP in next ${Math.floor(otpLockTime / 1000)} sec.`, common_1.HttpStatus.BAD_REQUEST);
+        const otp = this._generateOtp();
+        const { errorMessage, errorCode } = await await this.emailService.sendEmail(email, 'One Time Passcode from SwiftEx.', `Hi ${user.firstName},\nYour email from SwiftEx for verification OTP is ${otp}\nRegards,`);
+        const loginOtp = bcrypt_1.default.hashSync(otp, 10);
+        await this.userModel.findOneAndUpdate({ email }, {
+            loginOtp,
+            loginOtpUpdatedAt: new Date().getTime(),
+            isLoginOtpUsed: false,
+        });
+        if (errorMessage)
+            throw new common_1.HttpException(errorMessage, errorCode);
+        return user;
+    }
     async verifyLoginOtp(phoneOtp) {
         const { email, otp } = phoneOtp;
         const user = await this.userModel.findOne({ email });
