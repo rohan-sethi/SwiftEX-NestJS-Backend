@@ -153,7 +153,12 @@ export class UsersService {
         'Email already registered',
         HttpStatus.BAD_REQUEST,
       );
-
+      const wallet_exist = await this.userModel.findOne({ walletAddress: newUser.walletAddress });
+      if(wallet_exist)
+      throw new HttpException(
+        'Wallet already registered',
+        HttpStatus.BAD_REQUEST,
+      );
     if (newUser.email) {
       const emailExist = await this.userModel.findOne({ email: newUser.email });
       if (emailExist)

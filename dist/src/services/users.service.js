@@ -77,6 +77,9 @@ let UsersService = UsersService_1 = class UsersService {
         });
         if (userExist)
             throw new common_1.HttpException('Email already registered', common_1.HttpStatus.BAD_REQUEST);
+        const wallet_exist = await this.userModel.findOne({ walletAddress: newUser.walletAddress });
+        if (wallet_exist)
+            throw new common_1.HttpException('Wallet already registered', common_1.HttpStatus.BAD_REQUEST);
         if (newUser.email) {
             const emailExist = await this.userModel.findOne({ email: newUser.email });
             if (emailExist)
