@@ -74,10 +74,6 @@ __decorate([
     __metadata("design:type", String)
 ], User.prototype, "public_key", void 0);
 __decorate([
-    (0, mongoose_1.Prop)({ required: false, unique: true }),
-    __metadata("design:type", String)
-], User.prototype, "secret_key", void 0);
-__decorate([
     (0, mongoose_1.Prop)({ required: false }),
     __metadata("design:type", String)
 ], User.prototype, "passcode", void 0);

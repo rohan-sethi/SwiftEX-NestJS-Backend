@@ -103,13 +103,54 @@ export class UsersService {
 // }
 
   // Register new User
+  // async register(newUser: NewUserDto) {
+  //   const userExist = await this.userModel.findOne({
+  //     phoneNumber: newUser.phoneNumber,
+  //   });
+  //   if (userExist)
+  //     throw new HttpException(
+  //       'Phone No. already registered',
+  //       HttpStatus.BAD_REQUEST,
+  //     );
+
+  //   if (newUser.email) {
+  //     const emailExist = await this.userModel.findOne({ email: newUser.email });
+  //     if (emailExist)
+  //       throw new HttpException(
+  //         'Email already registered',
+  //         HttpStatus.BAD_REQUEST,
+  //       );
+  //   }
+
+  //   const otp = this._generateOtp();
+  //   const { errorMessage } = await this.emailService.sendEmail(
+  //     newUser.email,
+  //     'One Time Passcode from SwiftEx.',
+  //     `Hi ${newUser.firstName},\nYour email from SwiftEx verification OTP is ${otp}\nRegards,`,
+  //   );
+
+  //   if(errorMessage==="Otp Send successfully")
+  //   {
+  //     const loginOtp = bcrypt.hashSync(otp, 10);
+  //     const addedUser = await this.userModel.create({ ...newUser, loginOtp });
+
+  //     console.log("=================000000",addedUser)
+  //     return addedUser;
+  //   }
+  //   if (errorMessage)
+  //     throw new HttpException(errorMessage, HttpStatus.BAD_REQUEST);
+
+  // }
+
+
+
   async register(newUser: NewUserDto) {
     const userExist = await this.userModel.findOne({
       phoneNumber: newUser.phoneNumber,
     });
     if (userExist)
       throw new HttpException(
-        'Phone No. already registered',
+        'Email already registered',
         HttpStatus.BAD_REQUEST,
       );
 
@@ -121,23 +162,21 @@ export class UsersService {
           HttpStatus.BAD_REQUEST,
         );
     }
-
     const otp = this._generateOtp();
-    const { errorMessage } = await this.emailService.sendEmail(
-      newUser.email,
-      'One Time Passcode from SwiftEx.',
-      `Hi ${newUser.firstName},\nYour email from SwiftEx verification OTP is ${otp}\nRegards,`,
-    );
-
-    if(errorMessage==="Otp Send successfully")
-    {
-      const loginOtp = bcrypt.hashSync(otp, 10);
-      const addedUser = await this.userModel.create({ ...newUser, loginOtp });
-      return addedUser;
-    }
-    if (errorMessage)
-      throw new HttpException(errorMessage, HttpStatus.BAD_REQUEST);
-
+    const loginOtp = bcrypt.hashSync(otp, 10);
+    const addedUser = await this.userModel.create({ ...newUser, loginOtp });
+     if(!addedUser){
+      throw new HttpException({errorMessage:"not created"}, HttpStatus.BAD_REQUEST);
+     }else{
+      const { errorMessage } = await this.emailService.sendEmail(
+        newUser.email,
+        'One Time Passcode from SwiftEx.',
+        `Hi ${newUser.firstName},\nYour email from SwiftEx verification OTP is ${otp}\nRegards,`,
+      );
+      if (errorMessage)
+        throw new HttpException(errorMessage, HttpStatus.BAD_REQUEST);
+     }
+    return addedUser;
   }
 
 
