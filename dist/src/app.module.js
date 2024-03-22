@@ -46,6 +46,9 @@ const Listion_controller_1 = require("./controllers/Listion.controller");
 const listion_service_1 = require("./services/listion.service");
 const stripe_webhook_service_1 = require("./services/stripe-webhook.service");
 const Payout_service_1 = require("./services/Payout.service");
+const marketdata_schema_1 = require("./models/marketdata.schema");
+const market_data_controller_1 = require("./controllers/market-data.controller");
+const market_data_service_1 = require("./services/market-data.service");
 let AppModule = class AppModule {
     configure(consumer) {
         consumer
@@ -67,6 +70,7 @@ AppModule = __decorate([
                 { name: transaction_model_1.Transaction.name, schema: transaction_model_1.TransactionSchema },
                 { name: adminBalances_model_1.AdminBalances.name, schema: adminBalances_model_1.AdminBalancesSchema },
                 { name: txFees_model_1.TxFee.name, schema: txFees_model_1.TxFeeSchema },
+                { name: marketdata_schema_1.MarketData.name, schema: marketdata_schema_1.MarketDataSchema }
             ]),
             mailer_1.MailerModule.forRootAsync({
                 useFactory: () => ({
@@ -91,6 +95,7 @@ AppModule = __decorate([
             transactions_controller_1.TransactionsController,
             chain_controller_1.ChainController,
             payout_controller_1.PayoutController,
+            market_data_controller_1.MarketDataController
         ],
         providers: [
             app_service_1.AppService,
@@ -113,6 +118,7 @@ AppModule = __decorate([
             listion_service_1.ListionService,
             Payout_service_1.Payout_listion,
             stripe_webhook_service_1.StripeWebhookService,
+            market_data_service_1.MarketDataService
         ],
     })
 ], AppModule);

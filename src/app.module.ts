@@ -40,6 +40,9 @@ import {ListionController} from './controllers/Listion.controller';
 import {ListionService} from './services/listion.service'
 import { StripeWebhookService } from './services/stripe-webhook.service'
 import { Payout_listion } from './services/Payout.service'
+import { MarketData, MarketDataSchema } from './models/marketdata.schema';
+import { MarketDataController } from './controllers/market-data.controller';
+import { MarketDataService } from './services/market-data.service';
 
 
 @Module({
@@ -54,6 +57,7 @@ import { Payout_listion } from './services/Payout.service'
       { name: Transaction.name, schema: TransactionSchema },
       { name: AdminBalances.name, schema: AdminBalancesSchema },
       { name: TxFee.name, schema: TxFeeSchema },
+      { name: MarketData.name, schema: MarketDataSchema }
     ]),
     MailerModule.forRootAsync({
       useFactory: () => ({
@@ -80,6 +84,7 @@ import { Payout_listion } from './services/Payout.service'
     TransactionsController,
     ChainController,
     PayoutController,
+    MarketDataController
   ],
   providers: [
     AppService,
@@ -102,6 +107,7 @@ import { Payout_listion } from './services/Payout.service'
     ListionService,
     Payout_listion,
     StripeWebhookService,
+    MarketDataService
   ],
 })
 export class AppModule implements NestModule {
