@@ -4,6 +4,8 @@ export declare class MarketDataService {
     private readonly marketDataModel;
     constructor(marketDataModel: Model<MarketDataDocument>);
     getCryptoData(): Promise<void>;
-    create(marketData: MarketData): Promise<MarketData>;
+    startInterval(): void;
+    onModuleInit(): Promise<void>;
+    update_db(): Promise<any>;
     findAll(): Promise<MarketData[]>;
 }

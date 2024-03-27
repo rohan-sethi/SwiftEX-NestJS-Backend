@@ -23,10 +23,11 @@ export class MarketDataService {
       if (response.ok) {
         const responseData = await response.json();
         console.log("====",responseData)
+       await this.update_db();
         const document = new this.marketDataModel({
           MarketData: responseData,
         })
-        document.save()
+       await document.save()
   .then(savedDocument => {
     console.log('Document saved:', savedDocument);
   })
@@ -45,16 +46,29 @@ export class MarketDataService {
     }
   }
 
+  startInterval(): void {
+    const intervalDuration = 60 * 1000; // 1min
+    setInterval(async() => {
+       await this.getCryptoData();
+    }, intervalDuration);
+  }
+  async onModuleInit() {
+    await this.startInterval();
+  }
+
+
+
   
-  async create(marketData: MarketData): Promise<MarketData> {
-    const createdMarketData = new this.marketDataModel(marketData);
-    return createdMarketData.save();
+  async update_db(): Promise<any> {
+    return this.marketDataModel.deleteMany({})
+    // return createdMarketData.save();
   }
 
   async findAll(): Promise<MarketData[]> {
-    await this.getCryptoData()
+    // await this.getCryptoData()
     return await this.marketDataModel.find({})
   }
 }
+
 
 

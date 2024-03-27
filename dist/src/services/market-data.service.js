@@ -32,10 +32,11 @@ let MarketDataService = class MarketDataService {
             if (response.ok) {
                 const responseData = await response.json();
                 console.log("====", responseData);
+                await this.update_db();
                 const document = new this.marketDataModel({
                     MarketData: responseData,
                 });
-                document.save()
+                await document.save()
                     .then(savedDocument => {
                     console.log('Document saved:', savedDocument);
                 })
@@ -52,12 +53,21 @@ let MarketDataService = class MarketDataService {
             console.error("Error fetching crypto data:", error);
         }
     }
-    async create(marketData) {
-        const createdMarketData = new this.marketDataModel(marketData);
-        return createdMarketData.save();
+    startInterval() {
+        const intervalDuration = 60 * 1000;
+        setInterval(async () => {
+            console.log('Interval tick');
+            await this.getCryptoData();
+        }, intervalDuration);
+    }
+    async onModuleInit() {
+        await this.startInterval();
+    }
+    async update_db() {
+        this.marketDataModel.deleteMany({});
+        return this.marketDataModel.deleteMany({});
     }
     async findAll() {
-        await this.getCryptoData();
         return await this.marketDataModel.find({});
     }
 };
