@@ -56,7 +56,6 @@ let MarketDataService = class MarketDataService {
     startInterval() {
         const intervalDuration = 60 * 1000;
         setInterval(async () => {
-            console.log('Interval tick');
             await this.getCryptoData();
         }, intervalDuration);
     }
@@ -64,7 +63,6 @@ let MarketDataService = class MarketDataService {
         await this.startInterval();
     }
     async update_db() {
-        this.marketDataModel.deleteMany({});
         return this.marketDataModel.deleteMany({});
     }
     async findAll() {
