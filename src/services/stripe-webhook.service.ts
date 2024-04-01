@@ -40,6 +40,7 @@ export class StripeWebhookService {
                         sig,
                         endpointSecret,
                     );
+                    console.log("----------event----------,",event);
                 } catch (err) {
                     this.logger.error(`Webhook Error: ${err.message}`);
                     response.status(400).send(`Webhook Error: ${err.message}`);
@@ -47,8 +48,12 @@ export class StripeWebhookService {
                 }
 
                 switch (event.type) {
+                    
                     case 'charge.succeeded':
+                        console.log("-------event.type-------,",event.type)
                         const amount = event.data.object.amount_captured;
+                        console.log("-------amount-------,",amount);
+                        
                         const formattedNumber = `${amount
                             .toString()
                             .slice(0, -2)}.${amount.toString().slice(-2)}`;
@@ -71,6 +76,7 @@ export class StripeWebhookService {
                         }
                         break;
                 }
+                 console.log("----------------response-----------------")
                 response.send();
             },
         );
