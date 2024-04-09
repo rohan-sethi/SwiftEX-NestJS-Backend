@@ -12,6 +12,7 @@ import {
   ParseIntPipe,
   Req,Res, NotFoundException
 } from '@nestjs/common';
+import { response } from 'express';
 import { ObjectId } from 'mongoose';
 import { BidSyncBodyDto } from 'src/dtos/bidSyncBody.dto';
 import { NewStripeAccountDto } from 'src/dtos/newStripeAccount.dto';
@@ -193,4 +194,12 @@ export class UsersController {
       }
     }
 
+    @Post('SendXETH')
+    async SendXETH(
+      @Body('email') email: string,
+      @Body('amount') amount:string,
+    ) {
+        const result = await this.UsersService.sendXETH(email,amount);
+        return response.status(200).json(result);
+      }
 }

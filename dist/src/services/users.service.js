@@ -65,6 +65,8 @@ let UsersService = UsersService_1 = class UsersService {
         this.txFeeRepository = txFeeRepository;
         this.chainServices = chainServices;
         this.logger = new common_1.Logger(UsersService_1.name);
+        this.server = new Stellar.Server('https://horizon-testnet.stellar.org');
+        this.senderKeypair = Stellar.Keypair.fromSecret('SB2IR7WZS3EDS2YEJGC3POI56E5CESRZPUVN72DWHTS4AACW5OYZXDTZ');
         this.redisClient = redisService.getClient();
         Stellar.Network.useTestNetwork();
     }
@@ -324,6 +326,37 @@ let UsersService = UsersService_1 = class UsersService {
         });
         await this.userModel.findOneAndUpdate({ email }, { isLoginOtpUsed: true });
         return { token };
+    }
+    async sendXETH(email, amount) {
+        const emailExist = await this.userModel.findOne({ email: email });
+        if (!emailExist) {
+            throw new common_1.NotFoundException(`${email} is not listed`);
+        }
+        if (!emailExist.public_key) {
+            throw new common_1.NotFoundException(` public key is not listed`);
+        }
+        const recipientPublicKey = emailExist.public_key;
+        const server = new Stellar.Server('https://horizon-testnet.stellar.org');
+        const senderSecretKey = 'SB2IR7WZS3EDS2YEJGC3POI56E5CESRZPUVN72DWHTS4AACW5OYZXDTZ';
+        const issuingAccountPublicKey = 'GBZXN7PIRZGNMHGA7MUUUF4GWPY5AYPV6LY4UV2GL6VJGIQRXFDNMADI';
+        const senderKeypair = Stellar.Keypair.fromSecret(senderSecretKey);
+        const account = await server.loadAccount(senderKeypair.publicKey());
+        const XETHAsset = new Stellar.Asset('XETH', issuingAccountPublicKey);
+        const transaction = new Stellar.TransactionBuilder(account, {
+            fee: Stellar.BASE_FEE,
+            networkPassphrase: Stellar.Networks.TESTNET,
+        })
+            .addOperation(Stellar.Operation.payment({
+            destination: recipientPublicKey,
+            asset: XETHAsset,
+            amount: amount,
+        }))
+            .setTimeout(30)
+            .build();
+        transaction.sign(senderKeypair);
+        const transactionResult = await server.submitTransaction(transaction);
+        console.log('Transaction Successful to : ', recipientPublicKey);
+        throw new common_1.HttpException({ message: "true", res: transactionResult }, common_1.HttpStatus.ACCEPTED);
     }
 };
 UsersService = UsersService_1 = __decorate([

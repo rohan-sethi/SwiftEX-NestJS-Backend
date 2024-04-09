@@ -1,3 +1,4 @@
+/// <reference types="express" />
 /// <reference types="mongoose/types/aggregate" />
 /// <reference types="mongoose/types/callback" />
 /// <reference types="mongoose/types/collection" />
@@ -106,4 +107,5 @@ export declare class UsersController {
         status: string;
         message?: undefined;
     }>;
+    SendXETH(email: string, amount: string): Promise<import("express").Response<any, Record<string, any>>>;
 }

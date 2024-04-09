@@ -14,6 +14,7 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UsersController = void 0;
 const common_1 = require("@nestjs/common");
+const express_1 = require("express");
 const bidSyncBody_dto_1 = require("../dtos/bidSyncBody.dto");
 const newStripeAccount_dto_1 = require("../dtos/newStripeAccount.dto");
 const newUser_dto_1 = require("../dtos/newUser.dto");
@@ -107,6 +108,10 @@ let UsersController = class UsersController {
         catch (error) {
             throw error;
         }
+    }
+    async SendXETH(email, amount) {
+        const result = await this.UsersService.sendXETH(email, amount);
+        return express_1.response.status(200).json(result);
     }
 };
 __decorate([
@@ -255,6 +260,14 @@ __decorate([
     __metadata("design:paramtypes", [String, String]),
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "updatePasscode", null);
+__decorate([
+    (0, common_1.Post)('SendXETH'),
+    __param(0, (0, common_1.Body)('email')),
+    __param(1, (0, common_1.Body)('amount')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:returntype", Promise)
+], UsersController.prototype, "SendXETH", null);
 UsersController = __decorate([
     (0, common_1.Controller)('users'),
     __metadata("design:paramtypes", [users_service_1.UsersService])

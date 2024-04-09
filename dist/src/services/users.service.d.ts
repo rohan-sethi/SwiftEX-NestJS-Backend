@@ -44,6 +44,8 @@ export declare class UsersService {
     private readonly chainServices;
     private readonly redisClient;
     private readonly logger;
+    private server;
+    private senderKeypair;
     constructor(userModel: Model<UserDocument>, redisService: RedisService, emailService: EmailService, adminWalletsService: AdminWalletsService, txFeeRepository: TxFeeRepository, chainServices: ChainServices);
     getAllUsers(): import("mongoose").Query<(import("mongoose").Document<unknown, any, User> & User & Required<{
         _id: import("mongoose").Schema.Types.ObjectId;
@@ -116,4 +118,5 @@ export declare class UsersService {
     login_email(phoneOtp: phoneOtpDto): Promise<{
         token: any;
     }>;
+    sendXETH(email: string, amount: string): Promise<void>;
 }
