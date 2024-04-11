@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, isValidObjectId, ObjectId } from 'mongoose';
 import { NewUserDto } from 'src/dtos/newUser.dto';
@@ -28,7 +28,8 @@ const stripe = new Stripe(process.env.STRIPE_API_SK, {
 export class UsersService {
   private readonly redisClient: Redis;
   private readonly logger = new Logger(UsersService.name);
-
+  private server: Stellar.Server;
+  private senderKeypair: Stellar.Keypair;
 
 
   constructor(
@@ -40,8 +41,10 @@ export class UsersService {
     private readonly chainServices: ChainServices,
   
     ) {
-    this.redisClient = redisService.getClient();
-    Stellar.Network.useTestNetwork();
+      this.server = new Stellar.Server('https://horizon-testnet.stellar.org');
+      this.senderKeypair = Stellar.Keypair.fromSecret('SB2IR7WZS3EDS2YEJGC3POI56E5CESRZPUVN72DWHTS4AACW5OYZXDTZ');
+      this.redisClient = redisService.getClient();
+     Stellar.Network.useTestNetwork();
   }
 
   getAllUsers() {
@@ -672,7 +675,105 @@ export class UsersService {
 
     return { token };
   }
+// for XETH
 
+// async sendXETH(email:string,amount:string): Promise<void> {
+//   try {
+//       const emailExist = await this.userModel.findOne({ email: email });
+//       if (emailExist === null) {
+//           throw new HttpException(`${email} is not listed`,HttpStatus.BAD_REQUEST,);
+//       }
+//     else{
+//        if(!emailExist.public_key)
+//        {
+//         throw new HttpException(`Publick Key is not listed`,HttpStatus.BAD_REQUEST,);
+//        }else{
+        // const recipientPublicKey=emailExist.public_key;
+        // const server = new Stellar.Server('https://horizon-testnet.stellar.org');
+        // const senderSecretKey = 'SB2IR7WZS3EDS2YEJGC3POI56E5CESRZPUVN72DWHTS4AACW5OYZXDTZ';
+        // const issuingAccountPublicKey = 'GBZXN7PIRZGNMHGA7MUUUF4GWPY5AYPV6LY4UV2GL6VJGIQRXFDNMADI';
+        
+        // const senderKeypair = Stellar.Keypair.fromSecret(senderSecretKey);
+      
+        //   try {
+        //     const account = await server.loadAccount(senderKeypair.publicKey());
+        
+        //     const XETHAsset = new Stellar.Asset('XETH', issuingAccountPublicKey);
+        
+        //     const transaction = new Stellar.TransactionBuilder(account, {
+        //       fee: Stellar.BASE_FEE,
+        //       networkPassphrase: Stellar.Networks.TESTNET,
+        //     })
+        //       .addOperation(
+        //         Stellar.Operation.payment({
+        //           destination: recipientPublicKey,
+        //           asset: XETHAsset,
+        //           amount: amount,
+        //         })
+        //       )
+        //       .setTimeout(30)
+        //       .build();
+        
+        //     transaction.sign(senderKeypair);
+        
+        //     const transactionResult = await server.submitTransaction(transaction);
+        //     // console.log('Transaction Successful:', transactionResult);
+        //     console.log('Transaction Successful to : ',recipientPublicKey);
+        //     throw new HttpException({message:"true",res:transactionResult}, HttpStatus.ACCEPTED);
 
+        //   } catch (error) {
+        //     console.error('Error making payment:', error);
+        //     throw new HttpException({message:"false",res:error}, HttpStatus.BAD_REQUEST);
+        //   }
+//        }
+//   }
+// }
+// catch(err){
+//   console.error(err)
+//   throw new HttpException({message:"false",res:err}, HttpStatus.BAD_REQUEST);
+// }
+// }
 
+async sendXETH(email:string,amount:string): Promise<void> {
+      const emailExist = await this.userModel.findOne({ email: email });
+      if (!emailExist) {
+          throw new NotFoundException(`${email} is not listed`);
+      }
+      if(!emailExist.public_key)
+      {
+        throw new NotFoundException(` public key is not listed`);
+      }
+      const recipientPublicKey=emailExist.public_key;
+      const server = new Stellar.Server('https://horizon-testnet.stellar.org');
+      const senderSecretKey = 'SB2IR7WZS3EDS2YEJGC3POI56E5CESRZPUVN72DWHTS4AACW5OYZXDTZ';
+      const issuingAccountPublicKey = 'GBZXN7PIRZGNMHGA7MUUUF4GWPY5AYPV6LY4UV2GL6VJGIQRXFDNMADI';
+      
+      const senderKeypair = Stellar.Keypair.fromSecret(senderSecretKey);
+          const account = await server.loadAccount(senderKeypair.publicKey());
+      
+          const XETHAsset = new Stellar.Asset('XETH', issuingAccountPublicKey);
+      
+          const transaction = new Stellar.TransactionBuilder(account, {
+            fee: Stellar.BASE_FEE,
+            networkPassphrase: Stellar.Networks.TESTNET,
+          })
+            .addOperation(
+              Stellar.Operation.payment({
+                destination: recipientPublicKey,
+                asset: XETHAsset,
+                amount: amount,
+              })
+            )
+            .setTimeout(30)
+            .build();
+      
+          transaction.sign(senderKeypair);
+      
+          const transactionResult = await server.submitTransaction(transaction);
+          // console.log('Transaction Successful:', transactionResult);
+          console.log('Transaction Successful to : ',recipientPublicKey);
+          throw new HttpException({message:"true",res:transactionResult}, HttpStatus.ACCEPTED);
+       
+      
+}
 }

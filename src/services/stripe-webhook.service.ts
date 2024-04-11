@@ -33,7 +33,7 @@ export class StripeWebhookService {
                 const sig = request.headers['stripe-signature'];
 
                 let event;
-
+         
                 try {
                     event = stripe.webhooks.constructEvent(
                         request.body,
@@ -41,6 +41,7 @@ export class StripeWebhookService {
                         endpointSecret,
                     );
                     console.log("----------event----------,",event);
+                    console.log("-------------event---------",event);
                 } catch (err) {
                     this.logger.error(`Webhook Error: ${err.message}`);
                     response.status(400).send(`Webhook Error: ${err.message}`);
@@ -50,10 +51,9 @@ export class StripeWebhookService {
                 switch (event.type) {
                     
                     case 'charge.succeeded':
-                        console.log("-------event.type-------,",event.type)
+                        console.log("-------------------event.type---------------",event.type)
                         const amount = event.data.object.amount_captured;
-                        console.log("-------amount-------,",amount);
-                        
+                        console.log("-------------------amount---------------",amount)
                         const formattedNumber = `${amount
                             .toString()
                             .slice(0, -2)}.${amount.toString().slice(-2)}`;
