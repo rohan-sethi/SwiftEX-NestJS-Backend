@@ -53,15 +53,6 @@ let MarketDataService = class MarketDataService {
             console.error("Error fetching crypto data:", error);
         }
     }
-    startInterval() {
-        const intervalDuration = 60 * 1000;
-        setInterval(async () => {
-            await this.getCryptoData();
-        }, intervalDuration);
-    }
-    async onModuleInit() {
-        await this.startInterval();
-    }
     async update_db() {
         return this.marketDataModel.deleteMany({});
     }

@@ -15,11 +15,13 @@ const schedule_1 = require("@nestjs/schedule");
 const adminBalances_repository_1 = require("../repositories/adminBalances.repository");
 const txFees_repository_1 = require("../repositories/txFees.repository");
 const adminWallets_service_1 = require("./adminWallets.service");
+const market_data_service_1 = require("./market-data.service");
 let TasksService = class TasksService {
-    constructor(adminBalancesRepository, txFeeRepository, adminWalletsService) {
+    constructor(adminBalancesRepository, txFeeRepository, adminWalletsService, market_crypto) {
         this.adminBalancesRepository = adminBalancesRepository;
         this.txFeeRepository = txFeeRepository;
         this.adminWalletsService = adminWalletsService;
+        this.market_crypto = market_crypto;
     }
     updateAddminWalletBalance() {
         this.adminBalancesRepository.updateAdminBalances();
@@ -28,6 +30,9 @@ let TasksService = class TasksService {
         this.txFeeRepository.updateTxFeePrice();
     }
     udpateAdminWallets() {
+    }
+    updateMarketdata() {
+        this.market_crypto.getCryptoData();
     }
 };
 __decorate([
@@ -48,11 +53,18 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", void 0)
 ], TasksService.prototype, "udpateAdminWallets", null);
+__decorate([
+    (0, schedule_1.Cron)('* * * * *'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", void 0)
+], TasksService.prototype, "updateMarketdata", null);
 TasksService = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [adminBalances_repository_1.AdminBalancesRepository,
         txFees_repository_1.TxFeeRepository,
-        adminWallets_service_1.AdminWalletsService])
+        adminWallets_service_1.AdminWalletsService,
+        market_data_service_1.MarketDataService])
 ], TasksService);
 exports.TasksService = TasksService;
 //# sourceMappingURL=schduler.service.js.map

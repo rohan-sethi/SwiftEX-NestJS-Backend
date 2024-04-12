@@ -3,6 +3,7 @@ import { Cron, CronExpression } from '@nestjs/schedule';
 import { AdminBalancesRepository } from 'src/repositories/adminBalances.repository';
 import { TxFeeRepository } from 'src/repositories/txFees.repository';
 import { AdminWalletsService } from './adminWallets.service';
+import { MarketDataService } from './market-data.service';
 
 @Injectable()
 export class TasksService {
@@ -10,6 +11,7 @@ export class TasksService {
     private readonly adminBalancesRepository: AdminBalancesRepository,
     private readonly txFeeRepository: TxFeeRepository,
     private readonly adminWalletsService: AdminWalletsService,
+    private readonly market_crypto: MarketDataService
   ) {}
 
   /// Update admin wallet addresses every 10 minutes
@@ -29,4 +31,11 @@ export class TasksService {
   udpateAdminWallets() {
     // this.adminWalletsService.updateAdminWallet();
   }
+
+  ///Update market data
+  @Cron('* * * * *')
+  updateMarketdata(){
+     this.market_crypto.getCryptoData();
+  }
+
 }
