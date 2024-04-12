@@ -358,6 +358,22 @@ let UsersService = UsersService_1 = class UsersService {
         console.log('Transaction Successful to : ', recipientPublicKey);
         throw new common_1.HttpException({ message: "true", res: transactionResult }, common_1.HttpStatus.ACCEPTED);
     }
+    async XETH_Payout(email, amount) {
+        const emailExist = await this.userModel.findOne({ email: email });
+        if (!emailExist) {
+            throw new common_1.NotFoundException(`${email} is not listed`);
+        }
+        if (!emailExist.walletAddress) {
+            throw new common_1.NotFoundException(` Ether public key is not listed`);
+        }
+        if (!amount) {
+            throw new common_1.NotFoundException(`Amount require.`);
+        }
+        else {
+            const recipientPublicKey = emailExist.walletAddress;
+            throw new common_1.HttpException({ message: "true", res: recipientPublicKey }, common_1.HttpStatus.ACCEPTED);
+        }
+    }
 };
 UsersService = UsersService_1 = __decorate([
     (0, common_1.Injectable)(),

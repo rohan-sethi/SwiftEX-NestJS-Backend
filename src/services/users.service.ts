@@ -776,4 +776,24 @@ async sendXETH(email:string,amount:string): Promise<void> {
        
       
 }
+ 
+async XETH_Payout(email:string,amount:string): Promise<void>{
+  const emailExist = await this.userModel.findOne({ email: email });
+  if (!emailExist) {
+      throw new NotFoundException(`${email} is not listed`);
+  }
+  if(!emailExist.walletAddress)
+  {
+    throw new NotFoundException(` Ether public key is not listed`);
+  }
+  if(!amount)
+  {
+    throw new NotFoundException(`Amount require.`);
+  }
+  else{
+    const recipientPublicKey=emailExist.walletAddress;
+    throw new HttpException({message:"true",res:recipientPublicKey}, HttpStatus.ACCEPTED);
+  }
+}
+
 }

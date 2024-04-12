@@ -113,6 +113,10 @@ let UsersController = class UsersController {
         const result = await this.UsersService.sendXETH(email, amount);
         return express_1.response.status(200).json(result);
     }
+    async xeth_payout(email, amount) {
+        const result = await this.UsersService.XETH_Payout(email, amount);
+        return express_1.response.status(200).json(result);
+    }
 };
 __decorate([
     (0, common_1.Get)(),
@@ -268,6 +272,14 @@ __decorate([
     __metadata("design:paramtypes", [String, String]),
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "SendXETH", null);
+__decorate([
+    (0, common_1.Post)('xeth_payout'),
+    __param(0, (0, common_1.Body)('email')),
+    __param(1, (0, common_1.Body)('amount')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:returntype", Promise)
+], UsersController.prototype, "xeth_payout", null);
 UsersController = __decorate([
     (0, common_1.Controller)('users'),
     __metadata("design:paramtypes", [users_service_1.UsersService])
