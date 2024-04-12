@@ -46,15 +46,15 @@ export class MarketDataService {
     }
   }
 
-  startInterval(): void {
-    const intervalDuration = 60 * 1000; // 1min
-    setInterval(async() => {
-       await this.getCryptoData();
-    }, intervalDuration);
-  }
-  async onModuleInit() {
-    await this.startInterval();
-  }
+  // startInterval(): void {
+  //   const intervalDuration = 60 * 1000; // 1min
+  //   setInterval(async() => {
+  //      await this.getCryptoData();
+  //   }, intervalDuration);
+  // }
+  // async onModuleInit() {
+  //   await this.startInterval();
+  // }
 
 
 

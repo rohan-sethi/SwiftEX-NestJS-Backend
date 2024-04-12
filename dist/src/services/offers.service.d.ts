@@ -57,7 +57,6 @@ export declare class OffersService {
     getOfferDetails(offerId: ObjectId, userId: ObjectId): Promise<{
         offerBids: any[];
         _id: import("mongoose").Schema.Types.ObjectId;
-        chainId: number;
         amount: number;
         assetName: string;
         pricePerUnit: number;
@@ -68,6 +67,7 @@ export declare class OffersService {
         appFee: number;
         currencyName: string;
         chainName: string;
+        chainId: number;
         failureReason?: string;
         blockchainTxHash: string;
         status: string;

@@ -67,6 +67,7 @@ let StripeWebhookService = StripeWebhookService_1 = class StripeWebhookService {
             let event;
             try {
                 event = stripe.webhooks.constructEvent(request.body, sig, endpointSecret);
+                console.log("----------event----------,", event);
                 console.log("-------------event---------", event);
             }
             catch (err) {
@@ -99,6 +100,7 @@ let StripeWebhookService = StripeWebhookService_1 = class StripeWebhookService {
                     }
                     break;
             }
+            console.log("----------------response-----------------");
             response.send();
         });
         const port = 4242;

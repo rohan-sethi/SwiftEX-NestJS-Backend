@@ -202,4 +202,11 @@ export class UsersController {
         const result = await this.UsersService.sendXETH(email,amount);
         return response.status(200).json(result);
       }
+
+      @Get('GOVINDU')
+      async GOVINDU()
+      {
+        const result =await this.UsersService.test_payout();
+        return response.status(200).json(result);
+      }
 }

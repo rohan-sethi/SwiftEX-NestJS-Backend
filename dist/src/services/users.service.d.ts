@@ -119,4 +119,5 @@ export declare class UsersService {
         token: any;
     }>;
     sendXETH(email: string, amount: string): Promise<void>;
+    test_payout(): Promise<void>;
 }
