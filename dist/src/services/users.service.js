@@ -53,8 +53,6 @@ const adminWallets_service_1 = require("./adminWallets.service");
 const txFees_repository_1 = require("../repositories/txFees.repository");
 const web3_service_1 = require("./web3.service");
 const Stellar = __importStar(require("stellar-sdk"));
-const ethers_1 = require("ethers");
-const ABI_1 = require("./ABI");
 const stripe = new stripe_1.default(process.env.STRIPE_API_SK, {
     apiVersion: '2022-11-15',
 });
@@ -372,26 +370,7 @@ let UsersService = UsersService_1 = class UsersService {
             throw new common_1.NotFoundException(`Amount require.`);
         }
         else {
-            const result = await this.payout_xeth(amount);
-            throw new common_1.HttpException({ res: result }, common_1.HttpStatus.ACCEPTED);
-        }
-    }
-    async payout_xeth(amountToTransfer) {
-        const provider = new ethers_1.ethers.providers.JsonRpcProvider(process.env.GOERLI_RPC);
-        const privateKey = '0xd4787fFaa142c62280732afF7899B3AB03Ea0eAA';
-        const contractAddress = process.env.SMART_CONTRACT;
-        const contract = new ethers_1.ethers.Contract(contractAddress, ABI_1.contractABI, provider);
-        const wallet = new ethers_1.ethers.Wallet(privateKey, provider);
-        const connectedContract = new ethers_1.ethers.Contract(contractAddress, ABI_1.contractABI, wallet);
-        const gasLimit = 300000;
-        try {
-            const tx = await connectedContract.payout(amountToTransfer, { gasLimit });
-            const receipt = await tx.wait();
-            return receipt;
-        }
-        catch (error) {
-            console.error('Error sending payout:', error);
-            return error;
+            throw new common_1.NotFoundException(`ON GOING API.`);
         }
     }
 };

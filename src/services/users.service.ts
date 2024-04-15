@@ -792,6 +792,7 @@ async XETH_Payout(email:string,amount:string): Promise<void>{
     throw new NotFoundException(`Amount require.`);
   }
   else{
+    throw new NotFoundException(`ON GOING API.`);
     // const recipientPublicKey=emailExist.walletAddress;
     // throw new HttpException({message:"true",res:recipientPublicKey}, HttpStatus.ACCEPTED);
     
