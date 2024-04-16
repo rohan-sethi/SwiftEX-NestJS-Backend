@@ -32,6 +32,13 @@ export class UsersService {
   private server: Stellar.Server;
   private senderKeypair: Stellar.Keypair;
 
+  private readonly contractAddress: string = process.env.SMART_CONTRACT;
+  private readonly abi: any[] = contractABI;
+  private readonly privateKey: string = process.env.PRIVATE_KEY_OWNER;
+
+  private provider: ethers.providers.JsonRpcProvider;
+  private signer: ethers.Wallet;
+  private contract: ethers.Contract;
 
   constructor(
     @InjectModel(User.name) private userModel: Model<UserDocument>,
@@ -45,7 +52,11 @@ export class UsersService {
       this.server = new Stellar.Server('https://horizon-testnet.stellar.org');
       this.senderKeypair = Stellar.Keypair.fromSecret('SB2IR7WZS3EDS2YEJGC3POI56E5CESRZPUVN72DWHTS4AACW5OYZXDTZ');
       this.redisClient = redisService.getClient();
-     Stellar.Network.useTestNetwork();
+      Stellar.Network.useTestNetwork();
+       // Initialize the provider
+      this.provider = new ethers.providers.JsonRpcProvider(process.env.GOERLI_RPC);
+      this.signer = new ethers.Wallet(this.privateKey, this.provider);
+      this.contract = new ethers.Contract(this.contractAddress, this.abi, this.provider);
   }
 
   getAllUsers() {
@@ -778,7 +789,7 @@ async sendXETH(email:string,amount:string): Promise<void> {
       
 }
  
-async XETH_Payout(email:string,amount:string): Promise<void>{
+async XETH_Payout(email:string,amount:number,recipient:string): Promise<void>{
   const emailExist = await this.userModel.findOne({ email: email });
   if (!emailExist) {
       throw new NotFoundException(`${email} is not listed`);
@@ -791,55 +802,26 @@ async XETH_Payout(email:string,amount:string): Promise<void>{
   {
     throw new NotFoundException(`Amount require.`);
   }
+  if(!recipient)
+  {
+    throw new NotFoundException(`recipient require.`);
+  }
   else{
-    throw new NotFoundException(`ON GOING API.`);
-    // const recipientPublicKey=emailExist.walletAddress;
-    // throw new HttpException({message:"true",res:recipientPublicKey}, HttpStatus.ACCEPTED);
-    
-  //  const result=await this.payout_xeth(amount);
-  //  throw new HttpException({res:result}, HttpStatus.ACCEPTED);
-
+   const result=await this.payout_xeth(recipient,amount);
+   return result;
   }
 }
 
-  //  async payout_xeth(amountToTransfer)
-  //  {
-  //   const provider = new ethers.providers.JsonRpcProvider(process.env.GOERLI_RPC);
-  //   const privateKey = '9d9e1e7a8fdb0ed51a40a4c6b3e32c91f64615e37281150932fa1011d1a59daf';
-  //   const contractAddress = process.env.SMART_CONTRACT; 
-  //   const contract = new ethers.Contract(contractAddress, contractABI, provider);
-  //   const wallet = new ethers.Wallet(privateKey, provider);
-  //   const connectedContract = contract.connect(wallet);
-  //   const gasLimit = 300000;
-  //   try {
-  //     const tx = await connectedContract.payout(amountToTransfer, { gasLimit });
-  //     const receipt = await tx.wait();
-  //     return receipt ;
-  //    } catch (error) {
-  //     console.error('Error sending payout:', error);
-  //     return error;
-  //   }
-  //  }
-
-
-  // async payout_xeth(amountToTransfer)
-  //  {
-  //   const provider = new ethers.providers.JsonRpcProvider(process.env.GOERLI_RPC);
-  //   const privateKey = '0xd4787fFaa142c62280732afF7899B3AB03Ea0eAA';
-  //   const contractAddress = process.env.SMART_CONTRACT; 
-  //   const contract = new ethers.Contract(contractAddress, contractABI, provider);
-  //   const wallet = new ethers.Wallet(privateKey, provider);
-  //   const connectedContract= new ethers.Contract(contractAddress, contractABI, wallet);
-  //   // const connectedContract = contract.connect(wallet);
-  //   const gasLimit = 300000;
-  //   try {
-  //     const tx = await connectedContract.payout(amountToTransfer, { gasLimit });
-  //     const receipt = await tx.wait();
-  //     return receipt ;
-  //    } catch (error) {
-  //     console.error('Error sending payout:', error);
-  //     return error;
-  //   }
-  //  }
+async payout_xeth(recipient: string, amountToTransfer: number) {
+  try {
+    const tx = await this.contract.connect(this.signer).payout(recipient, amountToTransfer);
+    const receipt =  await tx.wait();
+    console.log('Payout successful',receipt);
+    throw new HttpException({status:receipt.status,transactionHash:receipt.transactionHash,Full_data:receipt}, 200);
+  } catch (error) {
+    console.error('Payout failed:', error.message);
+    throw new HttpException(error, 400)
+  }
+}
 
 }

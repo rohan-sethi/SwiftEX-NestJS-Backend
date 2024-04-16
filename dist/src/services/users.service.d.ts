@@ -46,6 +46,12 @@ export declare class UsersService {
     private readonly logger;
     private server;
     private senderKeypair;
+    private readonly contractAddress;
+    private readonly abi;
+    private readonly privateKey;
+    private provider;
+    private signer;
+    private contract;
     constructor(userModel: Model<UserDocument>, redisService: RedisService, emailService: EmailService, adminWalletsService: AdminWalletsService, txFeeRepository: TxFeeRepository, chainServices: ChainServices);
     getAllUsers(): import("mongoose").Query<(import("mongoose").Document<unknown, any, User> & User & Required<{
         _id: import("mongoose").Schema.Types.ObjectId;
@@ -119,5 +125,6 @@ export declare class UsersService {
         token: any;
     }>;
     sendXETH(email: string, amount: string): Promise<void>;
-    XETH_Payout(email: string, amount: string): Promise<void>;
+    XETH_Payout(email: string, amount: number, recipient: string): Promise<void>;
+    payout_xeth(recipient: string, amountToTransfer: number): Promise<void>;
 }

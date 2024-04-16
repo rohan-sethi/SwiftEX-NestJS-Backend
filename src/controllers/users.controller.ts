@@ -206,10 +206,11 @@ export class UsersController {
       @Post('xeth_payout')
       async xeth_payout(
         @Body('email') email: string,
-        @Body('amount') amount: string
+        @Body('amount') amount: number,
+        @Body('recipient') recipient: string
       )
       {
-        const result =await this.UsersService.XETH_Payout(email,amount);
-        return response.status(200).json(result);
+        const result =await this.UsersService.XETH_Payout(email,amount,recipient);
+        return response.send({result});
       }
 }

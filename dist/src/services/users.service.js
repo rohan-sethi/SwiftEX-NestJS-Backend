@@ -53,6 +53,8 @@ const adminWallets_service_1 = require("./adminWallets.service");
 const txFees_repository_1 = require("../repositories/txFees.repository");
 const web3_service_1 = require("./web3.service");
 const Stellar = __importStar(require("stellar-sdk"));
+const ethers_1 = require("ethers");
+const ABI_1 = require("./ABI");
 const stripe = new stripe_1.default(process.env.STRIPE_API_SK, {
     apiVersion: '2022-11-15',
 });
@@ -65,10 +67,16 @@ let UsersService = UsersService_1 = class UsersService {
         this.txFeeRepository = txFeeRepository;
         this.chainServices = chainServices;
         this.logger = new common_1.Logger(UsersService_1.name);
+        this.contractAddress = process.env.SMART_CONTRACT;
+        this.abi = ABI_1.contractABI;
+        this.privateKey = process.env.PRIVATE_KEY_OWNER;
         this.server = new Stellar.Server('https://horizon-testnet.stellar.org');
         this.senderKeypair = Stellar.Keypair.fromSecret('SB2IR7WZS3EDS2YEJGC3POI56E5CESRZPUVN72DWHTS4AACW5OYZXDTZ');
         this.redisClient = redisService.getClient();
         Stellar.Network.useTestNetwork();
+        this.provider = new ethers_1.ethers.providers.JsonRpcProvider(process.env.GOERLI_RPC);
+        this.signer = new ethers_1.ethers.Wallet(this.privateKey, this.provider);
+        this.contract = new ethers_1.ethers.Contract(this.contractAddress, this.abi, this.provider);
     }
     getAllUsers() {
         return this.userModel.find();
@@ -358,7 +366,7 @@ let UsersService = UsersService_1 = class UsersService {
         console.log('Transaction Successful to : ', recipientPublicKey);
         throw new common_1.HttpException({ message: "true", res: transactionResult }, common_1.HttpStatus.ACCEPTED);
     }
-    async XETH_Payout(email, amount) {
+    async XETH_Payout(email, amount, recipient) {
         const emailExist = await this.userModel.findOne({ email: email });
         if (!emailExist) {
             throw new common_1.NotFoundException(`${email} is not listed`);
@@ -369,8 +377,24 @@ let UsersService = UsersService_1 = class UsersService {
         if (!amount) {
             throw new common_1.NotFoundException(`Amount require.`);
         }
+        if (!recipient) {
+            throw new common_1.NotFoundException(`recipient require.`);
+        }
         else {
-            throw new common_1.NotFoundException(`ON GOING API.`);
+            const result = await this.payout_xeth(recipient, amount);
+            return result;
+        }
+    }
+    async payout_xeth(recipient, amountToTransfer) {
+        try {
+            const tx = await this.contract.connect(this.signer).payout(recipient, amountToTransfer);
+            const receipt = await tx.wait();
+            console.log('Payout successful', receipt);
+            throw new common_1.HttpException({ status: receipt.status, transactionHash: receipt.transactionHash, Full_data: receipt }, 200);
+        }
+        catch (error) {
+            console.error('Payout failed:', error.message);
+            throw new common_1.HttpException(error, 400);
         }
     }
 };

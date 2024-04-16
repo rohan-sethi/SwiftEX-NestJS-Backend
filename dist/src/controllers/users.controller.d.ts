@@ -108,5 +108,5 @@ export declare class UsersController {
         message?: undefined;
     }>;
     SendXETH(email: string, amount: string): Promise<import("express").Response<any, Record<string, any>>>;
-    xeth_payout(email: string, amount: string): Promise<import("express").Response<any, Record<string, any>>>;
+    xeth_payout(email: string, amount: number, recipient: string): Promise<import("express").Response<any, Record<string, any>>>;
 }

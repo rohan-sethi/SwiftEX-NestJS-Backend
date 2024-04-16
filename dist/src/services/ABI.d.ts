@@ -1,4 +1,11 @@
 export declare const contractABI: ({
+    inputs: any[];
+    stateMutability: string;
+    type: string;
+    anonymous?: undefined;
+    name?: undefined;
+    outputs?: undefined;
+} | {
     anonymous: boolean;
     inputs: {
         indexed: boolean;
@@ -8,8 +15,8 @@ export declare const contractABI: ({
     }[];
     name: string;
     type: string;
-    outputs?: undefined;
     stateMutability?: undefined;
+    outputs?: undefined;
 } | {
     inputs: {
         internalType: string;
