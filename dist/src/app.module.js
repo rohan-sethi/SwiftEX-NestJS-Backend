@@ -49,12 +49,13 @@ const Payout_service_1 = require("./services/Payout.service");
 const marketdata_schema_1 = require("./models/marketdata.schema");
 const market_data_controller_1 = require("./controllers/market-data.controller");
 const market_data_service_1 = require("./services/market-data.service");
+const stripe_controller_1 = require("./controllers/stripe.controller");
 let AppModule = class AppModule {
     configure(consumer) {
         consumer
             .apply(auth_middleware_1.AuthenticateUser)
             .exclude('users/login', 'users/register', 'transactions/webhook', 'transactions/webhook/connect', 'users/verifyLoginOtp', 'users/ACTIVATE', 'users/forgot_passcode')
-            .forRoutes(users_controller_1.UsersController, offers_controller_1.OffersController, bids_controller_1.BidsController, transactions_controller_1.TransactionsController, chain_controller_1.ChainController, payout_controller_1.PayoutController, Listion_controller_1.ListionController);
+            .forRoutes(users_controller_1.UsersController, offers_controller_1.OffersController, bids_controller_1.BidsController, transactions_controller_1.TransactionsController, chain_controller_1.ChainController, payout_controller_1.PayoutController, Listion_controller_1.ListionController, stripe_controller_1.stripe_controller);
     }
 };
 AppModule = __decorate([
@@ -95,7 +96,8 @@ AppModule = __decorate([
             transactions_controller_1.TransactionsController,
             chain_controller_1.ChainController,
             payout_controller_1.PayoutController,
-            market_data_controller_1.MarketDataController
+            market_data_controller_1.MarketDataController,
+            stripe_controller_1.stripe_controller
         ],
         providers: [
             app_service_1.AppService,

@@ -43,6 +43,7 @@ import { Payout_listion } from './services/Payout.service'
 import { MarketData, MarketDataSchema } from './models/marketdata.schema';
 import { MarketDataController } from './controllers/market-data.controller';
 import { MarketDataService } from './services/market-data.service';
+import { stripe_controller } from './controllers/stripe.controller';
 
 
 @Module({
@@ -84,7 +85,8 @@ import { MarketDataService } from './services/market-data.service';
     TransactionsController,
     ChainController,
     PayoutController,
-    MarketDataController
+    MarketDataController,
+    stripe_controller
   ],
   providers: [
     AppService,
@@ -132,7 +134,8 @@ export class AppModule implements NestModule {
         TransactionsController,
         ChainController,
         PayoutController,
-        ListionController
+        ListionController,
+        stripe_controller
       );
   }
 }
