@@ -24,11 +24,13 @@ export class stripe_controller{
         console.log("-----------------called");
       let event;
       try {
+        console.log("---------+++++++++++main++++++++++++++--------called");
         event = stripe.webhooks.constructEvent(
           request.rawBody,
           sig,
           process.env.STRIPE_ENDPOINT_SEC,
         );
+        console.log("---------+++++++event++++++++++++++++++--------called ",event);
         // Handle the payments event
       if (event.type === 'charge.succeeded') {
         const session = event.data.object;
