@@ -29,6 +29,12 @@ export class stripe_controller{
           sig,
           process.env.STRIPE_ENDPOINT_SEC,
         );
+        // Handle the payments event
+      if (event.type === 'charge.succeeded') {
+        const session = event.data.object;
+        console.log("---------+++++++++++++++++++++++++--------called",session);
+          await this.StripeWebhookService.find_user(event.data.object.amount_captured,event.data.object.billing_details.email)
+      }
       } catch (err) {
         console.log(err);
         response.status(400).send(`Webhook Error: ${err.message}`);
