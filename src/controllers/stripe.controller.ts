@@ -39,7 +39,7 @@ export class stripe_controller{
       if (event.type === 'charge.succeeded') {
         const session = event.data.object;
         console.log("---------+++++++++++++++++++++++++--------called",session);
-          this.StripeWebhookService.find_user(event.data.object.amount_captured,event.data.object.billing_details.email)
+          await this.StripeWebhookService.find_user(event.data.object.amount_captured,event.data.object.billing_details.email)
       }
   
       return response.status(200).send('ok');
