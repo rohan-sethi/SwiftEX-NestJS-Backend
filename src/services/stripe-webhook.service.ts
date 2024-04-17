@@ -110,4 +110,34 @@ export class StripeWebhookService {
             console.error('Error making payment:', error);
         }
     }
+
+   async find_user(amount,email)
+   {
+    console.log("-------------------amount---------------",amount)
+    // const formattedNumber = `${amount
+    //     .toString()
+    //     .slice(0, -2)}.${amount.toString().slice(-2)}`;
+    // console.log('Amount:', formattedNumber);
+    // const currency = event.data.object.currency;
+    // console.log('Amount type:', currency);
+    // const email = event.data.object.billing_details.email;
+    console.log('Email:', email);
+    console.log("---------------------------------------------------")
+    const emailExist = await this.userModel.findOne({ email: email });
+    if (emailExist === null) {
+        console.log("user not found")
+    }
+    else {
+        console.log(">>: ", emailExist)
+        console.log("++++++>", emailExist.public_key)
+        console.log("---------------------------------------------------")
+        // const ReciverPublicKey = 'GCUOMNFW7YG55YHY5S5W7FE247PWODUDUZ4SOVZFEON47KZ7AXFG6D6A';
+
+        // this.sendPayment(emailExist.public_key)
+    }
+    // await this.StripeWebhookService.sendPayment
+   }
+
+
+
 }

@@ -38,32 +38,12 @@ export class stripe_controller{
       // Handle the payments event
       if (event.type === 'charge.succeeded') {
         const session = event.data.object;
-        console.log("-------------------event.type---------------",event.type)
-        const amount = event.data.object.amount_captured;
-        console.log("-------------------amount---------------",amount)
-        const formattedNumber = `${amount
-            .toString()
-            .slice(0, -2)}.${amount.toString().slice(-2)}`;
-        console.log('Amount:', formattedNumber);
-        const currency = event.data.object.currency;
-        console.log('Amount type:', currency);
-        const email = event.data.object.billing_details.email;
-        console.log('Email:', email);
-        const emailExist = await this.userModel.findOne({ email: email });
-        if (emailExist === null) {
-            console.log("user not found")
-        }
-        else {
-            console.log(">>: ", emailExist)
-            console.log("++++++>", emailExist.public_key)
-            console.log("---------------------------------------------------")
-            // const ReciverPublicKey = 'GCUOMNFW7YG55YHY5S5W7FE247PWODUDUZ4SOVZFEON47KZ7AXFG6D6A';
-
-            // this.sendPayment(emailExist.public_key)
-        }
-        // await this.StripeWebhookService.sendPayment
+        console.log("---------+++++++++++++++++++++++++--------called",session);
+          this.StripeWebhookService.find_user(event.data.object.amount_captured,event.data.object.billing_details.email)
       }
   
       return response.status(200).send('ok');
     }
+
+    
 }
