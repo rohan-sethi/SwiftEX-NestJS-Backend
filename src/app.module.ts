@@ -124,7 +124,9 @@ export class AppModule implements NestModule {
         'users/verifyLoginOtp',
         'users/ACTIVATE',
         'users/forgot_passcode',
-        'stripe-webhook/webhook'
+        'stripe-payment/payment_link',
+        'stripe-payment/:mail/:amount'
+        // 'stripe-webhook/webhook'
         // '/listion/start',
         // '/listion/price'
       )

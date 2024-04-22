@@ -30,54 +30,42 @@ let stripe_controller = class stripe_controller {
         this.userModel = userModel;
         this.StripeWebhookService = StripeWebhookService;
     }
-    async webhook(sig, request, response) {
-        console.log("-----------------called");
-        let event;
+    async payment_link(id, amount, XUSD_amount) {
         try {
-            event = stripe.webhooks.constructEvent(request.rawBody, sig, process.env.STRIPE_ENDPOINT_SEC);
+            const result = await this.StripeWebhookService.payment_link(id, amount, XUSD_amount);
+            console.log(">>>>", result);
+            return result;
         }
-        catch (err) {
-            console.log(err);
-            response.status(400).send(`Webhook Error: ${err.message}`);
-            return;
-        }
-        if (event.type === 'charge.succeeded') {
-            const session = event.data.object;
-            console.log("-------------------event.type---------------", event.type);
-            const amount = event.data.object.amount_captured;
-            console.log("-------------------amount---------------", amount);
-            const formattedNumber = `${amount
-                .toString()
-                .slice(0, -2)}.${amount.toString().slice(-2)}`;
-            console.log('Amount:', formattedNumber);
-            const currency = event.data.object.currency;
-            console.log('Amount type:', currency);
-            const email = event.data.object.billing_details.email;
-            console.log('Email:', email);
-            const emailExist = await this.userModel.findOne({ email: email });
-            if (emailExist === null) {
-                console.log("user not found");
+        catch (error) {
+            if (error instanceof common_1.NotFoundException) {
+                return { success: false, message: 'User not found' };
             }
-            else {
-                console.log(">>: ", emailExist);
-                console.log("++++++>", emailExist.public_key);
-                console.log("---------------------------------------------------");
-            }
+            throw error;
         }
-        return response.status(200).send('ok');
+    }
+    async processPayment(mail, amount) {
+        return this.StripeWebhookService.sendPayment(mail, amount);
     }
 };
 __decorate([
-    (0, common_1.Post)('webhook'),
-    __param(0, (0, common_1.Headers)('stripe-signature')),
-    __param(1, (0, common_1.Req)()),
-    __param(2, (0, common_1.Response)()),
+    (0, common_1.Post)('payment_link'),
+    __param(0, (0, common_1.Body)('id')),
+    __param(1, (0, common_1.Body)('amount')),
+    __param(2, (0, common_1.Body)('XUSD_amount')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, Object, Object]),
+    __metadata("design:paramtypes", [String, Number, String]),
     __metadata("design:returntype", Promise)
-], stripe_controller.prototype, "webhook", null);
+], stripe_controller.prototype, "payment_link", null);
+__decorate([
+    (0, common_1.Get)(':mail/:amount'),
+    __param(0, (0, common_1.Param)('mail')),
+    __param(1, (0, common_1.Param)('amount')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:returntype", Promise)
+], stripe_controller.prototype, "processPayment", null);
 stripe_controller = __decorate([
-    (0, common_1.Controller)('stripe-webhook'),
+    (0, common_1.Controller)('stripe-payment'),
     __param(0, (0, mongoose_1.InjectModel)(user_model_1.User.name)),
     __metadata("design:paramtypes", [mongoose_2.Model,
         stripe_webhook_service_1.StripeWebhookService])

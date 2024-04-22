@@ -1,4 +1,4 @@
-import { Controller, Get, Headers, Post, RawBodyRequest, Req, Response } from '@nestjs/common';
+import { Body, Controller, Get, Headers, NotFoundException, Param, Post, Query, RawBodyRequest, Req, Response } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { User, UserDocument } from 'src/models/user.model';
@@ -9,49 +9,36 @@ const stripe = new Stripe(process.env.STRIPE_API_SK, {
     apiVersion: '2022-11-15',
   });
 
-@Controller('stripe-webhook')
+@Controller('stripe-payment')
 export class stripe_controller{
     constructor(
         @InjectModel(User.name) private userModel: Model<UserDocument>,
         private readonly StripeWebhookService:StripeWebhookService
       ) {}
-    @Post('webhook')
-    async webhook(
-      @Headers('stripe-signature') sig,
-      @Req() request: RawBodyRequest<Request>,
-      @Response() response,
-    ) {
-        console.log("-----------------called");
-      let event;
-      try {
-        console.log("---------+++++++++++main++++++++++++++--------called");
-        event = stripe.webhooks.constructEvent(
-          request.rawBody,
-          sig,
-          process.env.STRIPE_ENDPOINT_SEC,
-        );
-        console.log("---------+++++++event++++++++++++++++++--------called ",event);
-        // Handle the payments event
-      if (event.type === 'charge.succeeded') {
-        const session = event.data.object;
-        console.log("---------+++++++++++++++++++++++++--------called",session);
-          await this.StripeWebhookService.find_user(event.data.object.amount_captured,event.data.object.billing_details.email)
-      }
-      } catch (err) {
-        console.log(err);
-        response.status(400).send(`Webhook Error: ${err.message}`);
-        return;
-      }
-  
-      // Handle the payments event
-      if (event.type === 'charge.succeeded') {
-        const session = event.data.object;
-        console.log("---------+++++++++++++++++++++++++--------called",session);
-          await this.StripeWebhookService.find_user(event.data.object.amount_captured,event.data.object.billing_details.email)
-      }
-  
-      return response.status(200).send('ok');
-    }
+      @Post('payment_link')
+      async payment_link(
+        @Body('id') id: string,
+        @Body('amount') amount: number,
+        @Body('XUSD_amount') XUSD_amount: string,
 
-    
+      ){
+        try {
+          const result = await this.StripeWebhookService.payment_link(id,amount,XUSD_amount);
+          console.log(">>>>",result)
+          return result;
+        } catch (error) {
+          if (error instanceof NotFoundException) {
+            return { success: false, message: 'User not found' };
+          }
+          throw error;
+        }
+      }
+
+      @Get(':mail/:amount')
+      async processPayment(
+        @Param('mail') mail: string,
+        @Param('amount') amount: string,
+      ){
+        return this.StripeWebhookService.sendPayment(mail,amount);
+      }
 }
