@@ -45,7 +45,7 @@ const mongoose_1 = require("@nestjs/mongoose");
 const mongoose_2 = require("mongoose");
 const user_model_1 = require("../models/user.model");
 const jwtHandler_1 = require("../utils/jwtHandler");
-const bcrypt_1 = __importDefault(require("bcrypt"));
+const bcrypt = __importStar(require("bcryptjs"));
 const stripe_1 = __importDefault(require("stripe"));
 const redisHandler_1 = require("../utils/redisHandler");
 const emailHandler_1 = require("../utils/emailHandler");
@@ -96,7 +96,7 @@ let UsersService = UsersService_1 = class UsersService {
                 throw new common_1.HttpException('Email already registered', common_1.HttpStatus.BAD_REQUEST);
         }
         const otp = this._generateOtp();
-        const loginOtp = bcrypt_1.default.hashSync(otp, 10);
+        const loginOtp = bcrypt.hashSync(otp, 10);
         const addedUser = await this.userModel.create(Object.assign(Object.assign({}, newUser), { loginOtp }));
         if (!addedUser) {
             throw new common_1.HttpException({ errorMessage: "not created" }, common_1.HttpStatus.BAD_REQUEST);
@@ -129,7 +129,7 @@ let UsersService = UsersService_1 = class UsersService {
             throw new common_1.HttpException(`Cannot generate login OTP in next ${Math.floor(otpLockTime / 1000)} sec.`, common_1.HttpStatus.BAD_REQUEST);
         const otp = this._generateOtp();
         const { errorMessage, errorCode } = await await this.emailService.sendEmail(email, 'One Time Passcode from SwiftEx.', `Hi ${user.firstName},\nYour email from SwiftEx for Recover Account verification OTP is ${otp}\nRegards,`);
-        const loginOtp = bcrypt_1.default.hashSync(otp, 10);
+        const loginOtp = bcrypt.hashSync(otp, 10);
         await this.userModel.findOneAndUpdate({ email }, {
             loginOtp,
             loginOtpUpdatedAt: new Date().getTime(),
@@ -146,7 +146,7 @@ let UsersService = UsersService_1 = class UsersService {
             throw new common_1.HttpException('Invalid credintials', common_1.HttpStatus.BAD_REQUEST);
         if (user.isLoginOtpUsed)
             throw new common_1.HttpException('New OTP generation required', common_1.HttpStatus.BAD_REQUEST);
-        if (!bcrypt_1.default.compareSync(otp, user.loginOtp))
+        if (!bcrypt.compareSync(otp, user.loginOtp))
             throw new common_1.HttpException('Wrong OTP', common_1.HttpStatus.BAD_REQUEST);
         const token = (0, jwtHandler_1.signJwtToken)({
             phoneNumber: user.phoneNumber,
@@ -308,7 +308,7 @@ let UsersService = UsersService_1 = class UsersService {
             if (!user) {
                 return { success: false, message: "user not found", status: "404" };
             }
-            const newPasscode = bcrypt_1.default.hashSync(Passcode, 10);
+            const newPasscode = bcrypt.hashSync(Passcode, 10);
             const res = await this.userModel.findByIdAndUpdate(user._id, {
                 passcode: newPasscode,
             });
@@ -326,7 +326,7 @@ let UsersService = UsersService_1 = class UsersService {
         const user = await this.userModel.findOne({ email });
         if (!user)
             throw new common_1.HttpException('Invalid credintials', common_1.HttpStatus.BAD_REQUEST);
-        if (!bcrypt_1.default.compareSync(otp, user.passcode))
+        if (!bcrypt.compareSync(otp, user.passcode))
             throw new common_1.HttpException('Worng User Data', common_1.HttpStatus.BAD_REQUEST);
         const token = (0, jwtHandler_1.signJwtToken)({
             phoneNumber: user.phoneNumber,

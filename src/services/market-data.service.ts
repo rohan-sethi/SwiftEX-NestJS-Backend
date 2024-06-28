@@ -22,14 +22,14 @@ export class MarketDataService {
 
       if (response.ok) {
         const responseData = await response.json();
-        console.log("====",responseData)
+        // console.log("====",responseData)
        await this.update_db();
         const document = new this.marketDataModel({
           MarketData: responseData,
         })
        await document.save()
   .then(savedDocument => {
-    console.log('Document saved:', savedDocument);
+    // console.log('Document saved:', savedDocument);
   })
   .catch(error => {
     console.error('Error saving document:', error);

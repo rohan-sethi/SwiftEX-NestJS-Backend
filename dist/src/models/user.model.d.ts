@@ -41,7 +41,6 @@ export declare class User {
     isLoginOtpUsed?: boolean;
     fcmRegTokens?: string[];
     public_key: string;
-    secret_key: string;
     passcode: string;
 }
 export declare const UserSchema: import("mongoose").Schema<User, import("mongoose").Model<User, any, any, any, any>, {}, {}, {}, {}, import("mongoose").DefaultSchemaOptions, User>;
