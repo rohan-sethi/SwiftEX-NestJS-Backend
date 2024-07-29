@@ -87,9 +87,9 @@ let UsersController = class UsersController {
         console.log('Received POST request with data:', postData);
         return { message: 'Data received successfully', data: postData };
     }
-    async updatePublicKeyByEmail(email, newPublicKey) {
+    async updatePublicKeyByEmail(userId, newPublicKey) {
         try {
-            const result = await this.UsersService.findByEmailAndUpdatePublicKey(email, newPublicKey);
+            const result = await this.UsersService.findByEmailAndUpdatePublicKey(userId, newPublicKey);
             console.log(">>>>", result);
             return result;
         }
@@ -109,12 +109,12 @@ let UsersController = class UsersController {
             throw error;
         }
     }
-    async SendXETH(email, amount) {
-        const result = await this.UsersService.sendXETH(email, amount);
+    async SendXETH(userId, amount) {
+        const result = await this.UsersService.sendXETH(userId, amount);
         return express_1.response.status(200).json(result);
     }
-    async xeth_payout(email, amount, recipient) {
-        const result = await this.UsersService.XETH_Payout(email, amount, recipient);
+    async xeth_payout(userId, amount, recipient) {
+        const result = await this.UsersService.XETH_Payout(userId, amount, recipient);
         return express_1.response.send({ result });
     }
 };
@@ -250,10 +250,10 @@ __decorate([
 ], UsersController.prototype, "create", null);
 __decorate([
     (0, common_1.Post)('updatePublicKeyByEmail'),
-    __param(0, (0, common_1.Body)('email')),
+    __param(0, (0, common_1.Query)('userId')),
     __param(1, (0, common_1.Body)('publicKey')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "updatePublicKeyByEmail", null);
 __decorate([
@@ -266,19 +266,19 @@ __decorate([
 ], UsersController.prototype, "updatePasscode", null);
 __decorate([
     (0, common_1.Post)('SendXETH'),
-    __param(0, (0, common_1.Body)('email')),
+    __param(0, (0, common_1.Query)('userId')),
     __param(1, (0, common_1.Body)('amount')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "SendXETH", null);
 __decorate([
     (0, common_1.Post)('xeth_payout'),
-    __param(0, (0, common_1.Body)('email')),
+    __param(0, (0, common_1.Query)('userId')),
     __param(1, (0, common_1.Body)('amount')),
     __param(2, (0, common_1.Body)('recipient')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Number, String]),
+    __metadata("design:paramtypes", [Object, Number, String]),
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "xeth_payout", null);
 UsersController = __decorate([

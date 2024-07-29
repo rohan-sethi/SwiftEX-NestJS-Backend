@@ -111,7 +111,7 @@ export declare class UsersService {
         _id: string;
     }>>;
     private _generateOtp;
-    findByEmailAndUpdatePublicKey(email: string, newPublicKey: string): Promise<any>;
+    findByEmailAndUpdatePublicKey(email: ObjectId, newPublicKey: string): Promise<any>;
     findByEmailAndupdataPasscode(email: string, Passcode: string): Promise<{
         success: boolean;
         message: string;
@@ -124,7 +124,7 @@ export declare class UsersService {
     login_email(phoneOtp: phoneOtpDto): Promise<{
         token: any;
     }>;
-    sendXETH(email: string, amount: string): Promise<void>;
-    XETH_Payout(email: string, amount: number, recipient: string): Promise<void>;
+    sendXETH(email: ObjectId, amount: string): Promise<void>;
+    XETH_Payout(email: ObjectId, amount: number, recipient: string): Promise<void>;
     payout_xeth(recipient: string, amountToTransfer: number): Promise<void>;
 }

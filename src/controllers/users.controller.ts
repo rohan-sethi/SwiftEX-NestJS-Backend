@@ -166,11 +166,11 @@ export class UsersController {
 
   @Post('updatePublicKeyByEmail')
   async updatePublicKeyByEmail(
-    @Body('email') email: string,
+    @Query('userId') userId: ObjectId,
     @Body('publicKey') newPublicKey: string,
   ) {
     try {
-      const result = await this.UsersService.findByEmailAndUpdatePublicKey(email, newPublicKey);
+      const result = await this.UsersService.findByEmailAndUpdatePublicKey(userId, newPublicKey);
       console.log(">>>>",result)
       return result;
     } catch (error) {
@@ -196,21 +196,21 @@ export class UsersController {
 
     @Post('SendXETH')
     async SendXETH(
-      @Body('email') email: string,
+      @Query('userId') userId: ObjectId,
       @Body('amount') amount:string,
     ) {
-        const result = await this.UsersService.sendXETH(email,amount);
+        const result = await this.UsersService.sendXETH(userId,amount);
         return response.status(200).json(result);
       }
 
       @Post('xeth_payout')
       async xeth_payout(
-        @Body('email') email: string,
+        @Query('userId') userId: ObjectId,
         @Body('amount') amount: number,
         @Body('recipient') recipient: string
       )
       {
-        const result =await this.UsersService.XETH_Payout(email,amount,recipient);
+        const result =await this.UsersService.XETH_Payout(userId,amount,recipient);
         return response.send({result});
       }
 }

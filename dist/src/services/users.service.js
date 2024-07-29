@@ -88,8 +88,6 @@ let UsersService = UsersService_1 = class UsersService {
         if (userExist)
             throw new common_1.HttpException('Email already registered', common_1.HttpStatus.BAD_REQUEST);
         const wallet_exist = await this.userModel.findOne({ walletAddress: newUser.walletAddress });
-        if (wallet_exist)
-            throw new common_1.HttpException('Wallet already registered', common_1.HttpStatus.BAD_REQUEST);
         if (newUser.email) {
             const emailExist = await this.userModel.findOne({ email: newUser.email });
             if (emailExist)
@@ -282,7 +280,7 @@ let UsersService = UsersService_1 = class UsersService {
         return otp;
     }
     async findByEmailAndUpdatePublicKey(email, newPublicKey) {
-        const user = await this.userModel.findOne({ email });
+        const user = await this.userModel.findOne({ _id: email });
         if (!user) {
             throw new common_1.HttpException('User not found', common_1.HttpStatus.NOT_FOUND);
         }
@@ -336,7 +334,7 @@ let UsersService = UsersService_1 = class UsersService {
         return { token };
     }
     async sendXETH(email, amount) {
-        const emailExist = await this.userModel.findOne({ email: email });
+        const emailExist = await this.userModel.findOne({ _id: email });
         if (!emailExist) {
             throw new common_1.NotFoundException(`${email} is not listed`);
         }
@@ -367,7 +365,7 @@ let UsersService = UsersService_1 = class UsersService {
         throw new common_1.HttpException({ message: "true", res: transactionResult }, common_1.HttpStatus.ACCEPTED);
     }
     async XETH_Payout(email, amount, recipient) {
-        const emailExist = await this.userModel.findOne({ email: email });
+        const emailExist = await this.userModel.findOne({ _id: email });
         if (!emailExist) {
             throw new common_1.NotFoundException(`${email} is not listed`);
         }

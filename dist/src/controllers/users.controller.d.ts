@@ -97,7 +97,7 @@ export declare class UsersController {
         message: string;
         data: any;
     };
-    updatePublicKeyByEmail(email: string, newPublicKey: string): Promise<any>;
+    updatePublicKeyByEmail(userId: ObjectId, newPublicKey: string): Promise<any>;
     updatePasscode(email: string, passcode: string): Promise<{
         success: boolean;
         message: string;
@@ -107,6 +107,6 @@ export declare class UsersController {
         status: string;
         message?: undefined;
     }>;
-    SendXETH(email: string, amount: string): Promise<import("express").Response<any, Record<string, any>>>;
-    xeth_payout(email: string, amount: number, recipient: string): Promise<import("express").Response<any, Record<string, any>>>;
+    SendXETH(userId: ObjectId, amount: string): Promise<import("express").Response<any, Record<string, any>>>;
+    xeth_payout(userId: ObjectId, amount: number, recipient: string): Promise<import("express").Response<any, Record<string, any>>>;
 }
