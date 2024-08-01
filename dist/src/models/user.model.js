@@ -70,7 +70,7 @@ __decorate([
     __metadata("design:type", Array)
 ], User.prototype, "fcmRegTokens", void 0);
 __decorate([
-    (0, mongoose_1.Prop)({ required: false, unique: true }),
+    (0, mongoose_1.Prop)({ required: false }),
     __metadata("design:type", String)
 ], User.prototype, "public_key", void 0);
 __decorate([

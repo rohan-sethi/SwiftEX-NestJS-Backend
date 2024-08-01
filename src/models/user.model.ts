@@ -54,7 +54,7 @@ export class User {
   @Prop()
   fcmRegTokens?: string[];
 
-  @Prop({ required: false, unique: true })
+  @Prop({ required: false })
   public_key: string;
 
   // @Prop({ required: false, unique: true })
