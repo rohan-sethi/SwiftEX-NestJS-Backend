@@ -17,7 +17,7 @@ import { UpdateBidDto } from 'src/dtos/updateBid.dto';
 import { BidsService } from 'src/services/bids.service';
 import { ObjectIdValidationPipe } from 'src/utils/validation.pipe';
 
-@Controller('bids')
+@Controller('api/bids')
 export class BidsController {
   constructor(private readonly BidsService: BidsService) {}
 

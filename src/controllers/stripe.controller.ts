@@ -9,7 +9,7 @@ const stripe = new Stripe(process.env.STRIPE_API_SK, {
     apiVersion: '2022-11-15',
   });
 
-@Controller('stripe-payment')
+@Controller('api/stripe-payment')
 export class stripe_controller{
     constructor(
         @InjectModel(User.name) private userModel: Model<UserDocument>,

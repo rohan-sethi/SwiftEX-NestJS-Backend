@@ -47,7 +47,7 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], ListionController.prototype, "startListening", null);
 ListionController = __decorate([
-    (0, common_1.Controller)('listion'),
+    (0, common_1.Controller)('api/listion'),
     __metadata("design:paramtypes", [listion_service_1.ListionService])
 ], ListionController);
 exports.ListionController = ListionController;

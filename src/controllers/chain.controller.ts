@@ -1,7 +1,7 @@
 import { Controller, Get, Param, ParseIntPipe } from '@nestjs/common';
 import { ChainServices } from 'src/services/web3.service';
 
-@Controller('chains')
+@Controller('api/chains')
 export class ChainController {
   constructor(private readonly chainServices: ChainServices) {}
 

@@ -17,7 +17,7 @@ import { OfferUpdateDto } from 'src/dtos/offerUpdate.dto';
 import { ObjectIdValidationPipe } from 'src/utils/validation.pipe';
 import { OffersService } from '../services/offers.service';
 
-@Controller('offers')
+@Controller('api/offers')
 export class OffersController {
   constructor(private readonly OffersService: OffersService) {}
 

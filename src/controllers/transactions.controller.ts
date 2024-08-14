@@ -20,7 +20,7 @@ const stripe = new Stripe(process.env.STRIPE_API_SK, {
   apiVersion: '2022-11-15',
 });
 
-@Controller('transactions')
+@Controller('api/transactions')
 export class TransactionsController {
   constructor(
     private readonly transactionsService: TransactionsService,

@@ -79,7 +79,7 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], ChainController.prototype, "isAssetListed", null);
 ChainController = __decorate([
-    (0, common_1.Controller)('chains'),
+    (0, common_1.Controller)('api/chains'),
     __metadata("design:paramtypes", [web3_service_1.ChainServices])
 ], ChainController);
 exports.ChainController = ChainController;

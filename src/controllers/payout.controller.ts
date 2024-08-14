@@ -3,7 +3,7 @@ import { ObjectId } from 'mongoose';
 import { PayoutServices } from 'src/services/payout.services';
 import { ObjectIdValidationPipe } from 'src/utils/validation.pipe';
 
-@Controller('payout')
+@Controller('api/payout')
 export class PayoutController {
   constructor(private readonly payoutServices: PayoutServices) {}
 

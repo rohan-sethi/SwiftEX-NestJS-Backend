@@ -117,15 +117,16 @@ export class AppModule implements NestModule {
     consumer
       .apply(AuthenticateUser)
       .exclude(
-        'users/login',
-        'users/register',
-        'transactions/webhook',
-        'transactions/webhook/connect',
-        'users/verifyLoginOtp',
-        'users/ACTIVATE',
-        'users/forgot_passcode',
-        'stripe-payment/payment_link',
-        'stripe-payment/:mail/:amount'
+        'api/users/login',
+        'api/users/register',
+        'api/transactions/webhook',
+        'api/transactions/webhook/connect',
+        'api/users/verifyLoginOtp',
+        'api/users/ACTIVATE',
+        'api/users/forgot_passcode',
+        'api/stripe-payment/payment_link',
+        'api/stripe-payment/:mail/:amount',
+        'api/users/reports',
         // 'stripe-webhook/webhook'
         // '/listion/start',
         // '/listion/price'

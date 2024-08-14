@@ -32,7 +32,7 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], PayoutController.prototype, "getMyPayouts", null);
 PayoutController = __decorate([
-    (0, common_1.Controller)('payout'),
+    (0, common_1.Controller)('api/payout'),
     __metadata("design:paramtypes", [payout_services_1.PayoutServices])
 ], PayoutController);
 exports.PayoutController = PayoutController;

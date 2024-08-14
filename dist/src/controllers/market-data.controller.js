@@ -27,7 +27,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], MarketDataController.prototype, "get", null);
 MarketDataController = __decorate([
-    (0, common_1.Controller)('market-data'),
+    (0, common_1.Controller)('api/market-data'),
     __metadata("design:paramtypes", [market_data_service_1.MarketDataService])
 ], MarketDataController);
 exports.MarketDataController = MarketDataController;

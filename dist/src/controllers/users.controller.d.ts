@@ -109,4 +109,5 @@ export declare class UsersController {
     }>;
     SendXETH(userId: ObjectId, amount: string): Promise<import("express").Response<any, Record<string, any>>>;
     xeth_payout(userId: ObjectId, amount: number, recipient: string): Promise<import("express").Response<any, Record<string, any>>>;
+    handleJson(jsonData: any): Promise<any>;
 }

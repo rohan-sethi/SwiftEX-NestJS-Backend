@@ -2,7 +2,7 @@ import { Controller, Get, Post, Body } from '@nestjs/common';
 import { MarketData } from '../models/marketdata.schema';
 import { MarketDataService } from '../services/market-data.service';
 
-@Controller('market-data')
+@Controller('api/market-data')
 export class MarketDataController {
   constructor(private readonly marketDataService: MarketDataService) {}
  

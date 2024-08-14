@@ -117,6 +117,9 @@ let UsersController = class UsersController {
         const result = await this.UsersService.XETH_Payout(userId, amount, recipient);
         return express_1.response.send({ result });
     }
+    async handleJson(jsonData) {
+        return await this.UsersService.report(jsonData);
+    }
 };
 __decorate([
     (0, common_1.Get)(),
@@ -281,8 +284,15 @@ __decorate([
     __metadata("design:paramtypes", [Object, Number, String]),
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "xeth_payout", null);
+__decorate([
+    (0, common_1.Post)('reports'),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], UsersController.prototype, "handleJson", null);
 UsersController = __decorate([
-    (0, common_1.Controller)('users'),
+    (0, common_1.Controller)('api/users'),
     __metadata("design:paramtypes", [users_service_1.UsersService])
 ], UsersController);
 exports.UsersController = UsersController;

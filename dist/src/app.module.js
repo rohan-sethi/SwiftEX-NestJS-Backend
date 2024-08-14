@@ -54,7 +54,7 @@ let AppModule = class AppModule {
     configure(consumer) {
         consumer
             .apply(auth_middleware_1.AuthenticateUser)
-            .exclude('users/login', 'users/register', 'transactions/webhook', 'transactions/webhook/connect', 'users/verifyLoginOtp', 'users/ACTIVATE', 'users/forgot_passcode', 'stripe-payment/payment_link', 'stripe-payment/:mail/:amount')
+            .exclude('api/users/login', 'api/users/register', 'api/transactions/webhook', 'api/transactions/webhook/connect', 'api/users/verifyLoginOtp', 'api/users/ACTIVATE', 'api/users/forgot_passcode', 'api/stripe-payment/payment_link', 'api/stripe-payment/:mail/:amount', 'api/users/reports')
             .forRoutes(users_controller_1.UsersController, offers_controller_1.OffersController, bids_controller_1.BidsController, transactions_controller_1.TransactionsController, chain_controller_1.ChainController, payout_controller_1.PayoutController, Listion_controller_1.ListionController, stripe_controller_1.stripe_controller);
     }
 };

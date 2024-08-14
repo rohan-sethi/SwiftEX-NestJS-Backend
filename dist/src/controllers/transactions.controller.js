@@ -118,7 +118,7 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], TransactionsController.prototype, "getUserTansactions", null);
 TransactionsController = __decorate([
-    (0, common_1.Controller)('transactions'),
+    (0, common_1.Controller)('api/transactions'),
     __metadata("design:paramtypes", [transactions_service_1.TransactionsService,
         payout_services_1.PayoutServices])
 ], TransactionsController);

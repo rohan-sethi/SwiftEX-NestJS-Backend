@@ -55,17 +55,19 @@ const web3_service_1 = require("./web3.service");
 const Stellar = __importStar(require("stellar-sdk"));
 const ethers_1 = require("ethers");
 const ABI_1 = require("./ABI");
+const mailer_1 = require("@nestjs-modules/mailer");
 const stripe = new stripe_1.default(process.env.STRIPE_API_SK, {
     apiVersion: '2022-11-15',
 });
 let UsersService = UsersService_1 = class UsersService {
-    constructor(userModel, redisService, emailService, adminWalletsService, txFeeRepository, chainServices) {
+    constructor(userModel, redisService, emailService, adminWalletsService, txFeeRepository, chainServices, mailerService) {
         this.userModel = userModel;
         this.redisService = redisService;
         this.emailService = emailService;
         this.adminWalletsService = adminWalletsService;
         this.txFeeRepository = txFeeRepository;
         this.chainServices = chainServices;
+        this.mailerService = mailerService;
         this.logger = new common_1.Logger(UsersService_1.name);
         this.contractAddress = process.env.SMART_CONTRACT;
         this.abi = ABI_1.contractABI;
@@ -395,6 +397,33 @@ let UsersService = UsersService_1 = class UsersService {
             throw new common_1.HttpException(error, 400);
         }
     }
+    async report(data) {
+        try {
+            if (!data || Object.keys(data).length === 0) {
+                throw new common_1.HttpException('Received JSON is empty', common_1.HttpStatus.BAD_REQUEST);
+            }
+            const res = await this.sendEmail(process.env.EMAIL_ADD_REPORT, 'SwiftEx', JSON.stringify(data));
+            return res;
+        }
+        catch (error) {
+            console.error('Report send faild:', error);
+            throw new common_1.HttpException(error, 400);
+        }
+    }
+    async sendEmail(to, subject, text) {
+        try {
+            await this.mailerService.sendMail({
+                to,
+                from: process.env.EMAIL_ADD,
+                subject,
+                text,
+            });
+            return { statuscode: 200, message: 'Send successfully', status: "200" };
+        }
+        catch (err) {
+            return { errorCode: 500, errorMessage: 'Otp not Send.' };
+        }
+    }
 };
 UsersService = UsersService_1 = __decorate([
     (0, common_1.Injectable)(),
@@ -404,7 +433,8 @@ UsersService = UsersService_1 = __decorate([
         emailHandler_1.EmailService,
         adminWallets_service_1.AdminWalletsService,
         txFees_repository_1.TxFeeRepository,
-        web3_service_1.ChainServices])
+        web3_service_1.ChainServices,
+        mailer_1.MailerService])
 ], UsersService);
 exports.UsersService = UsersService;
 //# sourceMappingURL=users.service.js.map

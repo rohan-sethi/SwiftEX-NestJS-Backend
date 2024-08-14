@@ -65,7 +65,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], stripe_controller.prototype, "processPayment", null);
 stripe_controller = __decorate([
-    (0, common_1.Controller)('stripe-payment'),
+    (0, common_1.Controller)('api/stripe-payment'),
     __param(0, (0, mongoose_1.InjectModel)(user_model_1.User.name)),
     __metadata("design:paramtypes", [mongoose_2.Model,
         stripe_webhook_service_1.StripeWebhookService])

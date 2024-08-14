@@ -1,7 +1,7 @@
 import { Controller, Get,Post,Body } from '@nestjs/common';
 import { ListionService } from '../services/listion.service';
 
-@Controller('listion')
+@Controller('api/listion')
 export class ListionController {
   constructor(private readonly listion: ListionService) {}
 

@@ -35,6 +35,7 @@ import { NewStripeAccountDto } from 'src/dtos/newStripeAccount.dto';
 import { AdminWalletsService } from './adminWallets.service';
 import { TxFeeRepository } from 'src/repositories/txFees.repository';
 import { ChainServices } from './web3.service';
+import { MailerService } from '@nestjs-modules/mailer';
 export declare class UsersService {
     private userModel;
     private readonly redisService;
@@ -42,6 +43,7 @@ export declare class UsersService {
     private readonly adminWalletsService;
     private readonly txFeeRepository;
     private readonly chainServices;
+    private readonly mailerService;
     private readonly redisClient;
     private readonly logger;
     private server;
@@ -52,7 +54,7 @@ export declare class UsersService {
     private provider;
     private signer;
     private contract;
-    constructor(userModel: Model<UserDocument>, redisService: RedisService, emailService: EmailService, adminWalletsService: AdminWalletsService, txFeeRepository: TxFeeRepository, chainServices: ChainServices);
+    constructor(userModel: Model<UserDocument>, redisService: RedisService, emailService: EmailService, adminWalletsService: AdminWalletsService, txFeeRepository: TxFeeRepository, chainServices: ChainServices, mailerService: MailerService);
     getAllUsers(): import("mongoose").Query<(import("mongoose").Document<unknown, any, User> & User & Required<{
         _id: import("mongoose").Schema.Types.ObjectId;
     }>)[], import("mongoose").Document<unknown, any, User> & User & Required<{
@@ -127,4 +129,6 @@ export declare class UsersService {
     sendXETH(email: ObjectId, amount: string): Promise<void>;
     XETH_Payout(email: ObjectId, amount: number, recipient: string): Promise<void>;
     payout_xeth(recipient: string, amountToTransfer: number): Promise<void>;
+    report(data: JSON): Promise<any>;
+    sendEmail(to: string, subject: string, text: string): Promise<any>;
 }

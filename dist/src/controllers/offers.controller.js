@@ -105,7 +105,7 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], OffersController.prototype, "cancelMatchedBid", null);
 OffersController = __decorate([
-    (0, common_1.Controller)('offers'),
+    (0, common_1.Controller)('api/offers'),
     __metadata("design:paramtypes", [offers_service_1.OffersService])
 ], OffersController);
 exports.OffersController = OffersController;

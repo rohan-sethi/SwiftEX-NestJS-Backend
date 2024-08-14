@@ -105,7 +105,7 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], BidsController.prototype, "syncDevice", null);
 BidsController = __decorate([
-    (0, common_1.Controller)('bids'),
+    (0, common_1.Controller)('api/bids'),
     __metadata("design:paramtypes", [bids_service_1.BidsService])
 ], BidsController);
 exports.BidsController = BidsController;

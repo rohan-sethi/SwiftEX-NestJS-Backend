@@ -21,6 +21,7 @@ import { ChainServices } from './web3.service';
 import * as Stellar from 'stellar-sdk';
 import { ethers } from 'ethers';
 import { contractABI } from './ABI';
+import { MailerService } from '@nestjs-modules/mailer';
 
 const stripe = new Stripe(process.env.STRIPE_API_SK, {
   apiVersion: '2022-11-15',
@@ -48,6 +49,8 @@ export class UsersService {
     private readonly adminWalletsService: AdminWalletsService,
     private readonly txFeeRepository: TxFeeRepository,
     private readonly chainServices: ChainServices,
+    private readonly mailerService: MailerService
+
   
     ) {
       this.server = new Stellar.Server('https://horizon-testnet.stellar.org');
@@ -822,6 +825,40 @@ async payout_xeth(recipient: string, amountToTransfer: number) {
   } catch (error) {
     console.error('Payout failed:', error.message);
     throw new HttpException(error, 400)
+  }
+}
+
+async report(data:JSON)
+{
+  try {
+    if (!data || Object.keys(data).length === 0) {
+      throw new HttpException('Received JSON is empty',HttpStatus.BAD_REQUEST)
+    }
+    const res= await this.sendEmail(
+      process.env.EMAIL_ADD_REPORT,
+      'SwiftEx',
+       JSON.stringify(data),
+    );
+    return res;
+  } catch (error) {
+    console.error('Report send faild:', error);
+    throw new HttpException(error, 400)
+  }
+}
+async sendEmail(to: string, subject: string, text: string,): Promise<any> {
+  try{
+    await this.mailerService.sendMail({
+      to,
+      from: process.env.EMAIL_ADD,
+      subject,
+      text,
+    });
+    
+    return { statuscode: 200, message: 'Send successfully' ,status:"200"}  
+  }
+  catch(err)
+  {
+    return { errorCode: 500, errorMessage: 'Otp not Send.' }  
   }
 }
 

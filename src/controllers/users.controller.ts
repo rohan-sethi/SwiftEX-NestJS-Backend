@@ -24,7 +24,7 @@ import { VerifyEmailDto } from 'src/dtos/verifyEmail.dto';
 import { UsersService } from 'src/services/users.service';
 import { ObjectIdValidationPipe } from 'src/utils/validation.pipe';
 import { Stripe } from 'stripe';
-@Controller('users')
+@Controller('api/users')
 export class UsersController {
   private stripe: Stripe;
   constructor(private readonly UsersService: UsersService) {
@@ -213,4 +213,9 @@ export class UsersController {
         const result =await this.UsersService.XETH_Payout(userId,amount,recipient);
         return response.send({result});
       }
+
+  @Post('reports')
+  async handleJson(@Body() jsonData: any){
+    return await this.UsersService.report(jsonData)
+  }
 }
