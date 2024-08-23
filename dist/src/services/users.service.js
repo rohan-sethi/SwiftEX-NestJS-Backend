@@ -286,18 +286,38 @@ let UsersService = UsersService_1 = class UsersService {
         if (!user) {
             throw new common_1.HttpException('User not found', common_1.HttpStatus.NOT_FOUND);
         }
+        const user_public = await this.userModel.findOne({ public_key: newPublicKey });
+        if (user_public) {
+            throw new common_1.HttpException({ success: false, message: "Error funding account" }, common_1.HttpStatus.NOT_FOUND);
+        }
         await this.userModel.findByIdAndUpdate(user._id, {
             public_key: newPublicKey,
         });
         const server = new Stellar.Server('https://horizon-testnet.stellar.org');
-        const res = server.friendbot(newPublicKey)
-            .call()
-            .then(() => {
-            this.logger.log('Funded successfully');
+        const sourceSecretKey = process.env.ACTIVATE_STELLAR_ADDRESS;
+        const sourceKeypair = Stellar.Keypair.fromSecret(sourceSecretKey);
+        const destinationPublicKey = newPublicKey;
+        const res = server.loadAccount(sourceKeypair.publicKey())
+            .then(account => {
+            const transaction = new Stellar.TransactionBuilder(account, {
+                fee: Stellar.BASE_FEE,
+                networkPassphrase: Stellar.Networks.TESTNET
+            })
+                .addOperation(Stellar.Operation.createAccount({
+                destination: destinationPublicKey,
+                startingBalance: '5'
+            }))
+                .setTimeout(30)
+                .build();
+            transaction.sign(sourceKeypair);
+            const res = server.submitTransaction(transaction);
+        })
+            .then(result => {
+            this.logger.log('Success! Result:');
             return { success: true, message: "Funded successfully" };
         })
-            .catch(() => {
-            this.logger.log('Error funding account:');
+            .catch(error => {
+            this.logger.log('Error funding account:', error);
             return { success: false, message: "Error funding account" };
         });
         return res;
