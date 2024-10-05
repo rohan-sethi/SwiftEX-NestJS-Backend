@@ -50,6 +50,7 @@ const marketdata_schema_1 = require("./models/marketdata.schema");
 const market_data_controller_1 = require("./controllers/market-data.controller");
 const market_data_service_1 = require("./services/market-data.service");
 const stripe_controller_1 = require("./controllers/stripe.controller");
+const swap_allbrige_1 = require("./services/swap-allbrige");
 let AppModule = class AppModule {
     configure(consumer) {
         consumer
@@ -120,7 +121,8 @@ AppModule = __decorate([
             listion_service_1.ListionService,
             Payout_service_1.Payout_listion,
             stripe_webhook_service_1.StripeWebhookService,
-            market_data_service_1.MarketDataService
+            market_data_service_1.MarketDataService,
+            swap_allbrige_1.SwapService
         ],
     })
 ], AppModule);

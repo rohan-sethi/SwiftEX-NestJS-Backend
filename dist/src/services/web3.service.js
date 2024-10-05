@@ -8,18 +8,12 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Web3Services = exports.ChainServices = void 0;
 const common_1 = require("@nestjs/common");
-const web3_1 = __importDefault(require("web3"));
 const dotenv_1 = require("dotenv");
 const constants_1 = require("../utils/constants");
-const ethers_1 = require("ethers");
 const adminWallets_service_1 = require("./adminWallets.service");
-const getAssetPrice_1 = require("../utils/getAssetPrice");
 const chain_config_1 = require("../../chain.config");
 (0, dotenv_1.config)();
 let ChainServices = class ChainServices {
@@ -165,114 +159,15 @@ let Web3Services = class Web3Services {
                 throw new Error(`Invalid token name: ${tokenName}`);
             return this._transferEthToken(tokenAddress, receiver, amount, network);
         };
-        this.submitSignedTx = async (chainId, signedTx) => {
-            try {
-                const { provider } = this.chainServices.getNetwork(chainId);
-                const sentTx = await provider.sendTransaction(signedTx.rawTransaction);
-                const minedTx = await sentTx.wait();
-                return { sentTx: minedTx };
-            }
-            catch (err) {
-                console.log(err);
-                return { err };
-            }
-        };
-        this.verifyTransfer = async (chainId, signedTx, tokenName, amount) => {
-            try {
-                const { provider } = this.chainServices.getNetwork(chainId);
-                const assetAddress = this.chainServices.getAssetAddress(chainId, tokenName);
-                const decodedTx = ethers_1.ethers.utils.parseTransaction(signedTx.rawTransaction);
-                if (assetAddress === chain_config_1.CHAIN_NATIVE_CURRENCY)
-                    return this._verifyEthTransfer(decodedTx, amount);
-                return await this._verifyEthTokenTransfer(decodedTx, tokenName, amount, {
-                    provider,
-                    chainId,
-                });
-            }
-            catch (err) {
-                console.log(err);
-            }
-        };
         this._transferEth = async (reciever, amount, network) => {
-            try {
-                const value = ethers_1.ethers.utils.parseEther(amount.toString());
-                const { name } = this.chainServices.getNetworkNativeAsset(network.chainId);
-                const rawTx = {
-                    to: reciever,
-                    value,
-                };
-                const adminPK = await this.adminWalletsService.getEnoughEthBalanceHolder(value, network.chainId, name);
-                const wallet = new ethers_1.ethers.Wallet(adminPK, network.provider);
-                const sentTx = await wallet.sendTransaction(rawTx);
-                await sentTx.wait();
-                return { sentTx };
-            }
-            catch (err) {
-                console.log('SEND_ETH_ERROR:', err);
-                return { err };
-            }
         };
         this._transferEthToken = async (tokenAddress, receiver, amount, network) => {
-            try {
-                const token = new ethers_1.ethers.Contract(tokenAddress, JSON.parse(JSON.stringify(constants_1.ERC20_ABI)), network.provider);
-                const decimals = await token.decimals();
-                const amountInWei = ethers_1.ethers.utils.parseUnits(amount.toString(), decimals);
-                const adminPK = await this.adminWalletsService.getEnoughEthTokenBalanceHolder(tokenAddress, amountInWei, network.chainId);
-                const wallet = new ethers_1.ethers.Wallet(adminPK, network.provider);
-                const connectedToken = token.connect(wallet);
-                const sentTx = await connectedToken.transfer(receiver, amountInWei);
-                await sentTx.wait();
-                return { sentTx };
-            }
-            catch (err) {
-                console.log('SEND_ETH_TOKEN_ERROR:', err);
-                return { err };
-            }
         };
         this._verifyEthTransfer = (tx, amount) => {
             const { to, value } = tx;
-            const amountInWei = web3_1.default.utils.toWei(amount);
-            if (amountInWei.toString() !== value.toString())
-                return false;
-            if (!this.adminWalletsService.isAnAdminAccount(to))
-                return false;
-            return true;
-        };
-        this._verifyEthTokenTransfer = async (tx, tokenName, amount, network) => {
-            const tokenInterface = new ethers_1.ethers.utils.Interface(constants_1.ERC20_ABI);
-            const tokenAddress = this.chainServices.getAssetAddress(network.chainId, tokenName);
-            const tokenContract = new ethers_1.ethers.Contract(tokenAddress, JSON.parse(JSON.stringify(constants_1.ERC20_ABI)), network.provider);
-            const decimals = await tokenContract.decimals();
-            const amountInWei = ethers_1.ethers.utils.parseUnits(amount, decimals);
-            const { to, data } = tx;
-            const txData = tokenInterface.decodeFunctionData('transfer', data);
-            const reciever = txData[0];
-            const value = txData[1];
-            if (to.toLowerCase() !== tokenAddress.toLowerCase())
-                return false;
-            if (!this.adminWalletsService.isAnAdminAccount(reciever))
-                return false;
-            if (amountInWei.toString() !== value.toString())
-                return false;
-            return true;
         };
         this.txFeeAddOnPercentage =
             Number(process.env.TX_FEE_ADD_ON_PERCENTAGE) / 100;
-    }
-    async getTxFeeData(chainId, gasAmount, assetId) {
-        const { provider } = this.chainServices.getNetwork(chainId);
-        const { maxFeePerGas, gasPrice } = await provider.getFeeData();
-        const estimatedGasFee = maxFeePerGas || gasPrice;
-        const gasInBn = ethers_1.ethers.BigNumber.from(gasAmount);
-        const gasPriceInEth = ethers_1.ethers.utils.formatEther(gasInBn.mul(estimatedGasFee));
-        const ethPriceInUsd = await (0, getAssetPrice_1.getAssetToUsd)(assetId);
-        let gasPriceInUsd = Math.ceil(+gasPriceInEth * +ethPriceInUsd);
-        gasPriceInUsd = gasPriceInUsd + gasPriceInUsd * this.txFeeAddOnPercentage;
-        return {
-            gasFee: estimatedGasFee.toString(),
-            gasPriceInEth,
-            gasPriceInUsd: gasPriceInUsd.toString(),
-        };
     }
 };
 Web3Services = __decorate([

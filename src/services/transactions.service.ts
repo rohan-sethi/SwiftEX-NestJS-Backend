@@ -55,90 +55,90 @@ export class TransactionsService {
     const bidder: User = await this.userModel.findById(bid.bidder);
     const issuer: User = await this.userModel.findById(offer.issuer);
 
-    this.web3Services
-      .transfer(
-        Number(offer.chainId),
-        offer.assetName,
-        bidder.walletAddress,
-        offer.amount,
-      )
-      .then(async ({ err, sentTx }) => {
-        // Transaction update
-        if (err) {
-          await offer.updateOne({ status: OFFER_STATUS_ENUM.TRANSFER_FAILED });
-          await this.transactionRepository.updateOneTx(
-            { sessionId: session.id },
-            { status: TRANSACTION_STATUS_ENUM.TRANSFER_FAILED },
-          );
+    // this.web3Services
+    //   .transfer(
+    //     Number(offer.chainId),
+    //     offer.assetName,
+    //     bidder.walletAddress,
+    //     offer.amount,
+    //   )
+    //   .then(async ({ err, sentTx }) => {
+    //     // Transaction update
+    //     if (err) {
+    //       await offer.updateOne({ status: OFFER_STATUS_ENUM.TRANSFER_FAILED });
+    //       await this.transactionRepository.updateOneTx(
+    //         { sessionId: session.id },
+    //         { status: TRANSACTION_STATUS_ENUM.TRANSFER_FAILED },
+    //       );
 
-          // Send notification to seller & buyer
-          const notification = {
-            title: 'Transfer Failed',
-            body: 'Blockchain transaction failed',
-          };
+    //       // Send notification to seller & buyer
+    //       const notification = {
+    //         title: 'Transfer Failed',
+    //         body: 'Blockchain transaction failed',
+    //       };
 
-          pushNotification({
-            tokens: bidder.fcmRegTokens,
-            notification,
-            data: {
-              type: NOTIFICATION_TYPES_ENUM.TRANSFER_FAILED,
-              targetUser: bidder._id.toString(),
-              isActionRequired: 'yes',
-              message: `Blockchain transaction execution failed with the following message:\n ${err}`,
-              transactionHash: err.transactionHash || err.hash || '',
-            },
-          });
+    //       pushNotification({
+    //         tokens: bidder.fcmRegTokens,
+    //         notification,
+    //         data: {
+    //           type: NOTIFICATION_TYPES_ENUM.TRANSFER_FAILED,
+    //           targetUser: bidder._id.toString(),
+    //           isActionRequired: 'yes',
+    //           message: `Blockchain transaction execution failed with the following message:\n ${err}`,
+    //           transactionHash: err.transactionHash || err.hash || '',
+    //         },
+    //       });
 
-          pushNotification({
-            tokens: issuer.fcmRegTokens,
-            notification,
-            data: {
-              type: NOTIFICATION_TYPES_ENUM.TRANSFER_FAILED,
-              targetUser: issuer._id.toString(),
-              isActionRequired: 'yes',
-              message: `Blockchain transaction execution failed with the following message:\n ${err}`,
-              transactionHash: err.transactionHash || err.hash || '',
-            },
-          });
+    //       pushNotification({
+    //         tokens: issuer.fcmRegTokens,
+    //         notification,
+    //         data: {
+    //           type: NOTIFICATION_TYPES_ENUM.TRANSFER_FAILED,
+    //           targetUser: issuer._id.toString(),
+    //           isActionRequired: 'yes',
+    //           message: `Blockchain transaction execution failed with the following message:\n ${err}`,
+    //           transactionHash: err.transactionHash || err.hash || '',
+    //         },
+    //       });
 
-          return { message: 'Blockchain Transaction Failure' };
-        }
+    //       return { message: 'Blockchain Transaction Failure' };
+    //     }
 
-        await this.transactionRepository.updateOneTx(
-          { sessionId: session.id },
-          {
-            status: TRANSACTION_STATUS_ENUM.SUCCEEDED,
-            cryptoTxHash: sentTx.hash,
-          },
-        );
+    //     await this.transactionRepository.updateOneTx(
+    //       { sessionId: session.id },
+    //       {
+    //         status: TRANSACTION_STATUS_ENUM.SUCCEEDED,
+    //         cryptoTxHash: sentTx.hash,
+    //       },
+    //     );
 
-        // Offer & Bid update
-        await this.offerModel.findByIdAndUpdate(offer._id, {
-          status: OFFER_STATUS_ENUM.FINALIZIED,
-          winnerBid: bid._id,
-        });
+    //     // Offer & Bid update
+    //     await this.offerModel.findByIdAndUpdate(offer._id, {
+    //       status: OFFER_STATUS_ENUM.FINALIZIED,
+    //       winnerBid: bid._id,
+    //     });
 
-        await this.bidModel.findByIdAndUpdate(bid._id, {
-          status: BID_STATUS_ENUM.FINALIZIED,
-        });
+    //     await this.bidModel.findByIdAndUpdate(bid._id, {
+    //       status: BID_STATUS_ENUM.FINALIZIED,
+    //     });
 
-        // Send notification to seller (offer issuer)
-        const notificationData = {
-          type: NOTIFICATION_TYPES_ENUM.OFFER_FINALIZED,
-          targetUser: offer.issuer.toString(),
-          message: `Congrates on making a sale on ${offer.amount} 
-          ${offer.assetName} for ${bid.pricePerUnit} unit price!`,
-          isActionRequired: '',
-        };
-        await pushNotification({
-          tokens: issuer.fcmRegTokens,
-          notification: {
-            title: 'Offer Finalised',
-            body: 'One of your offers is finalized',
-          },
-          data: notificationData,
-        });
-      });
+    //     // Send notification to seller (offer issuer)
+    //     const notificationData = {
+    //       type: NOTIFICATION_TYPES_ENUM.OFFER_FINALIZED,
+    //       targetUser: offer.issuer.toString(),
+    //       message: `Congrates on making a sale on ${offer.amount} 
+    //       ${offer.assetName} for ${bid.pricePerUnit} unit price!`,
+    //       isActionRequired: '',
+    //     };
+    //     await pushNotification({
+    //       tokens: issuer.fcmRegTokens,
+    //       notification: {
+    //         title: 'Offer Finalised',
+    //         body: 'One of your offers is finalized',
+    //       },
+    //       data: notificationData,
+    //     });
+    //   });
 
     return { succes: true };
   }

@@ -44,6 +44,7 @@ import { MarketData, MarketDataSchema } from './models/marketdata.schema';
 import { MarketDataController } from './controllers/market-data.controller';
 import { MarketDataService } from './services/market-data.service';
 import { stripe_controller } from './controllers/stripe.controller';
+import { SwapService } from './services/swap-allbrige';
 
 
 @Module({
@@ -109,7 +110,8 @@ import { stripe_controller } from './controllers/stripe.controller';
     ListionService,
     Payout_listion,
     StripeWebhookService,
-    MarketDataService
+    MarketDataService,
+    SwapService
   ],
 })
 export class AppModule implements NestModule {

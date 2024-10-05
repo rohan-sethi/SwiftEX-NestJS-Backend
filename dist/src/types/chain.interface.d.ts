@@ -9,7 +9,7 @@ export declare type ChainNetwork = {
     default?: boolean;
     name: string;
     coingechoId: string;
-    provider: ethers.providers.JsonRpcProvider;
+    provider: ethers.JsonRpcProvider;
     assets: Array<ChainAsset>;
 };
 export declare type ChainConfig = {

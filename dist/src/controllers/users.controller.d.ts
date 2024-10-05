@@ -23,20 +23,24 @@
 /// <reference types="mongoose/types/validation" />
 /// <reference types="mongoose/types/virtuals" />
 /// <reference types="mongoose/types/inferschematype" />
+import { HttpException } from '@nestjs/common';
 import { ObjectId } from 'mongoose';
 import { BidSyncBodyDto } from 'src/dtos/bidSyncBody.dto';
 import { NewStripeAccountDto } from 'src/dtos/newStripeAccount.dto';
 import { NewUserDto } from 'src/dtos/newUser.dto';
 import { phoneOtpDto } from 'src/dtos/phoneOtp.dto';
+import { swap_allbridge_dto } from 'src/dtos/swap-allbrideg.dto';
 import { UpdateEmailDto } from 'src/dtos/updateEmail.dto';
 import { UserLoginDto } from 'src/dtos/userLogin.dto';
 import { VerifyEmailDto } from 'src/dtos/verifyEmail.dto';
+import { SwapService } from 'src/services/swap-allbrige';
 import { UsersService } from 'src/services/users.service';
 import { Stripe } from 'stripe';
 export declare class UsersController {
     private readonly UsersService;
+    private readonly SwapService;
     private stripe;
-    constructor(UsersService: UsersService);
+    constructor(UsersService: UsersService, SwapService: SwapService);
     getAllUsers(): import("mongoose").Query<(import("mongoose").Document<unknown, any, import("../models/user.model").User> & import("../models/user.model").User & Required<{
         _id: import("mongoose").Schema.Types.ObjectId;
     }>)[], import("mongoose").Document<unknown, any, import("../models/user.model").User> & import("../models/user.model").User & Required<{
@@ -110,4 +114,6 @@ export declare class UsersController {
     SendXETH(userId: ObjectId, amount: string): Promise<import("express").Response<any, Record<string, any>>>;
     xeth_payout(userId: ObjectId, amount: number, recipient: string): Promise<import("express").Response<any, Record<string, any>>>;
     handleJson(jsonData: any): Promise<any>;
+    prepare_swap(body: swap_allbridge_dto): Promise<HttpException>;
+    execute_swap(body: swap_allbridge_dto): Promise<HttpException>;
 }

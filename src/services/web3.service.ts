@@ -258,93 +258,93 @@ export class Web3Services {
     return this._transferEthToken(tokenAddress, receiver, amount, network);
   };
 
-  submitSignedTx = async (chainId: number, signedTx) => {
-    try {
-      const { provider } = this.chainServices.getNetwork(chainId);
-      const sentTx = await provider.sendTransaction(signedTx.rawTransaction);
-      const minedTx = await sentTx.wait();
-      return { sentTx: minedTx };
-    } catch (err) {
-      console.log(err);
-      return { err };
-    }
-  };
+  // submitSignedTx = async (chainId: number, signedTx) => {
+  //   try {
+  //     const { provider } = this.chainServices.getNetwork(chainId);
+  //     const sentTx = await provider.sendTransaction(signedTx.rawTransaction);
+  //     const minedTx = await sentTx.wait();
+  //     return { sentTx: minedTx };
+  //   } catch (err) {
+  //     console.log(err);
+  //     return { err };
+  //   }
+  // };
 
-  verifyTransfer = async (
-    chainId: number,
-    signedTx,
-    tokenName: string,
-    amount,
-  ) => {
-    try {
-      const { provider } = this.chainServices.getNetwork(chainId);
-      const assetAddress = this.chainServices.getAssetAddress(
-        chainId,
-        tokenName,
-      );
-      const decodedTx: ethers.Transaction = ethers.utils.parseTransaction(
-        signedTx.rawTransaction,
-      );
+  // verifyTransfer = async (
+  //   chainId: number,
+  //   signedTx,
+  //   tokenName: string,
+  //   amount,
+  // ) => {
+  //   // try {
+  //   //   const { provider } = this.chainServices.getNetwork(chainId);
+  //   //   const assetAddress = this.chainServices.getAssetAddress(
+  //   //     chainId,
+  //   //     tokenName,
+  //   //   );
+  //   //   const decodedTx: ethers.Transaction = ethers.utils.parseTransaction(
+  //   //     signedTx.rawTransaction,
+  //   //   );
 
-      if (assetAddress === CHAIN_NATIVE_CURRENCY)
-        return this._verifyEthTransfer(decodedTx, amount);
-      return await this._verifyEthTokenTransfer(decodedTx, tokenName, amount, {
-        provider,
-        chainId,
-      });
-    } catch (err) {
-      console.log(err);
-    }
-  };
+  //   //   if (assetAddress === CHAIN_NATIVE_CURRENCY)
+  //   //     return this._verifyEthTransfer(decodedTx, amount);
+  //   //   return await this._verifyEthTokenTransfer(decodedTx, tokenName, amount, {
+  //   //     provider,
+  //   //     chainId,
+  //   //   });
+  //   // } catch (err) {
+  //   //   console.log(err);
+  //   // }
+  // };
 
-  async getTxFeeData(chainId: number, gasAmount: string, assetId: string) {
-    const { provider } = this.chainServices.getNetwork(chainId);
-    const { maxFeePerGas, gasPrice } = await provider.getFeeData();
-    const estimatedGasFee = maxFeePerGas || gasPrice;
-    const gasInBn = ethers.BigNumber.from(gasAmount);
-    const gasPriceInEth = ethers.utils.formatEther(
-      gasInBn.mul(estimatedGasFee),
-    );
+  // async getTxFeeData(chainId: number, gasAmount: string, assetId: string) {
+  //   // const { provider } = this.chainServices.getNetwork(chainId);
+  //   // const { maxFeePerGas, gasPrice } = await provider.getFeeData();
+  //   // const estimatedGasFee = maxFeePerGas || gasPrice;
+  //   // const gasInBn = ethers.BigNumber.from(gasAmount);
+  //   // const gasPriceInEth = ethers.utils.formatEther(
+  //   //   gasInBn.mul(estimatedGasFee),
+  //   // );
 
-    const ethPriceInUsd = await getAssetToUsd(assetId);
-    let gasPriceInUsd = Math.ceil(+gasPriceInEth * +ethPriceInUsd);
-    gasPriceInUsd = gasPriceInUsd + gasPriceInUsd * this.txFeeAddOnPercentage;
+  //   // const ethPriceInUsd = await getAssetToUsd(assetId);
+  //   // let gasPriceInUsd = Math.ceil(+gasPriceInEth * +ethPriceInUsd);
+  //   // gasPriceInUsd = gasPriceInUsd + gasPriceInUsd * this.txFeeAddOnPercentage;
 
-    return {
-      gasFee: estimatedGasFee.toString(),
-      gasPriceInEth,
-      gasPriceInUsd: gasPriceInUsd.toString(),
-    };
-  }
+  //   // return {
+  //   //   gasFee: estimatedGasFee.toString(),
+  //   //   gasPriceInEth,
+  //   //   gasPriceInUsd: gasPriceInUsd.toString(),
+  //   // };
+  // }
 
   // <------------------------------< Private >------------------------------>
   private _transferEth = async (reciever, amount, network: Web3Network) => {
-    try {
-      const value = ethers.utils.parseEther(amount.toString());
-      const { name } = this.chainServices.getNetworkNativeAsset(
-        network.chainId,
-      );
+    // try {
+    //   const value = ethers.utils.parseEther(amount.toString());
+    //   const { name } = this.chainServices.getNetworkNativeAsset(
+    //     network.chainId,
+    //   );
 
-      const rawTx = {
-        to: reciever,
-        value,
-      };
+    //   const rawTx = {
+    //     to: reciever,
+    //     value,
+    //   };
 
-      const adminPK = await this.adminWalletsService.getEnoughEthBalanceHolder(
-        value,
-        network.chainId,
-        name,
-      );
+    //   const adminPK = await this.adminWalletsService.getEnoughEthBalanceHolder(
+    //     value,
+    //     network.chainId,
+    //     name,
+    //   );
 
-      const wallet = new ethers.Wallet(adminPK, network.provider);
-      const sentTx = await wallet.sendTransaction(rawTx);
-      await sentTx.wait();
+    //   const wallet = new ethers.Wallet(adminPK, network.provider);
+    //   const sentTx = await wallet.sendTransaction(rawTx);
+    //   await sentTx.wait();
 
-      return { sentTx };
-    } catch (err) {
-      console.log('SEND_ETH_ERROR:', err);
-      return { err };
-    }
+    //   return { sentTx };
+    // } catch (err) {
+    //   console.log('SEND_ETH_ERROR:', err);
+    //   return { err };
+    // }
   };
 
   private _transferEthToken = async (
@@ -353,74 +353,74 @@ export class Web3Services {
     amount,
     network: Web3Network,
   ) => {
-    try {
-      const token = new ethers.Contract(
-        tokenAddress,
-        JSON.parse(JSON.stringify(ERC20_ABI)),
-        network.provider,
-      );
+    // try {
+    //   const token = new ethers.Contract(
+    //     tokenAddress,
+    //     JSON.parse(JSON.stringify(ERC20_ABI)),
+    //     network.provider,
+    //   );
 
-      const decimals = await token.decimals();
-      const amountInWei = ethers.utils.parseUnits(amount.toString(), decimals);
-      const adminPK =
-        await this.adminWalletsService.getEnoughEthTokenBalanceHolder(
-          tokenAddress,
-          amountInWei,
-          network.chainId,
-        );
+    //   const decimals = await token.decimals();
+    //   const amountInWei = ethers.utils.parseUnits(amount.toString(), decimals);
+    //   const adminPK =
+    //     await this.adminWalletsService.getEnoughEthTokenBalanceHolder(
+    //       tokenAddress,
+    //       amountInWei,
+    //       network.chainId,
+    //     );
 
-      const wallet = new ethers.Wallet(adminPK, network.provider);
-      const connectedToken = token.connect(wallet);
-      const sentTx = await connectedToken.transfer(receiver, amountInWei);
-      await sentTx.wait();
+    //   const wallet = new ethers.Wallet(adminPK, network.provider);
+    //   const connectedToken = token.connect(wallet);
+    //   const sentTx = await connectedToken.transfer(receiver, amountInWei);
+    //   await sentTx.wait();
 
-      return { sentTx };
-    } catch (err) {
-      console.log('SEND_ETH_TOKEN_ERROR:', err);
-      return { err };
-    }
+    //   return { sentTx };
+    // } catch (err) {
+    //   console.log('SEND_ETH_TOKEN_ERROR:', err);
+    //   return { err };
+    // }
   };
 
   private _verifyEthTransfer = (tx: ethers.Transaction, amount) => {
     const { to, value } = tx;
 
-    const amountInWei = Web3.utils.toWei(amount);
-    if (amountInWei.toString() !== value.toString()) return false;
-    if (!this.adminWalletsService.isAnAdminAccount(to)) return false;
-    return true;
+    // const amountInWei = Web3.utils.toWei(amount);
+    // if (amountInWei.toString() !== value.toString()) return false;
+    // if (!this.adminWalletsService.isAnAdminAccount(to)) return false;
+    // return true;
   };
 
-  private _verifyEthTokenTransfer = async (
-    tx: ethers.Transaction,
-    tokenName: string,
-    amount,
-    network: Web3Network,
-  ) => {
-    const tokenInterface = new ethers.utils.Interface(ERC20_ABI);
+//   private _verifyEthTokenTransfer = async (
+//   //   tx: ethers.Transaction,
+//   //   tokenName: string,
+//   //   amount,
+//   //   network: Web3Network,
+//   // ) => {
+//   //   const tokenInterface = new ethers.utils.Interface(ERC20_ABI);
 
-    const tokenAddress = this.chainServices.getAssetAddress(
-      network.chainId,
-      tokenName,
-    );
+//   //   const tokenAddress = this.chainServices.getAssetAddress(
+//   //     network.chainId,
+//   //     tokenName,
+//   //   );
 
-    const tokenContract = new ethers.Contract(
-      tokenAddress,
-      JSON.parse(JSON.stringify(ERC20_ABI)),
-      network.provider,
-    );
+//   //   const tokenContract = new ethers.Contract(
+//   //     tokenAddress,
+//   //     JSON.parse(JSON.stringify(ERC20_ABI)),
+//   //     network.provider,
+//   //   );
 
-    const decimals = await tokenContract.decimals();
-    const amountInWei = ethers.utils.parseUnits(amount, decimals);
+//   //   const decimals = await tokenContract.decimals();
+//   //   const amountInWei = ethers.utils.parseUnits(amount, decimals);
 
-    const { to, data } = tx;
-    const txData = tokenInterface.decodeFunctionData('transfer', data);
-    const reciever = txData[0];
-    const value = txData[1];
+//   //   const { to, data } = tx;
+//   //   const txData = tokenInterface.decodeFunctionData('transfer', data);
+//   //   const reciever = txData[0];
+//   //   const value = txData[1];
 
-    // verify
-    if (to.toLowerCase() !== tokenAddress.toLowerCase()) return false;
-    if (!this.adminWalletsService.isAnAdminAccount(reciever)) return false;
-    if (amountInWei.toString() !== value.toString()) return false;
-    return true;
-  };
+//   //   // verify
+//   //   if (to.toLowerCase() !== tokenAddress.toLowerCase()) return false;
+//   //   if (!this.adminWalletsService.isAnAdminAccount(reciever)) return false;
+//   //   if (amountInWei.toString() !== value.toString()) return false;
+//   //   return true;
+//   // };
 }

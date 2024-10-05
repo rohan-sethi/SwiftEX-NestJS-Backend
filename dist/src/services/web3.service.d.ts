@@ -1,4 +1,3 @@
-import { ethers } from 'ethers';
 import { AdminWalletsService } from './adminWallets.service';
 import { ChainNetwork, ChainConfig, ChainAsset, ChainAssetsItem } from 'src/types/chain.interface';
 export declare class ChainServices {
@@ -33,28 +32,8 @@ export declare class Web3Services {
     private readonly chainServices;
     private readonly txFeeAddOnPercentage;
     constructor(adminWalletsService: AdminWalletsService, chainServices: ChainServices);
-    transfer: (chainId: number, tokenName: string, receiver: any, amount: any) => Promise<{
-        sentTx: any;
-        err?: undefined;
-    } | {
-        err: any;
-        sentTx?: undefined;
-    }>;
-    submitSignedTx: (chainId: number, signedTx: any) => Promise<{
-        sentTx: ethers.providers.TransactionReceipt;
-        err?: undefined;
-    } | {
-        err: any;
-        sentTx?: undefined;
-    }>;
-    verifyTransfer: (chainId: number, signedTx: any, tokenName: string, amount: any) => Promise<boolean>;
-    getTxFeeData(chainId: number, gasAmount: string, assetId: string): Promise<{
-        gasFee: string;
-        gasPriceInEth: string;
-        gasPriceInUsd: string;
-    }>;
+    transfer: (chainId: number, tokenName: string, receiver: any, amount: any) => Promise<void>;
     private _transferEth;
     private _transferEthToken;
     private _verifyEthTransfer;
-    private _verifyEthTokenTransfer;
 }

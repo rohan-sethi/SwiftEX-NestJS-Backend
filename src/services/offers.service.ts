@@ -77,35 +77,35 @@ export class OffersService {
     const issuer = userId;
 
     // Process blockchain transaction
-    const isVerified = await this.web3Services.verifyTransfer(
-      chainId,
-      signedTx,
-      assetName,
-      amount,
-    );
-    if (!isVerified)
-      throw new HttpException('Invalid transaction', HttpStatus.BAD_REQUEST);
+    // const isVerified = await this.web3Services.verifyTransfer(
+    //   chainId,
+    //   signedTx,
+    //   assetName,
+    //   amount,
+    // );
+    // if (!isVerified)
+    //   throw new HttpException('Invalid transaction', HttpStatus.BAD_REQUEST);
 
-    const { err, sentTx } = await this.web3Services.submitSignedTx(
-      chainId,
-      signedTx,
-    );
-    if (err) throw new HttpException(err.message, HttpStatus.NOT_IMPLEMENTED);
+    // const { err, sentTx } = await this.web3Services.submitSignedTx(
+    //   chainId,
+    //   signedTx,
+    // );
+    // if (err) throw new HttpException(err.message, HttpStatus.NOT_IMPLEMENTED);
 
-    delete newOffer.signedTx;
-    const chainName = this.chainServices.getNetwork(chainId).name;
+    // delete newOffer.signedTx;
+    // const chainName = this.chainServices.getNetwork(chainId).name;
 
     // Add offer
-    return this.offerModel.create({
-      ...newOffer,
-      totalPrice,
-      status,
-      issuer,
-      appFee,
-      blockchainTxHash: sentTx.transactionHash,
-      chainName,
-      pricePerUnit,
-    });
+    // return this.offerModel.create({
+    //   ...newOffer,
+    //   totalPrice,
+    //   status,
+    //   issuer,
+    //   appFee,
+    //   blockchainTxHash: sentTx.transactionHash,
+    //   chainName,
+    //   pricePerUnit,
+    // });
   }
 
   // Update offer
@@ -142,39 +142,39 @@ export class OffersService {
 
   // Cancel an offer
   async cancelOffer(userId: ObjectId, offerId: ObjectId) {
-    const offer = await this.offerModel.findById(offerId);
-    if (!offer)
-      throw new HttpException('Offer not found', HttpStatus.NOT_FOUND);
+    // const offer = await this.offerModel.findById(offerId);
+    // if (!offer)
+    //   throw new HttpException('Offer not found', HttpStatus.NOT_FOUND);
 
-    if (userId !== offer.issuer)
-      throw new HttpException('Not authorized', HttpStatus.FORBIDDEN);
+    // if (userId !== offer.issuer)
+    //   throw new HttpException('Not authorized', HttpStatus.FORBIDDEN);
 
-    if (offer.status !== OFFER_STATUS_ENUM.ACTIVE)
-      throw new HttpException(
-        `Cannot cancel a ${offer.status.toLowerCase()} offer`,
-        HttpStatus.BAD_REQUEST,
-      );
+    // if (offer.status !== OFFER_STATUS_ENUM.ACTIVE)
+    //   throw new HttpException(
+    //     `Cannot cancel a ${offer.status.toLowerCase()} offer`,
+    //     HttpStatus.BAD_REQUEST,
+    //   );
 
-    const issuer: User = await this.userModel.findOne({ _id: offer.issuer });
-    if (!issuer)
-      throw new HttpException('Issuer not found', HttpStatus.NOT_FOUND);
+    // const issuer: User = await this.userModel.findOne({ _id: offer.issuer });
+    // if (!issuer)
+    //   throw new HttpException('Issuer not found', HttpStatus.NOT_FOUND);
 
-    this.offerModel.findByIdAndUpdate(offerId, {
-      status: OFFER_STATUS_ENUM.CANCELED,
-    });
+    // this.offerModel.findByIdAndUpdate(offerId, {
+    //   status: OFFER_STATUS_ENUM.CANCELED,
+    // });
 
-    // Add blockchain transaction here
-    const { err, sentTx } = await this.web3Services.transfer(
-      Number(offer.chainId),
-      offer.assetName,
-      issuer.walletAddress,
-      offer.amount,
-    );
+    // // Add blockchain transaction here
+    // // const { err, sentTx } = await this.web3Services.transfer(
+    // //   Number(offer.chainId),
+    // //   offer.assetName,
+    // //   issuer.walletAddress,
+    // //   offer.amount,
+    // // );
 
-    if (err)
-      throw new HttpException(err.message, HttpStatus.NOT_IMPLEMENTED);
+    // if (err)
+    //   throw new HttpException(err.message, HttpStatus.NOT_IMPLEMENTED);
 
-    return { sentTx };
+    // return { sentTx };
   }
 
   // Get offer details

@@ -45,32 +45,28 @@ export declare class OffersService {
     }>, {}, import("mongoose").Document<unknown, any, Offer> & Offer & Required<{
         _id: import("mongoose").Schema.Types.ObjectId;
     }>>;
-    addNewOffer(newOffer: NewOfferDto, userId: ObjectId): Promise<import("mongoose").Document<unknown, any, Offer> & Offer & Required<{
-        _id: import("mongoose").Schema.Types.ObjectId;
-    }>>;
+    addNewOffer(newOffer: NewOfferDto, userId: ObjectId): Promise<void>;
     updateOffer(userId: ObjectId, offerId: ObjectId, update: OfferUpdateDto): Promise<import("mongoose").Document<unknown, any, Offer> & Offer & Required<{
         _id: import("mongoose").Schema.Types.ObjectId;
     }>>;
-    cancelOffer(userId: ObjectId, offerId: ObjectId): Promise<{
-        sentTx: any;
-    }>;
+    cancelOffer(userId: ObjectId, offerId: ObjectId): Promise<void>;
     getOfferDetails(offerId: ObjectId, userId: ObjectId): Promise<{
         offerBids: any[];
-        pricePerUnit: number;
-        currencyName: string;
-        _id: import("mongoose").Schema.Types.ObjectId;
-        status: string;
         amount: number;
+        _id: import("mongoose").Schema.Types.ObjectId;
         assetName: string;
+        chainId: number;
+        pricePerUnit: number;
         issuer: import("mongoose").Schema.Types.ObjectId;
         bids?: import("mongoose").LeanDocument<import("mongoose").Schema.Types.ObjectId>[];
         winnerBid?: import("mongoose").Schema.Types.ObjectId;
         totalPrice: number;
         appFee: number;
+        currencyName: string;
         chainName: string;
-        chainId: number;
         failureReason?: string;
         blockchainTxHash: string;
+        status: string;
     }>;
     acceptABid(userId: ObjectId, bidId: ObjectId, offerId: ObjectId): Promise<{
         success: boolean;

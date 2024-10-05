@@ -19,15 +19,18 @@ const bidSyncBody_dto_1 = require("../dtos/bidSyncBody.dto");
 const newStripeAccount_dto_1 = require("../dtos/newStripeAccount.dto");
 const newUser_dto_1 = require("../dtos/newUser.dto");
 const phoneOtp_dto_1 = require("../dtos/phoneOtp.dto");
+const swap_allbrideg_dto_1 = require("../dtos/swap-allbrideg.dto");
 const updateEmail_dto_1 = require("../dtos/updateEmail.dto");
 const userLogin_dto_1 = require("../dtos/userLogin.dto");
 const verifyEmail_dto_1 = require("../dtos/verifyEmail.dto");
+const swap_allbrige_1 = require("../services/swap-allbrige");
 const users_service_1 = require("../services/users.service");
 const validation_pipe_1 = require("../utils/validation.pipe");
 const stripe_1 = require("stripe");
 let UsersController = class UsersController {
-    constructor(UsersService) {
+    constructor(UsersService, SwapService) {
         this.UsersService = UsersService;
+        this.SwapService = SwapService;
         this.stripe = new stripe_1.Stripe('sk_test_51OSf1YSDyv8aVWPDeaJ9hWjya4bc6ojkuRof13ZFQLlwdOVUHyMYM5lt9vq4iTxJ9k2DldYMdSVjQUrMbv8UttQD00PMfckA0K', {
             apiVersion: '2020-08-27',
         });
@@ -119,6 +122,14 @@ let UsersController = class UsersController {
     }
     async handleJson(jsonData) {
         return await this.UsersService.report(jsonData);
+    }
+    async prepare_swap(body) {
+        const { fromAddress, toAddress, amount, sourceToken, destinationToken, walletType } = body;
+        return await this.SwapService.swap_prepare(fromAddress, toAddress, amount, sourceToken, destinationToken, walletType);
+    }
+    async execute_swap(body) {
+        const { fromAddress, toAddress, amount, sourceToken, destinationToken, walletType } = body;
+        return await this.SwapService.swap_execute(fromAddress, toAddress, amount, sourceToken, destinationToken, walletType);
     }
 };
 __decorate([
@@ -291,9 +302,26 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "handleJson", null);
+__decorate([
+    (0, common_1.Post)('swap_exchange_prepare'),
+    (0, common_1.UsePipes)(new common_1.ValidationPipe()),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [swap_allbrideg_dto_1.swap_allbridge_dto]),
+    __metadata("design:returntype", Promise)
+], UsersController.prototype, "prepare_swap", null);
+__decorate([
+    (0, common_1.Post)('swap_exchange_execute'),
+    (0, common_1.UsePipes)(new common_1.ValidationPipe()),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [swap_allbrideg_dto_1.swap_allbridge_dto]),
+    __metadata("design:returntype", Promise)
+], UsersController.prototype, "execute_swap", null);
 UsersController = __decorate([
     (0, common_1.Controller)('api/users'),
-    __metadata("design:paramtypes", [users_service_1.UsersService])
+    __metadata("design:paramtypes", [users_service_1.UsersService,
+        swap_allbrige_1.SwapService])
 ], UsersController);
 exports.UsersController = UsersController;
 //# sourceMappingURL=users.controller.js.map

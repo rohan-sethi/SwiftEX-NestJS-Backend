@@ -18,7 +18,6 @@ const mongoose_1 = require("@nestjs/mongoose");
 const mongoose_2 = require("mongoose");
 const txFees_model_1 = require("../models/txFees.model");
 const web3_service_1 = require("../services/web3.service");
-const constants_1 = require("../utils/constants");
 let TxFeeRepository = class TxFeeRepository {
     constructor(txFeeModel, web3Services, chainServices) {
         this.txFeeModel = txFeeModel;
@@ -30,43 +29,8 @@ let TxFeeRepository = class TxFeeRepository {
         return await this.txFeeModel.findOne({ txName, chainId });
     }
     async createTxFeePrice() {
-        for (let txKey of Object.keys(constants_1.TX_NAME_ENUM)) {
-            const chainIdList = this.chainServices.getNetworksChainIDList();
-            for (let chainId of chainIdList) {
-                const txName = constants_1.TX_NAME_ENUM[txKey];
-                const avgGasAmount = constants_1.TX_NAME_TO_AVG_GAS[txName];
-                const { coingechoId } = this.chainServices.getNetwork(chainId);
-                const txFee = await this.txFeeModel.findOne({ txName, chainId });
-                if (txFee)
-                    continue;
-                const { gasFee, gasPriceInEth, gasPriceInUsd } = await this.web3Services.getTxFeeData(chainId, avgGasAmount, coingechoId);
-                await this.txFeeModel.create({
-                    chainId,
-                    txName,
-                    avgGasAmount,
-                    gasFee,
-                    gasPriceInEth,
-                    gasPriceInUsd,
-                });
-            }
-        }
     }
     async updateTxFeePrice() {
-        for (let txKey of Object.keys(constants_1.TX_NAME_ENUM)) {
-            const chainIdList = this.chainServices.getNetworksChainIDList();
-            for (let chainId of chainIdList) {
-                const txName = constants_1.TX_NAME_ENUM[txKey];
-                const avgGasAmount = constants_1.TX_NAME_TO_AVG_GAS[txName];
-                const { coingechoId } = this.chainServices.getNetwork(chainId);
-                const { gasFee, gasPriceInEth, gasPriceInUsd } = await this.web3Services.getTxFeeData(chainId, avgGasAmount, coingechoId);
-                await this.txFeeModel.updateOne({ chainId, txName }, {
-                    avgGasAmount,
-                    gasFee,
-                    gasPriceInEth,
-                    gasPriceInUsd,
-                });
-            }
-        }
     }
 };
 TxFeeRepository = __decorate([

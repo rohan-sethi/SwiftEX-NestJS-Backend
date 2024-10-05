@@ -20,65 +20,65 @@ export class TxFeeRepository {
   }
 
   async createTxFeePrice() {
-    for (let txKey of Object.keys(TX_NAME_ENUM)) {
-      const chainIdList = this.chainServices.getNetworksChainIDList();
-      for (let chainId of chainIdList) {
-        const txName = TX_NAME_ENUM[txKey];
-        const avgGasAmount = TX_NAME_TO_AVG_GAS[txName];
-        const { coingechoId } = this.chainServices.getNetwork(chainId);
+    // for (let txKey of Object.keys(TX_NAME_ENUM)) {
+    //   const chainIdList = this.chainServices.getNetworksChainIDList();
+    //   for (let chainId of chainIdList) {
+    //     const txName = TX_NAME_ENUM[txKey];
+    //     const avgGasAmount = TX_NAME_TO_AVG_GAS[txName];
+    //     const { coingechoId } = this.chainServices.getNetwork(chainId);
 
-        // check if the record already exit
-        const txFee = await this.txFeeModel.findOne({ txName, chainId });
-        if (txFee) continue;
+    //     // check if the record already exit
+    //     const txFee = await this.txFeeModel.findOne({ txName, chainId });
+    //     if (txFee) continue;
 
-        // get gas price
-        const { gasFee, gasPriceInEth, gasPriceInUsd } =
-          await this.web3Services.getTxFeeData(
-            chainId,
-            avgGasAmount,
-            coingechoId,
-          );
+    //     // get gas price
+    //     const { gasFee, gasPriceInEth, gasPriceInUsd } =
+    //       await this.web3Services.getTxFeeData(
+    //         chainId,
+    //         avgGasAmount,
+    //         coingechoId,
+    //       );
 
-        // Create tx fee record
-        await this.txFeeModel.create({
-          chainId,
-          txName,
-          avgGasAmount,
-          gasFee,
-          gasPriceInEth,
-          gasPriceInUsd,
-        });
-      }
-    }
+    //     // Create tx fee record
+    //     await this.txFeeModel.create({
+    //       chainId,
+    //       txName,
+    //       avgGasAmount,
+    //       gasFee,
+    //       gasPriceInEth,
+    //       gasPriceInUsd,
+    //     });
+    //   }
+    // }
   }
 
   async updateTxFeePrice() {
-    for (let txKey of Object.keys(TX_NAME_ENUM)) {
-      const chainIdList = this.chainServices.getNetworksChainIDList();
-      for (let chainId of chainIdList) {
-        const txName = TX_NAME_ENUM[txKey];
-        const avgGasAmount = TX_NAME_TO_AVG_GAS[txName];
-        const { coingechoId } = this.chainServices.getNetwork(chainId);
+  //   for (let txKey of Object.keys(TX_NAME_ENUM)) {
+  //     const chainIdList = this.chainServices.getNetworksChainIDList();
+  //     for (let chainId of chainIdList) {
+  //       const txName = TX_NAME_ENUM[txKey];
+  //       const avgGasAmount = TX_NAME_TO_AVG_GAS[txName];
+  //       const { coingechoId } = this.chainServices.getNetwork(chainId);
 
-        // get gas price
-        const { gasFee, gasPriceInEth, gasPriceInUsd } =
-          await this.web3Services.getTxFeeData(
-            chainId,
-            avgGasAmount,
-            coingechoId,
-          );
+  //       // get gas price
+  //       const { gasFee, gasPriceInEth, gasPriceInUsd } =
+  //         await this.web3Services.getTxFeeData(
+  //           chainId,
+  //           avgGasAmount,
+  //           coingechoId,
+  //         );
 
-        // Create tx fee record
-        await this.txFeeModel.updateOne(
-          { chainId, txName },
-          {
-            avgGasAmount,
-            gasFee,
-            gasPriceInEth,
-            gasPriceInUsd,
-          },
-        );
-      }
-    }
+  //       // Create tx fee record
+  //       await this.txFeeModel.updateOne(
+  //         { chainId, txName },
+  //         {
+  //           avgGasAmount,
+  //           gasFee,
+  //           gasPriceInEth,
+  //           gasPriceInUsd,
+  //         },
+  //       );
+  //     }
+  //   }
   }
 }

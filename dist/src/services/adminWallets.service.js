@@ -63,33 +63,6 @@ let AdminWalletsService = class AdminWalletsService {
             return this.adminAddresses[randomIndex];
         };
         this.isAnAdminAccount = (address) => this.adminAddresses.some((adminAddress) => adminAddress.toLowerCase() === address.toLowerCase());
-        this.getEnoughEthBalanceHolder = async (amount, chainId, coinName) => {
-            const adminWallets = await this.awsServices.getAdminWallets();
-            const walletWithEnoughBalance = [];
-            const minTxFeeBalanceInBn = ethers_1.ethers.BigNumber.from(constants_1.MIN_TX_FEE_BALANCE);
-            const balances = await this.adminBalancesRepository.getAdminBalanceByAsset(coinName, chainId);
-            balances.map(({ balance, address }) => {
-                const balanceAvailable = ethers_1.ethers.BigNumber.from(balance).sub(minTxFeeBalanceInBn);
-                if (amount.lte(balanceAvailable))
-                    walletWithEnoughBalance.push(adminWallets[address]);
-            });
-            const randomIndex = Math.floor(Math.random() * walletWithEnoughBalance.length);
-            return walletWithEnoughBalance[randomIndex];
-        };
-        this.getEnoughEthTokenBalanceHolder = async (tokenAddress, tokenAmount, chainId) => {
-            const adminWallets = await this.awsServices.getAdminWallets();
-            const asset = this.chainServices.getAssetByAddress(chainId, tokenAddress);
-            const tokenName = asset.name;
-            const walletWithEnoughBalance = [];
-            const balances = await this.adminBalancesRepository.getAdminBalanceByAsset(tokenName, chainId);
-            balances.map(({ balance, address }) => {
-                const privateKey = adminWallets[address];
-                if (tokenAmount.lte(ethers_1.ethers.BigNumber.from(balance)))
-                    walletWithEnoughBalance.push(privateKey);
-            });
-            const randomIndex = Math.floor(Math.random() * walletWithEnoughBalance.length);
-            return walletWithEnoughBalance[randomIndex];
-        };
     }
 };
 AdminWalletsService = __decorate([

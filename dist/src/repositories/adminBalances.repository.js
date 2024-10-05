@@ -15,12 +15,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.AdminBalancesRepository = void 0;
 const common_1 = require("@nestjs/common");
 const mongoose_1 = require("@nestjs/mongoose");
-const chain_config_1 = require("../../chain.config");
-const ethers_1 = require("ethers");
 const mongoose_2 = require("mongoose");
 const adminBalances_model_1 = require("../models/adminBalances.model");
 const adminWallets_service_1 = require("../services/adminWallets.service");
-const constants_1 = require("../utils/constants");
 let AdminBalancesRepository = class AdminBalancesRepository {
     constructor(adminBalancesModel, adminWalletsService) {
         this.adminBalancesModel = adminBalancesModel;
@@ -28,57 +25,8 @@ let AdminBalancesRepository = class AdminBalancesRepository {
         this.createAdminBalances();
     }
     async createAdminBalances() {
-        try {
-            const adminAddresses = this.adminWalletsService.getAdminAddresses();
-            for (let address of adminAddresses) {
-                const adminBalances = await this.getAdminBalancesByAddress(address);
-                if (adminBalances)
-                    return;
-                const balances = await this.adminWalletsService.getAssetsBalances(address);
-                const insufficientBlances = [];
-                const txFeeBalances = [];
-                const ethBalances = balances.filter((balance) => balance.address === chain_config_1.CHAIN_NATIVE_CURRENCY);
-                ethBalances.map(({ balance, chainId }) => {
-                    const hasEnoughTxFeeBalance = ethers_1.ethers.BigNumber.from(balance).gte(ethers_1.ethers.BigNumber.from(constants_1.MIN_TX_FEE_BALANCE));
-                    txFeeBalances.push({ hasEnoughTxFeeBalance, chainId });
-                    if (!hasEnoughTxFeeBalance)
-                        insufficientBlances.push(chainId);
-                });
-                if (insufficientBlances.length)
-                    common_1.Logger.warn(`Admin Wallet with "${address}" address has not enough tx fee balance for the ${insufficientBlances.join(', ')} chainId/s`, 'AdminWalletsBalances');
-                await this.adminBalancesModel.create({
-                    address,
-                    txFeeBalances,
-                    balances,
-                });
-            }
-        }
-        catch (err) {
-            common_1.Logger.error(err, 'ADMIN_BALANCES_CREATION_ERROR');
-        }
     }
     async updateAdminBalances() {
-        try {
-            const adminAddresses = this.adminWalletsService.getAdminAddresses();
-            for (let address of adminAddresses) {
-                const balances = await this.adminWalletsService.getAssetsBalances(address);
-                const insufficientBlances = [];
-                const txFeeBalances = [];
-                const ethBalances = balances.filter((balance) => balance.address === chain_config_1.CHAIN_NATIVE_CURRENCY);
-                ethBalances.map(({ balance, chainId }) => {
-                    const hasEnoughTxFeeBalance = ethers_1.ethers.BigNumber.from(balance).gte(ethers_1.ethers.BigNumber.from(constants_1.MIN_TX_FEE_BALANCE));
-                    txFeeBalances.push({ hasEnoughTxFeeBalance, chainId });
-                    if (!hasEnoughTxFeeBalance)
-                        insufficientBlances.push(chainId);
-                });
-                if (insufficientBlances.length)
-                    common_1.Logger.warn(`Admin Wallet with "${address}" address has not enough tx fee balance for the ${insufficientBlances.join(', ')} chainId/s`, 'AdminWalletsBalances');
-                await this.adminBalancesModel.updateOne({ address }, { balances, txFeeBalances });
-            }
-        }
-        catch (err) {
-            common_1.Logger.error(err, 'ADMIN_BALNCES_UPDATE_ERROR');
-        }
     }
     async getAdminBalancesByAddress(address) {
         return await this.adminBalancesModel.findOne({ address });

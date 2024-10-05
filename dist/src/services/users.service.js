@@ -53,14 +53,14 @@ const adminWallets_service_1 = require("./adminWallets.service");
 const txFees_repository_1 = require("../repositories/txFees.repository");
 const web3_service_1 = require("./web3.service");
 const Stellar = __importStar(require("stellar-sdk"));
-const ethers_1 = require("ethers");
 const ABI_1 = require("./ABI");
 const mailer_1 = require("@nestjs-modules/mailer");
+const swap_allbrige_1 = require("./swap-allbrige");
 const stripe = new stripe_1.default(process.env.STRIPE_API_SK, {
     apiVersion: '2022-11-15',
 });
 let UsersService = UsersService_1 = class UsersService {
-    constructor(userModel, redisService, emailService, adminWalletsService, txFeeRepository, chainServices, mailerService) {
+    constructor(userModel, redisService, emailService, adminWalletsService, txFeeRepository, chainServices, mailerService, swap_allbrige) {
         this.userModel = userModel;
         this.redisService = redisService;
         this.emailService = emailService;
@@ -68,6 +68,7 @@ let UsersService = UsersService_1 = class UsersService {
         this.txFeeRepository = txFeeRepository;
         this.chainServices = chainServices;
         this.mailerService = mailerService;
+        this.swap_allbrige = swap_allbrige;
         this.logger = new common_1.Logger(UsersService_1.name);
         this.contractAddress = process.env.SMART_CONTRACT;
         this.abi = ABI_1.contractABI;
@@ -76,9 +77,6 @@ let UsersService = UsersService_1 = class UsersService {
         this.senderKeypair = Stellar.Keypair.fromSecret('SB2IR7WZS3EDS2YEJGC3POI56E5CESRZPUVN72DWHTS4AACW5OYZXDTZ');
         this.redisClient = redisService.getClient();
         Stellar.Network.useTestNetwork();
-        this.provider = new ethers_1.ethers.providers.JsonRpcProvider(process.env.GOERLI_RPC);
-        this.signer = new ethers_1.ethers.Wallet(this.privateKey, this.provider);
-        this.contract = new ethers_1.ethers.Contract(this.contractAddress, this.abi, this.provider);
     }
     getAllUsers() {
         return this.userModel.find();
@@ -401,20 +399,6 @@ let UsersService = UsersService_1 = class UsersService {
             throw new common_1.NotFoundException(`recipient require.`);
         }
         else {
-            const result = await this.payout_xeth(recipient, amount);
-            return result;
-        }
-    }
-    async payout_xeth(recipient, amountToTransfer) {
-        try {
-            const tx = await this.contract.connect(this.signer).payout(recipient, amountToTransfer);
-            const receipt = await tx.wait();
-            console.log('Payout successful', receipt);
-            throw new common_1.HttpException({ status: receipt.status, transactionHash: receipt.transactionHash, Full_data: receipt }, 200);
-        }
-        catch (error) {
-            console.error('Payout failed:', error.message);
-            throw new common_1.HttpException(error, 400);
         }
     }
     async report(data) {
@@ -454,7 +438,8 @@ UsersService = UsersService_1 = __decorate([
         adminWallets_service_1.AdminWalletsService,
         txFees_repository_1.TxFeeRepository,
         web3_service_1.ChainServices,
-        mailer_1.MailerService])
+        mailer_1.MailerService,
+        swap_allbrige_1.SwapService])
 ], UsersService);
 exports.UsersService = UsersService;
 //# sourceMappingURL=users.service.js.map

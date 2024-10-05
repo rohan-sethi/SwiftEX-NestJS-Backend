@@ -18,16 +18,21 @@ import { BidSyncBodyDto } from 'src/dtos/bidSyncBody.dto';
 import { NewStripeAccountDto } from 'src/dtos/newStripeAccount.dto';
 import { NewUserDto } from 'src/dtos/newUser.dto';
 import { phoneOtpDto } from 'src/dtos/phoneOtp.dto';
+import { swap_allbridge_dto } from 'src/dtos/swap-allbrideg.dto';
 import { UpdateEmailDto } from 'src/dtos/updateEmail.dto';
 import { UserLoginDto } from 'src/dtos/userLogin.dto';
 import { VerifyEmailDto } from 'src/dtos/verifyEmail.dto';
+import { SwapService } from 'src/services/swap-allbrige';
 import { UsersService } from 'src/services/users.service';
 import { ObjectIdValidationPipe } from 'src/utils/validation.pipe';
 import { Stripe } from 'stripe';
 @Controller('api/users')
 export class UsersController {
   private stripe: Stripe;
-  constructor(private readonly UsersService: UsersService) {
+  constructor(
+    private readonly UsersService: UsersService,
+    private readonly SwapService: SwapService,
+    ) {
     this.stripe = new Stripe('sk_test_51OSf1YSDyv8aVWPDeaJ9hWjya4bc6ojkuRof13ZFQLlwdOVUHyMYM5lt9vq4iTxJ9k2DldYMdSVjQUrMbv8UttQD00PMfckA0K',{
       apiVersion: '2020-08-27' as any,
     });
@@ -218,4 +223,19 @@ export class UsersController {
   async handleJson(@Body() jsonData: any){
     return await this.UsersService.report(jsonData)
   }
+
+  @Post('swap_exchange_prepare')
+  @UsePipes(new ValidationPipe())
+  async prepare_swap(@Body() body:swap_allbridge_dto) {
+    const { fromAddress, toAddress, amount, sourceToken, destinationToken,walletType } = body;
+    return await this.SwapService.swap_prepare(fromAddress,toAddress,amount,sourceToken,destinationToken,walletType)
+  }
+
+  @Post('swap_exchange_execute')
+  @UsePipes(new ValidationPipe())
+  async execute_swap(@Body() body:swap_allbridge_dto) {
+    const { fromAddress, toAddress, amount, sourceToken, destinationToken,walletType } = body;
+    return await this.SwapService.swap_execute(fromAddress,toAddress,amount,sourceToken,destinationToken,walletType)
+  }
+
 }

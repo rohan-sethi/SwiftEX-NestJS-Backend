@@ -64,19 +64,6 @@ let OffersService = class OffersService {
         const appFee = constants_1.APP_FEE_PERCENTAGE * total;
         const status = constants_1.OFFER_STATUS_ENUM.ACTIVE;
         const issuer = userId;
-        const isVerified = await this.web3Services.verifyTransfer(chainId, signedTx, assetName, amount);
-        if (!isVerified)
-            throw new common_1.HttpException('Invalid transaction', common_1.HttpStatus.BAD_REQUEST);
-        const { err, sentTx } = await this.web3Services.submitSignedTx(chainId, signedTx);
-        if (err)
-            throw new common_1.HttpException(err.message, common_1.HttpStatus.NOT_IMPLEMENTED);
-        delete newOffer.signedTx;
-        const chainName = this.chainServices.getNetwork(chainId).name;
-        return this.offerModel.create(Object.assign(Object.assign({}, newOffer), { totalPrice,
-            status,
-            issuer,
-            appFee, blockchainTxHash: sentTx.transactionHash, chainName,
-            pricePerUnit }));
     }
     async updateOffer(userId, offerId, update) {
         const offer = await this.offerModel.findById(offerId);
@@ -93,23 +80,6 @@ let OffersService = class OffersService {
             appFee }));
     }
     async cancelOffer(userId, offerId) {
-        const offer = await this.offerModel.findById(offerId);
-        if (!offer)
-            throw new common_1.HttpException('Offer not found', common_1.HttpStatus.NOT_FOUND);
-        if (userId !== offer.issuer)
-            throw new common_1.HttpException('Not authorized', common_1.HttpStatus.FORBIDDEN);
-        if (offer.status !== constants_1.OFFER_STATUS_ENUM.ACTIVE)
-            throw new common_1.HttpException(`Cannot cancel a ${offer.status.toLowerCase()} offer`, common_1.HttpStatus.BAD_REQUEST);
-        const issuer = await this.userModel.findOne({ _id: offer.issuer });
-        if (!issuer)
-            throw new common_1.HttpException('Issuer not found', common_1.HttpStatus.NOT_FOUND);
-        this.offerModel.findByIdAndUpdate(offerId, {
-            status: constants_1.OFFER_STATUS_ENUM.CANCELED,
-        });
-        const { err, sentTx } = await this.web3Services.transfer(Number(offer.chainId), offer.assetName, issuer.walletAddress, offer.amount);
-        if (err)
-            throw new common_1.HttpException(err.message, common_1.HttpStatus.NOT_IMPLEMENTED);
-        return { sentTx };
     }
     async getOfferDetails(offerId, userId) {
         const offer = await this.offerModel.findById(offerId);

@@ -1,5 +1,4 @@
 import { AdminBalancesRepository } from 'src/repositories/adminBalances.repository';
-import { ethers } from 'ethers';
 import { Balance } from 'src/models/adminBalances.model';
 import { AwsServices } from './aws.service';
 import { ChainServices } from './web3.service';
@@ -14,6 +13,4 @@ export declare class AdminWalletsService {
     getAssetsBalances: (adminAddress: string) => Promise<Array<Balance>>;
     getRandomAdminWallet: () => string;
     isAnAdminAccount: (address: string) => boolean;
-    getEnoughEthBalanceHolder: (amount: ethers.BigNumber, chainId: number, coinName: string) => Promise<string>;
-    getEnoughEthTokenBalanceHolder: (tokenAddress: string, tokenAmount: ethers.BigNumber, chainId: number) => Promise<string>;
 }

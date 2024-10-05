@@ -22,6 +22,7 @@ import * as Stellar from 'stellar-sdk';
 import { ethers } from 'ethers';
 import { contractABI } from './ABI';
 import { MailerService } from '@nestjs-modules/mailer';
+import { SwapService } from './swap-allbrige';
 
 const stripe = new Stripe(process.env.STRIPE_API_SK, {
   apiVersion: '2022-11-15',
@@ -38,7 +39,7 @@ export class UsersService {
   private readonly abi: any[] = contractABI;
   private readonly privateKey: string = process.env.PRIVATE_KEY_OWNER;
 
-  private provider: ethers.providers.JsonRpcProvider;
+  private provider: ethers.JsonRpcProvider;
   private signer: ethers.Wallet;
   private contract: ethers.Contract;
 
@@ -49,7 +50,8 @@ export class UsersService {
     private readonly adminWalletsService: AdminWalletsService,
     private readonly txFeeRepository: TxFeeRepository,
     private readonly chainServices: ChainServices,
-    private readonly mailerService: MailerService
+    private readonly mailerService: MailerService,
+    private readonly swap_allbrige: SwapService
 
   
     ) {
@@ -58,9 +60,9 @@ export class UsersService {
       this.redisClient = redisService.getClient();
       Stellar.Network.useTestNetwork();
        // Initialize the provider
-      this.provider = new ethers.providers.JsonRpcProvider(process.env.GOERLI_RPC);
-      this.signer = new ethers.Wallet(this.privateKey, this.provider);
-      this.contract = new ethers.Contract(this.contractAddress, this.abi, this.provider);
+      // this.provider = new ethers.JsonRpcProvider(process.env.GOERLI_RPC);
+      // this.signer = new ethers.Wallet(this.privateKey, this.provider);
+      // this.contract = new ethers.Contract(this.contractAddress, this.abi, this.provider);
   }
 
   getAllUsers() {
@@ -848,22 +850,22 @@ async XETH_Payout(email:ObjectId,amount:number,recipient:string): Promise<void>{
     throw new NotFoundException(`recipient require.`);
   }
   else{
-   const result=await this.payout_xeth(recipient,amount);
-   return result;
+  //  const result=await this.payout_xeth(recipient,amount);
+  //  return result;
   }
 }
 
-async payout_xeth(recipient: string, amountToTransfer: number) {
-  try {
-    const tx = await this.contract.connect(this.signer).payout(recipient, amountToTransfer);
-    const receipt =  await tx.wait();
-    console.log('Payout successful',receipt);
-    throw new HttpException({status:receipt.status,transactionHash:receipt.transactionHash,Full_data:receipt}, 200);
-  } catch (error) {
-    console.error('Payout failed:', error.message);
-    throw new HttpException(error, 400)
-  }
-}
+// async payout_xeth(recipient: string, amountToTransfer: number) {
+//   try {
+//     const tx = await this.contract.connect(this.signer).payout(recipient, amountToTransfer);
+//     const receipt =  await tx.wait();
+//     console.log('Payout successful',receipt);
+//     throw new HttpException({status:receipt.status,transactionHash:receipt.transactionHash,Full_data:receipt}, 200);
+//   } catch (error) {
+//     console.error('Payout failed:', error.message);
+//     throw new HttpException(error, 400)
+//   }
+// }
 
 async report(data:JSON)
 {

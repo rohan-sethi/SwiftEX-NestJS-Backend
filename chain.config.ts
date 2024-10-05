@@ -15,7 +15,7 @@ export const chainConfig: ChainConfig = {
       default: true,
       name: 'eth_mainnet',
       coingechoId: 'ethereum',
-      provider: new ethers.providers.JsonRpcProvider(
+      provider: new ethers.JsonRpcProvider(
         process.env.ETH_MAINNET_RPC,
       ),
       assets: [
@@ -35,7 +35,7 @@ export const chainConfig: ChainConfig = {
       default: true,
       name: 'Goerli',
       coingechoId: 'ethereum',
-      provider: new ethers.providers.JsonRpcProvider(process.env.GOERLI_RPC),
+      provider: new ethers.JsonRpcProvider(process.env.GOERLI_RPC),
       assets: [
         {
           name: 'ETH',
@@ -64,7 +64,7 @@ export const chainConfig: ChainConfig = {
       default: true,
       name: 'bsc_testnet',
       coingechoId: 'binancecoin',
-      provider: new ethers.providers.JsonRpcProvider(
+      provider: new ethers.JsonRpcProvider(
         process.env.BSC_TESTNET_RPC,
       ),
       assets: [
@@ -85,7 +85,7 @@ export const chainConfig: ChainConfig = {
       default: true,
       name: 'mumbai_testnet',
       coingechoId: 'matic-network',
-      provider: new ethers.providers.JsonRpcProvider(
+      provider: new ethers.JsonRpcProvider(
         process.env.MATIC_TESTNET_RPC,
       ),
       assets: [

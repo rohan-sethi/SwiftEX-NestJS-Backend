@@ -23,101 +23,101 @@ export class AdminBalancesRepository {
   }
 
   private async createAdminBalances() {
-    try {
-      // Get admin addresses
-      const adminAddresses = this.adminWalletsService.getAdminAddresses();
+    // try {
+    //   // Get admin addresses
+    //   const adminAddresses = this.adminWalletsService.getAdminAddresses();
 
-      for (let address of adminAddresses) {
-        // Check if admin already exist
-        const adminBalances = await this.getAdminBalancesByAddress(address);
-        if (adminBalances) return;
+    //   for (let address of adminAddresses) {
+    //     // Check if admin already exist
+    //     const adminBalances = await this.getAdminBalancesByAddress(address);
+    //     if (adminBalances) return;
 
-        // Create admin balances collection
-        const balances = await this.adminWalletsService.getAssetsBalances(
-          address,
-        );
+    //     // Create admin balances collection
+    //     const balances = await this.adminWalletsService.getAssetsBalances(
+    //       address,
+    //     );
 
-        // Check if it has enough tx fee balance
-        const insufficientBlances = [];
-        const txFeeBalances: Array<HasEnoughFeeBalance> = [];
-        const ethBalances = balances.filter(
-          (balance) => balance.address === CHAIN_NATIVE_CURRENCY,
-        );
+    //     // Check if it has enough tx fee balance
+    //     const insufficientBlances = [];
+    //     const txFeeBalances: Array<HasEnoughFeeBalance> = [];
+    //     const ethBalances = balances.filter(
+    //       (balance) => balance.address === CHAIN_NATIVE_CURRENCY,
+    //     );
 
-        ethBalances.map(({ balance, chainId }) => {
-          const hasEnoughTxFeeBalance = ethers.BigNumber.from(balance).gte(
-            ethers.BigNumber.from(MIN_TX_FEE_BALANCE),
-          );
-          txFeeBalances.push({ hasEnoughTxFeeBalance, chainId });
-          if (!hasEnoughTxFeeBalance) insufficientBlances.push(chainId);
-        });
+    //     ethBalances.map(({ balance, chainId }) => {
+    //       const hasEnoughTxFeeBalance = ethers.BigNumber.from(balance).gte(
+    //         ethers.BigNumber.from(MIN_TX_FEE_BALANCE),
+    //       );
+    //       txFeeBalances.push({ hasEnoughTxFeeBalance, chainId });
+    //       if (!hasEnoughTxFeeBalance) insufficientBlances.push(chainId);
+    //     });
 
-        // NOTE: this can be annoying if every ten min an email is sent or
-        //       a seperate email is sent for each address/wallet
-        if (insufficientBlances.length)
-          Logger.warn(
-            `Admin Wallet with "${address}" address has not enough tx fee balance for the ${insufficientBlances.join(
-              ', ',
-            )} chainId/s`,
-            'AdminWalletsBalances',
-          );
+    //     // NOTE: this can be annoying if every ten min an email is sent or
+    //     //       a seperate email is sent for each address/wallet
+    //     if (insufficientBlances.length)
+    //       Logger.warn(
+    //         `Admin Wallet with "${address}" address has not enough tx fee balance for the ${insufficientBlances.join(
+    //           ', ',
+    //         )} chainId/s`,
+    //         'AdminWalletsBalances',
+    //       );
 
-        await this.adminBalancesModel.create({
-          address,
-          txFeeBalances,
-          balances,
-        });
-      }
-    } catch (err) {
-      Logger.error(err, 'ADMIN_BALANCES_CREATION_ERROR');
-    }
+    //     await this.adminBalancesModel.create({
+    //       address,
+    //       txFeeBalances,
+    //       balances,
+    //     });
+    //   }
+    // } catch (err) {
+    //   Logger.error(err, 'ADMIN_BALANCES_CREATION_ERROR');
+    // }
   }
   
   async updateAdminBalances() {
-    try {
-      // Get admin addresses
-      const adminAddresses = this.adminWalletsService.getAdminAddresses();
+    // try {
+    //   // Get admin addresses
+    //   const adminAddresses = this.adminWalletsService.getAdminAddresses();
 
-      // Update balances
-      for (let address of adminAddresses) {
-        // Create admin balances collection
-        const balances = await this.adminWalletsService.getAssetsBalances(
-          address,
-        );
+    //   // Update balances
+    //   for (let address of adminAddresses) {
+    //     // Create admin balances collection
+    //     const balances = await this.adminWalletsService.getAssetsBalances(
+    //       address,
+    //     );
 
-        // Check if it has enough tx fee balance
-        const insufficientBlances = [];
-        const txFeeBalances: Array<HasEnoughFeeBalance> = [];
-        const ethBalances = balances.filter(
-          (balance) => balance.address === CHAIN_NATIVE_CURRENCY,
-        );
+    //     // Check if it has enough tx fee balance
+    //     const insufficientBlances = [];
+    //     const txFeeBalances: Array<HasEnoughFeeBalance> = [];
+    //     const ethBalances = balances.filter(
+    //       (balance) => balance.address === CHAIN_NATIVE_CURRENCY,
+    //     );
 
-        ethBalances.map(({ balance, chainId }) => {
-          const hasEnoughTxFeeBalance = ethers.BigNumber.from(balance).gte(
-            ethers.BigNumber.from(MIN_TX_FEE_BALANCE),
-          );
-          txFeeBalances.push({ hasEnoughTxFeeBalance, chainId });
-          if (!hasEnoughTxFeeBalance) insufficientBlances.push(chainId);
-        });
+    //     ethBalances.map(({ balance, chainId }) => {
+    //       const hasEnoughTxFeeBalance = ethers.BigNumber.from(balance).gte(
+    //         ethers.BigNumber.from(MIN_TX_FEE_BALANCE),
+    //       );
+    //       txFeeBalances.push({ hasEnoughTxFeeBalance, chainId });
+    //       if (!hasEnoughTxFeeBalance) insufficientBlances.push(chainId);
+    //     });
 
-        // NOTE: this can be annoying if every ten min an email is sent or
-        //       a seperate email is sent for each address/wallet
-        if (insufficientBlances.length)
-          Logger.warn(
-            `Admin Wallet with "${address}" address has not enough tx fee balance for the ${insufficientBlances.join(
-              ', ',
-            )} chainId/s`,
-            'AdminWalletsBalances',
-          );
+    //     // NOTE: this can be annoying if every ten min an email is sent or
+    //     //       a seperate email is sent for each address/wallet
+    //     if (insufficientBlances.length)
+    //       Logger.warn(
+    //         `Admin Wallet with "${address}" address has not enough tx fee balance for the ${insufficientBlances.join(
+    //           ', ',
+    //         )} chainId/s`,
+    //         'AdminWalletsBalances',
+    //       );
 
-        await this.adminBalancesModel.updateOne(
-          { address },
-          { balances, txFeeBalances },
-        );
-      }
-    } catch (err) {
-      Logger.error(err, 'ADMIN_BALNCES_UPDATE_ERROR');
-    }
+    //     await this.adminBalancesModel.updateOne(
+    //       { address },
+    //       { balances, txFeeBalances },
+    //     );
+    //   }
+    // } catch (err) {
+    //   Logger.error(err, 'ADMIN_BALNCES_UPDATE_ERROR');
+    // }
   }
 
   async getAdminBalancesByAddress(address: string) {

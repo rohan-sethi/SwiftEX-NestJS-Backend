@@ -81,65 +81,65 @@ export class AdminWalletsService {
    * @param coinName the native currency name of the EVM chain
    * @returns a private key of admin wallets
    */
-  getEnoughEthBalanceHolder = async (
-    amount: ethers.BigNumber,
-    chainId: number,
-    coinName: string,
-  ): Promise<string> => {
-    const adminWallets = await this.awsServices.getAdminWallets();
-    const walletWithEnoughBalance = [];
-    const minTxFeeBalanceInBn = ethers.BigNumber.from(MIN_TX_FEE_BALANCE);
-    const balances = await this.adminBalancesRepository.getAdminBalanceByAsset(
-      coinName,
-      chainId,
-    );
+//   getEnoughEthBalanceHolder = async (
+//     amount: ethers.BigNumber,
+//     chainId: number,
+//     coinName: string,
+//   ): Promise<string> => {
+//     const adminWallets = await this.awsServices.getAdminWallets();
+//     const walletWithEnoughBalance = [];
+//     const minTxFeeBalanceInBn = ethers.BigNumber.from(MIN_TX_FEE_BALANCE);
+//     const balances = await this.adminBalancesRepository.getAdminBalanceByAsset(
+//       coinName,
+//       chainId,
+//     );
 
-    balances.map(({ balance, address }) => {
-      const balanceAvailable =
-        ethers.BigNumber.from(balance).sub(minTxFeeBalanceInBn);
-      if (amount.lte(balanceAvailable))
-        walletWithEnoughBalance.push(adminWallets[address]);
-    });
+//     balances.map(({ balance, address }) => {
+//       const balanceAvailable =
+//         ethers.BigNumber.from(balance).sub(minTxFeeBalanceInBn);
+//       if (amount.lte(balanceAvailable))
+//         walletWithEnoughBalance.push(adminWallets[address]);
+//     });
 
-    const randomIndex = Math.floor(
-      Math.random() * walletWithEnoughBalance.length,
-    );
+//     const randomIndex = Math.floor(
+//       Math.random() * walletWithEnoughBalance.length,
+//     );
 
-    return walletWithEnoughBalance[randomIndex];
-  };
+//     return walletWithEnoughBalance[randomIndex];
+//   };
 
-  /**
-   * Finds wallet having equal/more amount of ether token in balance
-   * @param tokenAddress address of the token
-   * @param tokenAmount amount (inWei) of token needed
-   * @param chainId the networkId in the chain.config
-   * @returns a private key of admin wallets
-   */
-  getEnoughEthTokenBalanceHolder = async (
-    tokenAddress: string,
-    tokenAmount: ethers.BigNumber,
-    chainId: number,
-  ): Promise<string> => {
-    const adminWallets = await this.awsServices.getAdminWallets();
-    const asset = this.chainServices.getAssetByAddress(chainId, tokenAddress);
-    const tokenName = asset.name;
+//   /**
+//    * Finds wallet having equal/more amount of ether token in balance
+//    * @param tokenAddress address of the token
+//    * @param tokenAmount amount (inWei) of token needed
+//    * @param chainId the networkId in the chain.config
+//    * @returns a private key of admin wallets
+//    */
+//   getEnoughEthTokenBalanceHolder = async (
+//     tokenAddress: string,
+//     tokenAmount: ethers.BigNumber,
+//     chainId: number,
+//   ): Promise<string> => {
+//     const adminWallets = await this.awsServices.getAdminWallets();
+//     const asset = this.chainServices.getAssetByAddress(chainId, tokenAddress);
+//     const tokenName = asset.name;
 
-    const walletWithEnoughBalance = [];
-    const balances = await this.adminBalancesRepository.getAdminBalanceByAsset(
-      tokenName,
-      chainId,
-    );
+//     const walletWithEnoughBalance = [];
+//     const balances = await this.adminBalancesRepository.getAdminBalanceByAsset(
+//       tokenName,
+//       chainId,
+//     );
 
-    balances.map(({ balance, address }) => {
-      const privateKey = adminWallets[address];
-      if (tokenAmount.lte(ethers.BigNumber.from(balance)))
-        walletWithEnoughBalance.push(privateKey);
-    });
+//     balances.map(({ balance, address }) => {
+//       const privateKey = adminWallets[address];
+//       if (tokenAmount.lte(ethers.BigNumber.from(balance)))
+//         walletWithEnoughBalance.push(privateKey);
+//     });
 
-    const randomIndex = Math.floor(
-      Math.random() * walletWithEnoughBalance.length,
-    );
+//     const randomIndex = Math.floor(
+//       Math.random() * walletWithEnoughBalance.length,
+//     );
 
-    return walletWithEnoughBalance[randomIndex];
-  };
+//     return walletWithEnoughBalance[randomIndex];
+//   };
 }

@@ -17,7 +17,7 @@ export type ChainNetwork = {
    * when found copy its API id.
    */
   coingechoId: string;
-  provider: ethers.providers.JsonRpcProvider;
+  provider: ethers.JsonRpcProvider;
   assets: Array<ChainAsset>;
 };
 
