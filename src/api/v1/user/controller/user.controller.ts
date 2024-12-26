@@ -1,0 +1,117 @@
+import { Controller, Get, Post, Body, Param, Delete, Put, HttpStatus, HttpCode, Query, UseGuards, HttpException, Req, NotFoundException } from '@nestjs/common';
+import { UserService } from '../service/user.service';
+import { CreateUserDto, PasscodeDTO, UpdatePublicKey, VerifyEmailDto } from '../dto/create-user.dto';
+import { User } from '../schema/user.schema';
+import { FcmTokenDto, OtpDto, UpdateUserDto } from '../dto/update-user.dto';
+import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
+import { ObjectIdValidationPipe } from '../../utils/validation.pipe';
+import mongoose, { Types } from 'mongoose';
+import { UserForgetDto } from '../../auth/dto/auth-credentials.dto';
+
+
+@Controller('/users')
+export class UserController {
+  constructor(private readonly userService: UserService) {}
+
+  @Post('/register')
+  @HttpCode(HttpStatus.CREATED)
+  async register(@Body() newUser: CreateUserDto) {
+    return this.userService.register(newUser);
+  }
+
+  @Post('/forgotPasscode')
+  forgot_passcode(@Body() credintials: UserForgetDto) {
+    return this.userService.forgotEmail(credintials);
+  }
+
+  @Post('/verifyLoginOtp')
+  verifyLoginOtp(
+    @Req() req: any,
+    @Body() credintials: OtpDto) {
+    return this.userService.verifyLoginOtp(req.user._id,credintials);
+  }
+
+  @Get('/:id')
+  async getUserDetails(
+    @Req() req: any,
+  ) {
+    const user = await this.userService.findOneById(req.user.sub);
+    if (!user) {
+      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+    }
+    return user;
+  }
+
+  @Post('/updatePublicKeyByEmail')
+  async updatePublicKeyByEmail(
+    @Req() req: any,
+    @Body() publicKey: UpdatePublicKey,
+  ) {
+    try {
+      const result = await this.userService.findAndUpdatePublicKey(req.user.sub, publicKey.publicKey);
+      console.log(">>>>", result)
+      return result;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        return { success: false, message: 'User not found' };
+      }
+      throw error;
+    }
+  }
+
+  @Post('/verifyUserEmail')
+  verifyUserEmail(
+    @Req() req: any,
+    @Body() emailBody: VerifyEmailDto,
+  ) {
+    return this.userService.verifyUserEmail(req.user.sub, emailBody);
+  }
+
+  @Get('/getInSynced/:fcmRegToken')
+  getInSynced(
+    @Param('fcmRegToken') fcmRegToken: string,
+    @Req() req: any,
+  ) {
+    return this.userService.getInSynced(req.user.sub, fcmRegToken);
+  }
+
+  @Post('/syncDevice')
+  syncDevice(
+    @Req() req: any,
+    @Body() FcmTokenbody: FcmTokenDto,
+  ) {
+    return this.userService.syncDevice(req.user.sub, FcmTokenbody.fcmRegToken,FcmTokenbody.deviceInfo);
+  }
+
+  @Post('/updatePasscode')
+  async updatePasscode(
+    @Req() req: any,
+    @Body() {passcode}:PasscodeDTO,
+    ){
+      try {
+        const result=await this.userService.findByEmailAndupdataPasscode(req.user._id,passcode);
+        return result;
+      } catch (error) {
+        throw error;
+      }
+    }
+
+    @Post('/kyc')
+    userKycApply(
+    @Req() req: any,
+    ) {
+      return this.userService.userKycApply(req.user.sub);
+    }
+
+  @Get('/getStripeAccount')
+  handleStripeAccount(
+    @Req() req: any,
+  ) {
+    return this.userService.getStripeAccount(req.user._id);
+  }
+
+    @Post('/reports')
+    async handleJson(@Body() jsonData: any){
+      return await this.userService.report(jsonData)
+    }
+}
