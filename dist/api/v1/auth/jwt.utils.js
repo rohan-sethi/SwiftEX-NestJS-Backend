@@ -32,7 +32,7 @@ const signJwtToken = (payload) => {
 exports.signJwtToken = signJwtToken;
 const LoginJwtToken = (payload) => {
     const secretKey = process.env.JWT_SECRET;
-    return jwt.sign(payload, secretKey, { expiresIn: '3d' });
+    return jwt.sign(payload, secretKey, { expiresIn: '30d' });
 };
 exports.LoginJwtToken = LoginJwtToken;
 //# sourceMappingURL=jwt.utils.js.map

@@ -7,5 +7,5 @@ export const signJwtToken = (payload: any): string => {
 
 export const LoginJwtToken = (payload: any): string => {
   const secretKey = process.env.JWT_SECRET;
-  return jwt.sign(payload, secretKey, { expiresIn: '3d' });
+  return jwt.sign(payload, secretKey, { expiresIn: '30d' });
 };

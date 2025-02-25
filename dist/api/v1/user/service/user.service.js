@@ -56,6 +56,37 @@ let UserService = UserService_1 = class UserService {
         this.logger = new common_1.Logger(UserService_1.name);
         Stellar.Network.useTestNetwork();
     }
+    async guestRegister(CreateGuestUserDto) {
+        try {
+            const userExist = await this.userModel.findOne({ email: CreateGuestUserDto.deviceUniqueID });
+            if (userExist) {
+                const payload = { email: userExist.email, sub: userExist._id };
+                const token = (0, jwt_utils_1.LoginJwtToken)(payload);
+                return { success: true, message: "Guest user alredy exist", status: 200, token };
+            }
+            const gusetUserInfo = {
+                firstName: "Guest",
+                lastName: "guest",
+                phoneNumber: CreateGuestUserDto === null || CreateGuestUserDto === void 0 ? void 0 : CreateGuestUserDto.deviceUniqueID,
+                email: CreateGuestUserDto === null || CreateGuestUserDto === void 0 ? void 0 : CreateGuestUserDto.deviceUniqueID,
+                accountAddress: CreateGuestUserDto === null || CreateGuestUserDto === void 0 ? void 0 : CreateGuestUserDto.deviceUniqueID,
+                walletAddress: CreateGuestUserDto === null || CreateGuestUserDto === void 0 ? void 0 : CreateGuestUserDto.deviceUniqueID,
+                password: "null",
+                loginOtp: "null",
+                DeviceInfo: CreateGuestUserDto
+            };
+            const guestUser = await this.userModel.create(gusetUserInfo);
+            if (!guestUser) {
+                return { success: false, message: "somthig went wrong", status: 400, error: "null" };
+            }
+            const payload = { email: guestUser.email, sub: guestUser._id };
+            const token = (0, jwt_utils_1.LoginJwtToken)(payload);
+            return { success: true, message: "Guest user created", status: 200, token };
+        }
+        catch (error) {
+            return { success: false, message: "Internal server error", status: 500, error: error.message };
+        }
+    }
     async register(CreateUserDto) {
         const userExist = await this.userModel.findOne({ phoneNumber: CreateUserDto.phoneNumber });
         if (userExist)
@@ -168,13 +199,14 @@ let UserService = UserService_1 = class UserService {
     async findOneById(id) {
         return await this.userModel.findById(id).select('-passcode');
     }
-    async findAndUpdatePublicKey(id, newPublicKey) {
+    async findAndUpdatePublicKey(id, newPublicKey, newWalletPublicKey) {
         const user = await this.userModel.findById(id);
         if (!user) {
             throw new common_1.HttpException('User not found', common_1.HttpStatus.NOT_FOUND);
         }
         await this.userModel.findByIdAndUpdate(user._id, {
             public_key: newPublicKey,
+            walletAddress: newWalletPublicKey
         });
         const server = new Stellar.Server(process.env.RPC_STELLAR);
         const sourceSecretKey = process.env.ACTIVATE_STELLAR_ADDRESS;
@@ -205,6 +237,20 @@ let UserService = UserService_1 = class UserService {
             return { success: false, message: "Error funding account", status_code: common_1.HttpStatus.EXPECTATION_FAILED };
         });
         return res;
+    }
+    async UpdatePublicKey(id, newPublicKey, newWalletPublicKey) {
+        const user = await this.userModel.findById(id);
+        if (!user) {
+            throw new common_1.HttpException('User not found', common_1.HttpStatus.NOT_FOUND);
+        }
+        const res = await this.userModel.findByIdAndUpdate(user._id, {
+            public_key: newPublicKey,
+            walletAddress: newWalletPublicKey
+        });
+        if (!res) {
+            return { success: false, message: "keys updates faild", status_code: common_1.HttpStatus.BAD_REQUEST };
+        }
+        return { success: true, message: "keys updates successfully", status_code: common_1.HttpStatus.ACCEPTED };
     }
     async findByEmailAndupdataPasscode(userId, passcode) {
         try {

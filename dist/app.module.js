@@ -17,11 +17,12 @@ const auth_module_1 = require("./api/v1/auth/auth.module");
 const market_data_module_1 = require("./api/v1/market-data/market-data.module");
 const jwt_auth_middleware_1 = require("./api/v1/auth/jwt-auth.middleware");
 const notification_module_1 = require("./api/v1/notification/notification.module");
+const transaction_listener_1 = require("./api/v1/transactionListener/transaction.listener");
 let AppModule = class AppModule {
     configure(consumer) {
         consumer
             .apply(jwt_auth_middleware_1.JwtAuthMiddleware)
-            .exclude({ path: "/api/market-data/getcryptodata", method: common_1.RequestMethod.GET }, { path: "/api/auth/login", method: common_1.RequestMethod.POST }, { path: "/api/users/register", method: common_1.RequestMethod.POST }, { path: "/api/users/forgotPasscode", method: common_1.RequestMethod.POST })
+            .exclude({ path: "/api/market-data/getcryptodata", method: common_1.RequestMethod.GET }, { path: "/api/auth/login", method: common_1.RequestMethod.POST }, { path: "/api/users/register", method: common_1.RequestMethod.POST }, { path: "/api/users/forgotPasscode", method: common_1.RequestMethod.POST }, { path: "/api/users/guestRegister", method: common_1.RequestMethod.POST })
             .forRoutes("*");
     }
 };
@@ -60,6 +61,7 @@ AppModule = __decorate([
             market_data_module_1.MarketDataModule,
             notification_module_1.NotificationModule
         ],
+        providers: [transaction_listener_1.ContractTransactionListener],
     })
 ], AppModule);
 exports.AppModule = AppModule;

@@ -8,6 +8,7 @@ import { AuthModule } from './api/v1/auth/auth.module';
 import { MarketDataModule } from './api/v1/market-data/market-data.module';
 import { JwtAuthMiddleware } from './api/v1/auth/jwt-auth.middleware';
 import { NotificationModule } from './api/v1/notification/notification.module';
+import { ContractTransactionListener } from './api/v1/transactionListener/transaction.listener';
 
 @Module({
   imports: [
@@ -43,6 +44,7 @@ import { NotificationModule } from './api/v1/notification/notification.module';
     MarketDataModule,
     NotificationModule
   ],
+  providers: [ContractTransactionListener],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
@@ -52,7 +54,8 @@ export class AppModule implements NestModule {
         { path: "/api/market-data/getcryptodata", method: RequestMethod.GET },
         { path: "/api/auth/login", method: RequestMethod.POST },
         { path: "/api/users/register", method: RequestMethod.POST },
-        { path: "/api/users/forgotPasscode",method: RequestMethod.POST}
+        { path: "/api/users/forgotPasscode",method: RequestMethod.POST},
+        { path: "/api/users/guestRegister",method: RequestMethod.POST}
       )
       .forRoutes("*")
   }

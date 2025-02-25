@@ -2,7 +2,7 @@ import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, ObjectId } from 'mongoose';
 import { User } from '../schema/user.schema';
-import { CreateUserDto, PasscodeDTO, VerifyEmailDto } from '../dto/create-user.dto';
+import { CreateGuestUserDto, CreateUserDto, PasscodeDTO, VerifyEmailDto } from '../dto/create-user.dto';
 import { OtpDto, UpdateUserDto } from '../dto/update-user.dto';
 import { EmailService } from '../../utils/email.service';
 import { LoginJwtToken, signJwtToken } from '../../auth/jwt.utils';
@@ -22,6 +22,42 @@ export class UserService {
     private readonly notificationService: NotificationService,
   ) {
     Stellar.Network.useTestNetwork();
+  }
+
+  async guestRegister(CreateGuestUserDto: CreateGuestUserDto) {
+    try {
+      // Check if user with the same device unique ID exists
+      const userExist = await this.userModel.findOne({ email:CreateGuestUserDto.deviceUniqueID })
+      // const userExist = await this.userModel.findOne({ "DeviceInfo": { "deviceUniqueID": CreateGuestUserDto.deviceUniqueID } })
+      if (userExist) {
+        // Generate a JWT token for the updated user
+        const payload = { email: userExist.email, sub: userExist._id };
+        const token = LoginJwtToken(payload);
+        return { success: true, message: "Guest user alredy exist", status: 200, token };
+      }
+      const gusetUserInfo = {
+        firstName: "Guest",
+        lastName: "guest",
+        phoneNumber: CreateGuestUserDto?.deviceUniqueID,
+        email: CreateGuestUserDto?.deviceUniqueID,
+        accountAddress: CreateGuestUserDto?.deviceUniqueID,
+        walletAddress: CreateGuestUserDto?.deviceUniqueID,
+        password: "null",
+        loginOtp: "null",
+        DeviceInfo: CreateGuestUserDto
+      }
+      const guestUser = await this.userModel.create(gusetUserInfo);
+      if (!guestUser) {
+        return { success: false, message: "somthig went wrong", status: 400, error: "null" };
+      }
+      // Generate a JWT token for the updated user
+      const payload = { email: guestUser.email, sub: guestUser._id };
+      const token = LoginJwtToken(payload);
+      return { success: true, message: "Guest user created", status: 200, token };
+
+    } catch (error) {
+      return { success: false, message: "Internal server error", status: 500, error: error.message };
+    }
   }
 
   async register(CreateUserDto: CreateUserDto) {
@@ -202,7 +238,7 @@ export class UserService {
     return await this.userModel.findById(id).select('-passcode');
   }
 
-  async findAndUpdatePublicKey(id: string, newPublicKey) {
+  async findAndUpdatePublicKey(id: string, newPublicKey,newWalletPublicKey) {
     const user = await this.userModel.findById(id);
 
     if (!user) {
@@ -213,6 +249,7 @@ export class UserService {
     // }
     await this.userModel.findByIdAndUpdate(user._id, {
       public_key: newPublicKey,
+      walletAddress:newWalletPublicKey
     })
 
     const server = new Stellar.Server(process.env.RPC_STELLAR);
@@ -252,6 +289,22 @@ export class UserService {
         return { success: false, message: "Error funding account", status_code: HttpStatus.EXPECTATION_FAILED };
       });
     return res;
+  }
+
+  async UpdatePublicKey(id: string, newPublicKey,newWalletPublicKey) {
+    const user = await this.userModel.findById(id);
+
+    if (!user) {
+      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+    }
+    const res=await this.userModel.findByIdAndUpdate(user._id, {
+      public_key: newPublicKey,
+      walletAddress:newWalletPublicKey
+    })
+    if(!res){
+      return { success: false, message: "keys updates faild", status_code: HttpStatus.BAD_REQUEST };
+    }
+    return { success: true, message: "keys updates successfully", status_code: HttpStatus.ACCEPTED };
   }
 
   async findByEmailAndupdataPasscode(userId: ObjectId, passcode: string) {

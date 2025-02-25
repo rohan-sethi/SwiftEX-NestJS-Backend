@@ -28,6 +28,28 @@ export class CreateUserDto {
   @IsString()
   walletAddress: string;
 }
+export class CreateGuestUserDto {
+  @IsNotEmpty()
+  @IsString()
+  deviceBrand?: string;
+  @IsNotEmpty()
+  @IsString()
+  deviceModel?: string;
+  @IsNotEmpty()
+  @IsString()
+  systemVersion?: string;
+  @IsNotEmpty()
+  @IsString()
+  deviceIP?: string;
+  @IsNotEmpty()
+  @IsString()
+  deviceType?: string;
+  @IsString()
+  deviceMacAddress?: string;
+  @IsNotEmpty()
+  @IsString()
+  deviceUniqueID?: string;
+}
 
 export class UpdatePublicKey {
 @IsNotEmpty()
@@ -35,7 +57,10 @@ export class UpdatePublicKey {
 @Matches(/^G[A-Z0-9]{55}$/, {
   message: 'Invalid Stellar public key format',
 })
-publicKey: string;
+  publicKey: string;
+  @IsNotEmpty()
+  @IsString()
+  wallletPublicKey: string;
 }
 
 export class VerifyEmailDto {

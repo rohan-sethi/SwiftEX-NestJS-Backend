@@ -9,7 +9,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.PasscodeDTO = exports.VerifyEmailDto = exports.UpdatePublicKey = exports.CreateUserDto = void 0;
+exports.PasscodeDTO = exports.VerifyEmailDto = exports.UpdatePublicKey = exports.CreateGuestUserDto = exports.CreateUserDto = void 0;
 const class_validator_1 = require("class-validator");
 class CreateUserDto {
 }
@@ -38,6 +38,43 @@ __decorate([
     __metadata("design:type", String)
 ], CreateUserDto.prototype, "walletAddress", void 0);
 exports.CreateUserDto = CreateUserDto;
+class CreateGuestUserDto {
+}
+__decorate([
+    (0, class_validator_1.IsNotEmpty)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateGuestUserDto.prototype, "deviceBrand", void 0);
+__decorate([
+    (0, class_validator_1.IsNotEmpty)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateGuestUserDto.prototype, "deviceModel", void 0);
+__decorate([
+    (0, class_validator_1.IsNotEmpty)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateGuestUserDto.prototype, "systemVersion", void 0);
+__decorate([
+    (0, class_validator_1.IsNotEmpty)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateGuestUserDto.prototype, "deviceIP", void 0);
+__decorate([
+    (0, class_validator_1.IsNotEmpty)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateGuestUserDto.prototype, "deviceType", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateGuestUserDto.prototype, "deviceMacAddress", void 0);
+__decorate([
+    (0, class_validator_1.IsNotEmpty)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateGuestUserDto.prototype, "deviceUniqueID", void 0);
+exports.CreateGuestUserDto = CreateGuestUserDto;
 class UpdatePublicKey {
 }
 __decorate([
@@ -48,6 +85,11 @@ __decorate([
     }),
     __metadata("design:type", String)
 ], UpdatePublicKey.prototype, "publicKey", void 0);
+__decorate([
+    (0, class_validator_1.IsNotEmpty)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], UpdatePublicKey.prototype, "wallletPublicKey", void 0);
 exports.UpdatePublicKey = UpdatePublicKey;
 class VerifyEmailDto {
 }

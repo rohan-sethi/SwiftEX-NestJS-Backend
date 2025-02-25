@@ -31,50 +31,48 @@ var __importStar = (this && this.__importStar) || function (mod) {
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+var ContractTransactionListener_1;
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.AuthService = void 0;
+exports.ContractTransactionListener = void 0;
 const common_1 = require("@nestjs/common");
-const jwt = __importStar(require("jsonwebtoken"));
-const user_service_1 = require("../../user/service/user.service");
-const bcrypt = __importStar(require("bcryptjs"));
-let AuthService = class AuthService {
-    constructor(userService) {
-        this.userService = userService;
-        this.jwtSecret = process.env.JWT_SECRET;
+const ethers_1 = require("ethers");
+const dotenv = __importStar(require("dotenv"));
+dotenv.config();
+let ContractTransactionListener = ContractTransactionListener_1 = class ContractTransactionListener {
+    constructor() {
+        this.logger = new common_1.Logger(ContractTransactionListener_1.name);
+        this.contractAddress = process.env.ETH_SMART_CONTRACT;
+        this.contractABI = [
+            {
+                anonymous: false,
+                inputs: [
+                    { indexed: true, internalType: 'address', name: 'sender', type: 'address' },
+                    { indexed: false, internalType: 'uint256', name: 'amount', type: 'uint256' },
+                ],
+                name: 'EthReceived',
+                type: 'event',
+            },
+        ];
+        this.provider = new ethers_1.ethers.JsonRpcProvider(process.env.ALCHEMY_PROVIDER_WEBSOCKET);
+        this.contract = new ethers_1.ethers.Contract(this.contractAddress, this.contractABI, this.provider);
     }
-    async validateUser(email, otp) {
-        const user = await this.userService.findOneByEmail(email);
-        if (!user) {
-            return null;
-        }
-        if (!user.isEmailVerified) {
-            return 'Please verify your email';
-        }
-        if (bcrypt.compareSync(otp, user.passcode)) {
-            return user;
-        }
-        return null;
+    onModuleInit() {
+        this.listenToEvents();
     }
-    async login(user) {
-        const payload = { email: user.email, sub: user._id };
-        const token = jwt.sign(payload, this.jwtSecret, { expiresIn: '30d' });
-        return {
-            token,
-        };
-    }
-    verifyToken(token) {
-        try {
-            const decoded = jwt.verify(token, this.jwtSecret);
-            return decoded;
-        }
-        catch (err) {
-            throw new Error('Invalid or expired token');
-        }
+    listenToEvents() {
+        this.logger.log('Listening for EthReceived events...');
+        this.contract.on('EthReceived', (sender, amount, event) => {
+            this.logger.log(`EthReceived Event:`);
+            this.logger.log(`Sender: ${sender}`);
+            this.logger.log(`Amount: ${ethers_1.ethers.formatUnits(amount, 'ether')} ETH`);
+            this.logger.log(`Transaction Hash: ${event.transactionHash}`);
+            this.logger.log('-----------------------------------');
+        });
     }
 };
-AuthService = __decorate([
+ContractTransactionListener = ContractTransactionListener_1 = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [user_service_1.UserService])
-], AuthService);
-exports.AuthService = AuthService;
-//# sourceMappingURL=auth.service.js.map
+    __metadata("design:paramtypes", [])
+], ContractTransactionListener);
+exports.ContractTransactionListener = ContractTransactionListener;
+//# sourceMappingURL=transaction.listener.js.map

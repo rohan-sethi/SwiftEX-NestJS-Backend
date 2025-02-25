@@ -1,6 +1,6 @@
 import { Controller, Get, Post, Body, Param, Delete, Put, HttpStatus, HttpCode, Query, UseGuards, HttpException, Req, NotFoundException } from '@nestjs/common';
 import { UserService } from '../service/user.service';
-import { CreateUserDto, PasscodeDTO, UpdatePublicKey, VerifyEmailDto } from '../dto/create-user.dto';
+import { CreateGuestUserDto, CreateUserDto, PasscodeDTO, UpdatePublicKey, VerifyEmailDto } from '../dto/create-user.dto';
 import { User } from '../schema/user.schema';
 import { FcmTokenDto, OtpDto, UpdateUserDto } from '../dto/update-user.dto';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
@@ -17,6 +17,11 @@ export class UserController {
   @HttpCode(HttpStatus.CREATED)
   async register(@Body() newUser: CreateUserDto) {
     return this.userService.register(newUser);
+  }
+  @Post('/guestRegister')
+  @HttpCode(HttpStatus.CREATED)
+  async guestRegister(@Body() newUser: CreateGuestUserDto) {
+    return this.userService.guestRegister(newUser);
   }
 
   @Post('/forgotPasscode')
@@ -48,7 +53,24 @@ export class UserController {
     @Body() publicKey: UpdatePublicKey,
   ) {
     try {
-      const result = await this.userService.findAndUpdatePublicKey(req.user.sub, publicKey.publicKey);
+      const result = await this.userService.findAndUpdatePublicKey(req.user.sub, publicKey.publicKey,publicKey.wallletPublicKey);
+      console.log(">>>>", result)
+      return result;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        return { success: false, message: 'User not found' };
+      }
+      throw error;
+    }
+  }
+
+  @Post('/updatePublicKey')
+  async updatePublicKey(
+    @Req() req: any,
+    @Body() publicKey: UpdatePublicKey,
+  ) {
+    try {
+      const result = await this.userService.UpdatePublicKey(req.user.sub, publicKey.publicKey,publicKey.wallletPublicKey);
       console.log(">>>>", result)
       return result;
     } catch (error) {

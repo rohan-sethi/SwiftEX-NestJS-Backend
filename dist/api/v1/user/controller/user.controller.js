@@ -25,6 +25,9 @@ let UserController = class UserController {
     async register(newUser) {
         return this.userService.register(newUser);
     }
+    async guestRegister(newUser) {
+        return this.userService.guestRegister(newUser);
+    }
     forgot_passcode(credintials) {
         return this.userService.forgotEmail(credintials);
     }
@@ -40,7 +43,20 @@ let UserController = class UserController {
     }
     async updatePublicKeyByEmail(req, publicKey) {
         try {
-            const result = await this.userService.findAndUpdatePublicKey(req.user.sub, publicKey.publicKey);
+            const result = await this.userService.findAndUpdatePublicKey(req.user.sub, publicKey.publicKey, publicKey.wallletPublicKey);
+            console.log(">>>>", result);
+            return result;
+        }
+        catch (error) {
+            if (error instanceof common_1.NotFoundException) {
+                return { success: false, message: 'User not found' };
+            }
+            throw error;
+        }
+    }
+    async updatePublicKey(req, publicKey) {
+        try {
+            const result = await this.userService.UpdatePublicKey(req.user.sub, publicKey.publicKey, publicKey.wallletPublicKey);
             console.log(">>>>", result);
             return result;
         }
@@ -88,6 +104,14 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], UserController.prototype, "register", null);
 __decorate([
+    (0, common_1.Post)('/guestRegister'),
+    (0, common_1.HttpCode)(common_1.HttpStatus.CREATED),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [create_user_dto_1.CreateGuestUserDto]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "guestRegister", null);
+__decorate([
     (0, common_1.Post)('/forgotPasscode'),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
@@ -117,6 +141,14 @@ __decorate([
     __metadata("design:paramtypes", [Object, create_user_dto_1.UpdatePublicKey]),
     __metadata("design:returntype", Promise)
 ], UserController.prototype, "updatePublicKeyByEmail", null);
+__decorate([
+    (0, common_1.Post)('/updatePublicKey'),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, create_user_dto_1.UpdatePublicKey]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "updatePublicKey", null);
 __decorate([
     (0, common_1.Post)('/verifyUserEmail'),
     __param(0, (0, common_1.Req)()),

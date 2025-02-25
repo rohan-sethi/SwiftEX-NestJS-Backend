@@ -22,9 +22,10 @@
 /// <reference types="mongoose/types/validation" />
 /// <reference types="mongoose/types/virtuals" />
 /// <reference types="mongoose/types/inferschematype" />
+import { HttpStatus } from '@nestjs/common';
 import { Model, ObjectId } from 'mongoose';
 import { User } from '../schema/user.schema';
-import { CreateUserDto, VerifyEmailDto } from '../dto/create-user.dto';
+import { CreateGuestUserDto, CreateUserDto, VerifyEmailDto } from '../dto/create-user.dto';
 import { OtpDto } from '../dto/update-user.dto';
 import { EmailService } from '../../utils/email.service';
 import { UserForgetDto } from '../../auth/dto/auth-credentials.dto';
@@ -37,6 +38,19 @@ export declare class UserService {
     private readonly notificationService;
     private readonly logger;
     constructor(userModel: Model<User>, emailService: EmailService, mailerService: MailerService, notificationService: NotificationService);
+    guestRegister(CreateGuestUserDto: CreateGuestUserDto): Promise<{
+        success: boolean;
+        message: string;
+        status: number;
+        token: string;
+        error?: undefined;
+    } | {
+        success: boolean;
+        message: string;
+        status: number;
+        error: any;
+        token?: undefined;
+    }>;
     register(CreateUserDto: CreateUserDto): Promise<{
         token: string;
         message: string;
@@ -56,7 +70,12 @@ export declare class UserService {
     }>;
     findOneByEmail(email: string): Promise<User | null>;
     findOneById(id: string): Promise<User | null>;
-    findAndUpdatePublicKey(id: string, newPublicKey: any): Promise<any>;
+    findAndUpdatePublicKey(id: string, newPublicKey: any, newWalletPublicKey: any): Promise<any>;
+    UpdatePublicKey(id: string, newPublicKey: any, newWalletPublicKey: any): Promise<{
+        success: boolean;
+        message: string;
+        status_code: HttpStatus;
+    }>;
     findByEmailAndupdataPasscode(userId: ObjectId, passcode: string): Promise<{
         success: boolean;
         message: string;

@@ -1,5 +1,6 @@
+import { HttpStatus } from '@nestjs/common';
 import { UserService } from '../service/user.service';
-import { CreateUserDto, PasscodeDTO, UpdatePublicKey, VerifyEmailDto } from '../dto/create-user.dto';
+import { CreateGuestUserDto, CreateUserDto, PasscodeDTO, UpdatePublicKey, VerifyEmailDto } from '../dto/create-user.dto';
 import { User } from '../schema/user.schema';
 import { FcmTokenDto, OtpDto } from '../dto/update-user.dto';
 import mongoose from 'mongoose';
@@ -11,6 +12,19 @@ export declare class UserController {
         token: string;
         message: string;
     }>;
+    guestRegister(newUser: CreateGuestUserDto): Promise<{
+        success: boolean;
+        message: string;
+        status: number;
+        token: string;
+        error?: undefined;
+    } | {
+        success: boolean;
+        message: string;
+        status: number;
+        error: any;
+        token?: undefined;
+    }>;
     forgot_passcode(credintials: UserForgetDto): Promise<User & Required<{
         _id: mongoose.Schema.Types.ObjectId;
     }>>;
@@ -19,6 +33,14 @@ export declare class UserController {
     }>;
     getUserDetails(req: any): Promise<User>;
     updatePublicKeyByEmail(req: any, publicKey: UpdatePublicKey): Promise<any>;
+    updatePublicKey(req: any, publicKey: UpdatePublicKey): Promise<{
+        success: boolean;
+        message: string;
+        status_code: HttpStatus;
+    } | {
+        success: boolean;
+        message: string;
+    }>;
     verifyUserEmail(req: any, emailBody: VerifyEmailDto): Promise<{
         otpSent: boolean;
     }>;
