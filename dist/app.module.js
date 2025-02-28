@@ -17,7 +17,7 @@ const auth_module_1 = require("./api/v1/auth/auth.module");
 const market_data_module_1 = require("./api/v1/market-data/market-data.module");
 const jwt_auth_middleware_1 = require("./api/v1/auth/jwt-auth.middleware");
 const notification_module_1 = require("./api/v1/notification/notification.module");
-const transaction_listener_1 = require("./api/v1/transactionListener/transaction.listener");
+const transaction_module_1 = require("./api/v1/transactionListener/transaction.module");
 let AppModule = class AppModule {
     configure(consumer) {
         consumer
@@ -59,9 +59,9 @@ AppModule = __decorate([
             user_module_1.UserModule,
             auth_module_1.AuthModule,
             market_data_module_1.MarketDataModule,
-            notification_module_1.NotificationModule
+            notification_module_1.NotificationModule,
+            transaction_module_1.ListenerModule
         ],
-        providers: [transaction_listener_1.ContractTransactionListener],
     })
 ], AppModule);
 exports.AppModule = AppModule;

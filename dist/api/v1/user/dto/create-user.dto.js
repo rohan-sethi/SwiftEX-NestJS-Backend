@@ -9,7 +9,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.PasscodeDTO = exports.VerifyEmailDto = exports.UpdatePublicKey = exports.CreateGuestUserDto = exports.CreateUserDto = void 0;
+exports.PasscodeDTO = exports.VerifyEmailDto = exports.UpdatePublicKeyNew = exports.UpdatePublicKey = exports.CreateGuestUserDto = exports.CreateUserDto = void 0;
 const class_validator_1 = require("class-validator");
 class CreateUserDto {
 }
@@ -85,12 +85,23 @@ __decorate([
     }),
     __metadata("design:type", String)
 ], UpdatePublicKey.prototype, "publicKey", void 0);
+exports.UpdatePublicKey = UpdatePublicKey;
+class UpdatePublicKeyNew {
+}
+__decorate([
+    (0, class_validator_1.IsNotEmpty)(),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.Matches)(/^G[A-Z0-9]{55}$/, {
+        message: 'Invalid Stellar public key format',
+    }),
+    __metadata("design:type", String)
+], UpdatePublicKeyNew.prototype, "publicKey", void 0);
 __decorate([
     (0, class_validator_1.IsNotEmpty)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
-], UpdatePublicKey.prototype, "wallletPublicKey", void 0);
-exports.UpdatePublicKey = UpdatePublicKey;
+], UpdatePublicKeyNew.prototype, "wallletPublicKey", void 0);
+exports.UpdatePublicKeyNew = UpdatePublicKeyNew;
 class VerifyEmailDto {
 }
 __decorate([

@@ -1,7 +1,10 @@
-import { Injectable, OnModuleInit, Logger } from '@nestjs/common';
+import { Injectable, OnModuleInit, Logger, NotFoundException } from '@nestjs/common';
 import { ethers } from 'ethers';
 import * as dotenv from 'dotenv';
-
+import * as Stellar from 'stellar-sdk';
+import { Model } from 'mongoose';
+import { User } from '../user/schema/user.schema';
+import { InjectModel } from '@nestjs/mongoose';
 dotenv.config();
 
 @Injectable()
@@ -10,22 +13,18 @@ export class ContractTransactionListener implements OnModuleInit {
   private provider: ethers.JsonRpcProvider;
   private contract: ethers.Contract;
   private contractAddress = process.env.ETH_SMART_CONTRACT;
+  private readonly StellarRpc = process.env.RPC_STELLAR;
+  private server: Stellar.Server;
 
   private contractABI = [
-    {
-      anonymous: false,
-      inputs: [
-        { indexed: true, internalType: 'address', name: 'sender', type: 'address' },
-        { indexed: false, internalType: 'uint256', name: 'amount', type: 'uint256' },
-      ],
-      name: 'EthReceived',
-      type: 'event',
-    },
-  ];
+     "event Transfer(address indexed from, address indexed to, uint256 value)"
+  ]
 
-  constructor() {
+  constructor( @InjectModel(User.name) private userModel: Model<User>) {
     this.provider = new ethers.JsonRpcProvider(process.env.ALCHEMY_PROVIDER_WEBSOCKET);
     this.contract = new ethers.Contract(this.contractAddress, this.contractABI, this.provider);
+    this.server = new Stellar.Server(this.StellarRpc);
+    Stellar.Network.useTestNetwork();
   }
 
   onModuleInit() {
@@ -35,12 +34,57 @@ export class ContractTransactionListener implements OnModuleInit {
   private listenToEvents() {
     this.logger.log('Listening for EthReceived events...');
 
-    this.contract.on('EthReceived', (sender, amount, event) => {
+    this.contract.on('Transfer', (from, to, value, event) => {
       this.logger.log(`EthReceived Event:`);
-      this.logger.log(`Sender: ${sender}`);
-      this.logger.log(`Amount: ${ethers.formatUnits(amount, 'ether')} ETH`);
-      this.logger.log(`Transaction Hash: ${event.transactionHash}`);
+      this.logger.log(`Sender: ${from}`);
+      this.logger.log(`Amount: ${ethers.formatUnits(value, 6)} USDT} USDT`);
       this.logger.log('-----------------------------------');
+      this.findUserByWallet(from,ethers.formatUnits(value, 6));
+
     });
+  }
+
+  async findUserByWallet(sender: string,amount: string): Promise<any> {
+    const user = await this.userModel.findOne({ walletAddress: sender });
+    if (!user) {
+      this.logger.log(`User with wallet address not found`);
+    }
+    else{
+      this.sendXLM(user.public_key,amount)
+    }
+  }
+  async sendXLM(destinationPublic: string, amount: string): Promise<any> {
+      const sourceSecretKey = process.env.STELLAR_ONETAP_KEY
+      const sourceKeypair = Stellar.Keypair.fromSecret(sourceSecretKey);
+  
+  
+      const res = this.server.loadAccount(sourceKeypair.publicKey())
+        .then(account => {
+          const newAsset = new Stellar.Asset('USDC', process.env.STELLAR_ONETAP_ISSUER);
+          const transaction = new Stellar.TransactionBuilder(account, {
+            fee: Stellar.BASE_FEE,
+            networkPassphrase: Stellar.Networks.TESTNET
+          })
+            .addOperation(Stellar.Operation.payment({
+              destination: destinationPublic,
+              asset: newAsset,
+              amount: amount,
+            }))
+            .setTimeout(30)
+            .build();
+  
+          transaction.sign(sourceKeypair);
+  
+          const res = this.server.submitTransaction(transaction);
+        })
+        .then(result => {
+          this.logger.log('Success! Result:');
+          return { success: true, message: "Sended successfully"};
+        })
+        .catch(error => {
+          this.logger.log('Error in sending funds:', error);
+          return { success: false, message: "Error in sending funds" };
+        });
+   
   }
 }

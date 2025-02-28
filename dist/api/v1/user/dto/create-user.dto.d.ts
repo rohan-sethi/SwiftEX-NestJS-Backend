@@ -18,6 +18,10 @@ export declare class UpdatePublicKey {
     publicKey: string;
     wallletPublicKey: string;
 }
+export declare class UpdatePublicKeyNew {
+    publicKey: string;
+    wallletPublicKey: string;
+}
 export declare class VerifyEmailDto {
     email: string;
     otp?: string;

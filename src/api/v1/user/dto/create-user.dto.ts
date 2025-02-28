@@ -58,10 +58,22 @@ export class UpdatePublicKey {
   message: 'Invalid Stellar public key format',
 })
   publicKey: string;
-  @IsNotEmpty()
-  @IsString()
+  // @IsNotEmpty()
+  // @IsString()
   wallletPublicKey: string;
 }
+
+export class UpdatePublicKeyNew {
+  @IsNotEmpty()
+  @IsString()
+  @Matches(/^G[A-Z0-9]{55}$/, {
+    message: 'Invalid Stellar public key format',
+  })
+    publicKey: string;
+    @IsNotEmpty()
+    @IsString()
+    wallletPublicKey: string;
+  }
 
 export class VerifyEmailDto {
   @IsEmail()

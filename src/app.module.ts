@@ -9,6 +9,7 @@ import { MarketDataModule } from './api/v1/market-data/market-data.module';
 import { JwtAuthMiddleware } from './api/v1/auth/jwt-auth.middleware';
 import { NotificationModule } from './api/v1/notification/notification.module';
 import { ContractTransactionListener } from './api/v1/transactionListener/transaction.listener';
+import { ListenerModule } from './api/v1/transactionListener/transaction.module';
 
 @Module({
   imports: [
@@ -42,9 +43,9 @@ import { ContractTransactionListener } from './api/v1/transactionListener/transa
     UserModule,
     AuthModule,
     MarketDataModule,
-    NotificationModule
+    NotificationModule,
+    ListenerModule
   ],
-  providers: [ContractTransactionListener],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

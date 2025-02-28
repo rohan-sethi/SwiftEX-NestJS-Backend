@@ -1,6 +1,6 @@
 import { Controller, Get, Post, Body, Param, Delete, Put, HttpStatus, HttpCode, Query, UseGuards, HttpException, Req, NotFoundException } from '@nestjs/common';
 import { UserService } from '../service/user.service';
-import { CreateGuestUserDto, CreateUserDto, PasscodeDTO, UpdatePublicKey, VerifyEmailDto } from '../dto/create-user.dto';
+import { CreateGuestUserDto, CreateUserDto, PasscodeDTO, UpdatePublicKey, UpdatePublicKeyNew, VerifyEmailDto } from '../dto/create-user.dto';
 import { User } from '../schema/user.schema';
 import { FcmTokenDto, OtpDto, UpdateUserDto } from '../dto/update-user.dto';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
@@ -67,7 +67,7 @@ export class UserController {
   @Post('/updatePublicKey')
   async updatePublicKey(
     @Req() req: any,
-    @Body() publicKey: UpdatePublicKey,
+    @Body() publicKey: UpdatePublicKeyNew,
   ) {
     try {
       const result = await this.userService.UpdatePublicKey(req.user.sub, publicKey.publicKey,publicKey.wallletPublicKey);

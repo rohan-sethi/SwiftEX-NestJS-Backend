@@ -1,6 +1,6 @@
 import { HttpStatus } from '@nestjs/common';
 import { UserService } from '../service/user.service';
-import { CreateGuestUserDto, CreateUserDto, PasscodeDTO, UpdatePublicKey, VerifyEmailDto } from '../dto/create-user.dto';
+import { CreateGuestUserDto, CreateUserDto, PasscodeDTO, UpdatePublicKey, UpdatePublicKeyNew, VerifyEmailDto } from '../dto/create-user.dto';
 import { User } from '../schema/user.schema';
 import { FcmTokenDto, OtpDto } from '../dto/update-user.dto';
 import mongoose from 'mongoose';
@@ -33,7 +33,7 @@ export declare class UserController {
     }>;
     getUserDetails(req: any): Promise<User>;
     updatePublicKeyByEmail(req: any, publicKey: UpdatePublicKey): Promise<any>;
-    updatePublicKey(req: any, publicKey: UpdatePublicKey): Promise<{
+    updatePublicKey(req: any, publicKey: UpdatePublicKeyNew): Promise<{
         success: boolean;
         message: string;
         status_code: HttpStatus;
