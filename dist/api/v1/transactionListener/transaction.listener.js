@@ -44,17 +44,19 @@ const Stellar = __importStar(require("stellar-sdk"));
 const mongoose_1 = require("mongoose");
 const user_schema_1 = require("../user/schema/user.schema");
 const mongoose_2 = require("@nestjs/mongoose");
+const notification_service_1 = require("../notification/service/notification.service");
 dotenv.config();
 let ContractTransactionListener = ContractTransactionListener_1 = class ContractTransactionListener {
-    constructor(userModel) {
+    constructor(userModel, notificationService) {
         this.userModel = userModel;
+        this.notificationService = notificationService;
         this.logger = new common_1.Logger(ContractTransactionListener_1.name);
         this.contractAddress = process.env.ETH_SMART_CONTRACT;
         this.StellarRpc = process.env.RPC_STELLAR;
         this.contractABI = [
             "event Transfer(address indexed from, address indexed to, uint256 value)"
         ];
-        this.provider = new ethers_1.ethers.JsonRpcProvider(process.env.ALCHEMY_PROVIDER_WEBSOCKET);
+        this.provider = new ethers_1.ethers.WebSocketProvider(process.env.ALCHEMY_PROVIDER_WEBSOCKET);
         this.contract = new ethers_1.ethers.Contract(this.contractAddress, this.contractABI, this.provider);
         this.server = new Stellar.Server(this.StellarRpc);
         Stellar.Network.useTestNetwork();
@@ -78,7 +80,13 @@ let ContractTransactionListener = ContractTransactionListener_1 = class Contract
             this.logger.log(`User with wallet address not found`);
         }
         else {
-            this.sendXLM(user.public_key, amount);
+            this.sendXLM(user.public_key, amount)
+                .then(async () => {
+                await this.notificationService.sendNotification(user.fcmRegTokens[0], 'Cross Chain', `Congratulations! ${amount} USDC has been successfully added to your wallet.`);
+            })
+                .catch((error) => {
+                console.log("--->", error);
+            });
         }
     }
     async sendXLM(destinationPublic, amount) {
@@ -114,7 +122,8 @@ let ContractTransactionListener = ContractTransactionListener_1 = class Contract
 ContractTransactionListener = ContractTransactionListener_1 = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, mongoose_2.InjectModel)(user_schema_1.User.name)),
-    __metadata("design:paramtypes", [mongoose_1.Model])
+    __metadata("design:paramtypes", [mongoose_1.Model,
+        notification_service_1.NotificationService])
 ], ContractTransactionListener);
 exports.ContractTransactionListener = ContractTransactionListener;
 //# sourceMappingURL=transaction.listener.js.map

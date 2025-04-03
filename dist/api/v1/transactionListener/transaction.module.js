@@ -11,12 +11,13 @@ const common_1 = require("@nestjs/common");
 const mongoose_1 = require("@nestjs/mongoose");
 const user_schema_1 = require("../user/schema/user.schema");
 const transaction_listener_1 = require("./transaction.listener");
+const notification_service_1 = require("../notification/service/notification.service");
 let ListenerModule = class ListenerModule {
 };
 ListenerModule = __decorate([
     (0, common_1.Module)({
         imports: [mongoose_1.MongooseModule.forFeature([{ name: user_schema_1.User.name, schema: user_schema_1.UserSchema }])],
-        providers: [transaction_listener_1.ContractTransactionListener],
+        providers: [transaction_listener_1.ContractTransactionListener, notification_service_1.NotificationService],
     })
 ], ListenerModule);
 exports.ListenerModule = ListenerModule;

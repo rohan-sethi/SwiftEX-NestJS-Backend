@@ -5,23 +5,28 @@ import * as Stellar from 'stellar-sdk';
 import { Model } from 'mongoose';
 import { User } from '../user/schema/user.schema';
 import { InjectModel } from '@nestjs/mongoose';
+import { NotificationService } from '../notification/service/notification.service';
+
 dotenv.config();
 
 @Injectable()
 export class ContractTransactionListener implements OnModuleInit {
   private readonly logger = new Logger(ContractTransactionListener.name);
-  private provider: ethers.JsonRpcProvider;
+  private provider: ethers.WebSocketProvider;
   private contract: ethers.Contract;
   private contractAddress = process.env.ETH_SMART_CONTRACT;
   private readonly StellarRpc = process.env.RPC_STELLAR;
   private server: Stellar.Server;
+  
 
   private contractABI = [
      "event Transfer(address indexed from, address indexed to, uint256 value)"
   ]
 
-  constructor( @InjectModel(User.name) private userModel: Model<User>) {
-    this.provider = new ethers.JsonRpcProvider(process.env.ALCHEMY_PROVIDER_WEBSOCKET);
+  constructor( @InjectModel(User.name) private userModel: Model<User>,
+  private readonly notificationService: NotificationService,
+) {
+    this.provider = new ethers.WebSocketProvider(process.env.ALCHEMY_PROVIDER_WEBSOCKET);
     this.contract = new ethers.Contract(this.contractAddress, this.contractABI, this.provider);
     this.server = new Stellar.Server(this.StellarRpc);
     Stellar.Network.useTestNetwork();
@@ -51,6 +56,16 @@ export class ContractTransactionListener implements OnModuleInit {
     }
     else{
       this.sendXLM(user.public_key,amount)
+      .then(async()=>{
+        await this.notificationService.sendNotification(
+          user.fcmRegTokens[0],
+          'Cross Chain',
+          `Congratulations! ${amount} USDC has been successfully added to your wallet.`
+        );
+      })
+      .catch((error)=>{
+        console.log("--->",error)
+      })
     }
   }
   async sendXLM(destinationPublic: string, amount: string): Promise<any> {

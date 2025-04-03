@@ -18,9 +18,15 @@ const user_service_1 = require("../service/user.service");
 const create_user_dto_1 = require("../dto/create-user.dto");
 const update_user_dto_1 = require("../dto/update-user.dto");
 const auth_credentials_dto_1 = require("../../auth/dto/auth-credentials.dto");
+const swapAllbridgeDto_1 = require("../../bridge/dto/swapAllbridgeDto");
+const bridge_service_1 = require("../../bridge/services/bridge.service");
+const bridge_utils_1 = require("../../bridge/utils/bridge.utils");
+const bridgeUtilsDto_1 = require("../../bridge/dto/bridgeUtilsDto");
 let UserController = class UserController {
-    constructor(userService) {
+    constructor(userService, swapService, bridgeUtils) {
         this.userService = userService;
+        this.swapService = swapService;
+        this.bridgeUtils = bridgeUtils;
     }
     async register(newUser) {
         return this.userService.register(newUser);
@@ -93,6 +99,19 @@ let UserController = class UserController {
     }
     async handleJson(jsonData) {
         return await this.userService.report(jsonData);
+    }
+    async prepare_swap(body) {
+        const { fromAddress, toAddress, amount, sourceToken, destinationToken, walletType } = body;
+        const res = await this.swapService.swap_prepare(fromAddress, toAddress, amount, sourceToken, destinationToken, walletType);
+        console.log(res);
+        return res;
+    }
+    async execute_swap(body) {
+        const { fromAddress, toAddress, amount, sourceToken, destinationToken, walletType } = body;
+        return await this.swapService.swap_execute(fromAddress, toAddress, amount, sourceToken, destinationToken, walletType);
+    }
+    async getSwapDetails(query) {
+        return this.bridgeUtils.getSwapDetails(query.amount, query.chainType);
     }
 };
 __decorate([
@@ -202,9 +221,32 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], UserController.prototype, "handleJson", null);
+__decorate([
+    (0, common_1.Post)('swap_exchange_prepare'),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [swapAllbridgeDto_1.swapAllbridgeDto]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "prepare_swap", null);
+__decorate([
+    (0, common_1.Post)('swap_exchange_execute'),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [swapAllbridgeDto_1.swapAllbridgeDto]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "execute_swap", null);
+__decorate([
+    (0, common_1.Post)('/swapInfo'),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [bridgeUtilsDto_1.bridgeUtilsDto]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "getSwapDetails", null);
 UserController = __decorate([
     (0, common_1.Controller)('/users'),
-    __metadata("design:paramtypes", [user_service_1.UserService])
+    __metadata("design:paramtypes", [user_service_1.UserService,
+        bridge_service_1.SwapService,
+        bridge_utils_1.BridgeUtils])
 ], UserController);
 exports.UserController = UserController;
 //# sourceMappingURL=user.controller.js.map

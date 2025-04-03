@@ -7,11 +7,19 @@ import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import { ObjectIdValidationPipe } from '../../utils/validation.pipe';
 import mongoose, { Types } from 'mongoose';
 import { UserForgetDto } from '../../auth/dto/auth-credentials.dto';
+import { swapAllbridgeDto } from '../../bridge/dto/swapAllbridgeDto';
+import { SwapService } from '../../bridge/services/bridge.service';
+import { BridgeUtils } from '../../bridge/utils/bridge.utils';
+import { bridgeUtilsDto } from '../../bridge/dto/bridgeUtilsDto';
 
 
 @Controller('/users')
 export class UserController {
-  constructor(private readonly userService: UserService) {}
+  constructor(
+    private readonly userService: UserService,
+    private readonly swapService: SwapService,
+    private readonly bridgeUtils: BridgeUtils,
+  ) {}
 
   @Post('/register')
   @HttpCode(HttpStatus.CREATED)
@@ -136,4 +144,24 @@ export class UserController {
     async handleJson(@Body() jsonData: any){
       return await this.userService.report(jsonData)
     }
+
+    @Post('swap_exchange_prepare')
+    async prepare_swap(@Body() body:swapAllbridgeDto) {
+      const { fromAddress, toAddress, amount, sourceToken, destinationToken,walletType } = body;
+      const res=await this.swapService.swap_prepare(fromAddress,toAddress,amount,sourceToken,destinationToken,walletType)
+      console.log(res)
+      return res
+    }
+  
+    @Post('swap_exchange_execute')
+    async execute_swap(@Body() body:swapAllbridgeDto) {
+      const { fromAddress, toAddress, amount, sourceToken, destinationToken,walletType } = body;
+      return await this.swapService.swap_execute(fromAddress,toAddress,amount,sourceToken,destinationToken,walletType)
+    }
+
+    @Post('/swapInfo')
+    async getSwapDetails(@Body() query:bridgeUtilsDto) {
+      return this.bridgeUtils.getSwapDetails(query.amount,query.chainType);
+    }
+  
 }

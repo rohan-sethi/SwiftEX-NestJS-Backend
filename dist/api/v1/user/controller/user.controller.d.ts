@@ -1,13 +1,19 @@
-import { HttpStatus } from '@nestjs/common';
+import { HttpStatus, HttpException } from '@nestjs/common';
 import { UserService } from '../service/user.service';
 import { CreateGuestUserDto, CreateUserDto, PasscodeDTO, UpdatePublicKey, UpdatePublicKeyNew, VerifyEmailDto } from '../dto/create-user.dto';
 import { User } from '../schema/user.schema';
 import { FcmTokenDto, OtpDto } from '../dto/update-user.dto';
 import mongoose from 'mongoose';
 import { UserForgetDto } from '../../auth/dto/auth-credentials.dto';
+import { swapAllbridgeDto } from '../../bridge/dto/swapAllbridgeDto';
+import { SwapService } from '../../bridge/services/bridge.service';
+import { BridgeUtils } from '../../bridge/utils/bridge.utils';
+import { bridgeUtilsDto } from '../../bridge/dto/bridgeUtilsDto';
 export declare class UserController {
     private readonly userService;
-    constructor(userService: UserService);
+    private readonly swapService;
+    private readonly bridgeUtils;
+    constructor(userService: UserService, swapService: SwapService, bridgeUtils: BridgeUtils);
     register(newUser: CreateUserDto): Promise<{
         token: string;
         message: string;
@@ -77,4 +83,7 @@ export declare class UserController {
     userKycApply(req: any): Promise<string>;
     handleStripeAccount(req: any): Promise<any>;
     handleJson(jsonData: any): Promise<any>;
+    prepare_swap(body: swapAllbridgeDto): Promise<HttpException>;
+    execute_swap(body: swapAllbridgeDto): Promise<HttpException>;
+    getSwapDetails(query: bridgeUtilsDto): Promise<HttpException>;
 }

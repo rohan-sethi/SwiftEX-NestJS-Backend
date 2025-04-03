@@ -14,12 +14,14 @@ const user_service_1 = require("./service/user.service");
 const user_controller_1 = require("./controller/user.controller");
 const email_service_1 = require("../utils/email.service");
 const notification_service_1 = require("../notification/service/notification.service");
+const bridge_service_1 = require("../bridge/services/bridge.service");
+const bridge_utils_1 = require("../bridge/utils/bridge.utils");
 let UserModule = class UserModule {
 };
 UserModule = __decorate([
     (0, common_1.Module)({
         imports: [mongoose_1.MongooseModule.forFeature([{ name: user_schema_1.User.name, schema: user_schema_1.UserSchema }])],
-        providers: [user_service_1.UserService, email_service_1.EmailService, notification_service_1.NotificationService],
+        providers: [user_service_1.UserService, email_service_1.EmailService, notification_service_1.NotificationService, bridge_service_1.SwapService, bridge_utils_1.BridgeUtils],
         controllers: [user_controller_1.UserController],
         exports: [user_service_1.UserService],
     })
