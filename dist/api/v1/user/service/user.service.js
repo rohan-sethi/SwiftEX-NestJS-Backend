@@ -200,20 +200,21 @@ let UserService = UserService_1 = class UserService {
         return await this.userModel.findById(id).select('-passcode');
     }
     async findAndUpdatePublicKey(id, newPublicKey, newWalletPublicKey) {
-        const user = await this.userModel.findById(id);
-        if (!user) {
-            throw new common_1.HttpException('User not found', common_1.HttpStatus.NOT_FOUND);
-        }
-        await this.userModel.findByIdAndUpdate(user._id, {
-            public_key: newPublicKey,
-            walletAddress: newWalletPublicKey
-        });
-        const server = new Stellar.Server(process.env.RPC_STELLAR);
-        const sourceSecretKey = process.env.ACTIVATE_STELLAR_ADDRESS;
-        const sourceKeypair = Stellar.Keypair.fromSecret(sourceSecretKey);
-        const destinationPublicKey = newPublicKey;
-        const res = server.loadAccount(sourceKeypair.publicKey())
-            .then(account => {
+        try {
+            const user = await this.userModel.findById(id);
+            if (!user) {
+                throw new common_1.HttpException('User not found', common_1.HttpStatus.NOT_FOUND);
+            }
+            await this.userModel.findByIdAndUpdate(user._id, {
+                public_key: newPublicKey,
+                walletAddress: newWalletPublicKey
+            });
+            const server = new Stellar.Server(process.env.RPC_STELLAR);
+            const sourceSecretKey = process.env.ACTIVATE_STELLAR_ADDRESS;
+            const sourceKeypair = Stellar.Keypair.fromSecret(sourceSecretKey);
+            const destinationPublicKey = newPublicKey;
+            const asset = new Stellar.Asset("USDC", process.env.STELLAR_ONETAP_ISSUER);
+            const account = await server.loadAccount(sourceKeypair.publicKey());
             const transaction = new Stellar.TransactionBuilder(account, {
                 fee: Stellar.BASE_FEE,
                 networkPassphrase: Stellar.Networks.TESTNET
@@ -222,21 +223,23 @@ let UserService = UserService_1 = class UserService {
                 destination: destinationPublicKey,
                 startingBalance: '5'
             }))
-                .setTimeout(30)
+                .addOperation(Stellar.Operation.changeTrust({
+                asset: asset,
+                limit: "1000",
+                source: destinationPublicKey,
+            }))
+                .setTimeout(180)
                 .build();
             transaction.sign(sourceKeypair);
-            const res = server.submitTransaction(transaction);
-        })
-            .then(async (result) => {
+            const xdr = transaction.toEnvelope().toXDR("base64");
             await this.notificationService.sendNotification(user.fcmRegTokens[0], 'Activate', 'Congratulations! 5 XLM has been successfully added to your wallet.');
             this.logger.log('Success! Result:');
-            return { success: true, message: "Funded successfully", status_code: common_1.HttpStatus.ACCEPTED };
-        })
-            .catch(error => {
+            return { success: true, message: "Funded successfully", resXdr: xdr, status_code: common_1.HttpStatus.ACCEPTED };
+        }
+        catch (error) {
             this.logger.log('Error funding account:', error);
             return { success: false, message: "Error funding account", status_code: common_1.HttpStatus.EXPECTATION_FAILED };
-        });
-        return res;
+        }
     }
     async UpdatePublicKey(id, newPublicKey, newWalletPublicKey) {
         const user = await this.userModel.findById(id);

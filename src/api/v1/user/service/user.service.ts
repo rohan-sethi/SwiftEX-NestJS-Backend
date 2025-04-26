@@ -239,14 +239,15 @@ export class UserService {
   }
 
   async findAndUpdatePublicKey(id: string, newPublicKey,newWalletPublicKey) {
+  try {
     const user = await this.userModel.findById(id);
 
     if (!user) {
-      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
-    }
-    // if (user.public_key) {
-    //   throw new HttpException({ success: false, message: "Error funding account", status_code: HttpStatus.CONFLICT, funded_key: user.public_key }, HttpStatus.CONFLICT);
-    // }
+          throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+        }
+        // if (user.public_key) {
+        //   throw new HttpException({ success: false, message: "Error funding account", status_code: HttpStatus.CONFLICT, funded_key: user.public_key }, HttpStatus.CONFLICT);
+        // }
     await this.userModel.findByIdAndUpdate(user._id, {
       public_key: newPublicKey,
       walletAddress:newWalletPublicKey
@@ -258,8 +259,8 @@ export class UserService {
 
     const destinationPublicKey = newPublicKey;
 
-    const res = server.loadAccount(sourceKeypair.publicKey())
-      .then(account => {
+    const asset = new Stellar.Asset("USDC", process.env.STELLAR_ONETAP_ISSUER);
+    const account = await server.loadAccount(sourceKeypair.publicKey())
         const transaction = new Stellar.TransactionBuilder(account, {
           fee: Stellar.BASE_FEE,
           networkPassphrase: Stellar.Networks.TESTNET
@@ -268,28 +269,32 @@ export class UserService {
             destination: destinationPublicKey,
             startingBalance: '5'
           }))
-          .setTimeout(30)
+          .addOperation(
+            Stellar.Operation.changeTrust({
+              asset: asset,
+              limit: "1000",
+              source: destinationPublicKey,
+            })
+          )
+          .setTimeout(180)
           .build();
 
         transaction.sign(sourceKeypair);
-
-        const res = server.submitTransaction(transaction);
-      })
-      .then(async(result) => {
+        const xdr = transaction.toEnvelope().toXDR("base64");
+        // const res = server.submitTransaction(transaction);
         await this.notificationService.sendNotification(
           user.fcmRegTokens[0],
           'Activate',
           'Congratulations! 5 XLM has been successfully added to your wallet.'
         );
         this.logger.log('Success! Result:');
-        return { success: true, message: "Funded successfully", status_code: HttpStatus.ACCEPTED };
-      })
-      .catch(error => {
+        return { success: true, message: "Funded successfully",resXdr:xdr, status_code: HttpStatus.ACCEPTED };
+      }catch(error) {
         this.logger.log('Error funding account:', error);
         return { success: false, message: "Error funding account", status_code: HttpStatus.EXPECTATION_FAILED };
-      });
-    return res;
-  }
+      }
+    }
+    
 
   async UpdatePublicKey(id: string, newPublicKey,newWalletPublicKey) {
     const user = await this.userModel.findById(id);

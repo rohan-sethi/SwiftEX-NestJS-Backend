@@ -38,7 +38,20 @@ export declare class UserController {
         token: string;
     }>;
     getUserDetails(req: any): Promise<User>;
-    updatePublicKeyByEmail(req: any, publicKey: UpdatePublicKey): Promise<any>;
+    updatePublicKeyByEmail(req: any, publicKey: UpdatePublicKey): Promise<{
+        success: boolean;
+        message: string;
+        resXdr: any;
+        status_code: HttpStatus;
+    } | {
+        success: boolean;
+        message: string;
+        status_code: HttpStatus;
+        resXdr?: undefined;
+    } | {
+        success: boolean;
+        message: string;
+    }>;
     updatePublicKey(req: any, publicKey: UpdatePublicKeyNew): Promise<{
         success: boolean;
         message: string;
