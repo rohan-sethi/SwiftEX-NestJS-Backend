@@ -11,6 +11,9 @@ import * as Stellar from 'stellar-sdk';
 import { UserForgetDto } from '../../auth/dto/auth-credentials.dto';
 import { MailerService } from '@nestjs-modules/mailer';
 import { NotificationService } from '../../notification/service/notification.service';
+import { AlchemyService } from '../../alchemyPay/service/alchemy.service';
+import { SorobanHooksService } from '../../notification/service/sorobanHooks.service';
+import { ADDWALLETWATCH } from '../../notification/utils/sorobanHooksURL';
 
 
 @Injectable()
@@ -20,6 +23,8 @@ export class UserService {
     private readonly emailService: EmailService,
     private readonly mailerService: MailerService,
     private readonly notificationService: NotificationService,
+    private readonly alchemyService: AlchemyService,
+    private readonly sorobanHooksService: SorobanHooksService,
   ) {
     Stellar.Network.useTestNetwork();
   }
@@ -309,6 +314,8 @@ export class UserService {
     if(!res){
       return { success: false, message: "keys updates faild", status_code: HttpStatus.BAD_REQUEST };
     }
+    const response=await this.sorobanHooksService.addWalletWatcher(ADDWALLETWATCH,newPublicKey);
+    this.logger.log(response)
     return { success: true, message: "keys updates successfully", status_code: HttpStatus.ACCEPTED };
   }
 
@@ -409,5 +416,83 @@ async syncDevice(userId: ObjectId, fcmRegToken: string, deviceInfo:object) {
     }
     await this.userModel.updateOne({ _id: userId }, { isVerified: true });
     return 'success';
+  }
+
+  async fetchAlchemyQuotes(userId: ObjectId, payload): Promise<any> {
+    const user = await this.userModel.findOne({ _id: userId });
+    if (!user) {
+      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+    }
+    const resPayloadGen=await this.alchemyService.fetchQuotes(payload);
+    throw new HttpException(resPayloadGen, HttpStatus.OK);
+  }
+
+  async userRegisterForAlchemy(userId: ObjectId, businessSubType:string): Promise<any> {
+    const user = await this.userModel.findOne({ _id: userId });
+    if (!user||!user.isEmailVerified) {
+      throw new HttpException(!user?'user not found':"user need login or create account", !user?HttpStatus.NOT_FOUND:HttpStatus.NOT_ACCEPTABLE);
+    }
+    const payload={
+      "merchantNo": "00001",
+      "subMerchantNo": "00001",
+      "businessSubcategories": businessSubType,
+      "email": user.email,
+      "kycType": "1",
+      "kycPlatform": "sumsub",
+      "redirectUrl": "",
+      "callbackUrl": "",
+      "remark": "9999"
+    }
+    const resPayloadGen=await this.alchemyService.userRegister(payload);
+    throw new HttpException(resPayloadGen, HttpStatus.OK);
+  }
+
+  async userKycStatus(userId: ObjectId): Promise<any> {
+    const user = await this.userModel.findOne({ _id: userId });
+    if (!user||!user.isEmailVerified) {
+      throw new HttpException(!user?'user not found':"user need login or create account", !user?HttpStatus.NOT_FOUND:HttpStatus.NOT_ACCEPTABLE);
+    }
+    const payload={
+      "email": user.email,
+      "kycPlatform": "sumsub",
+      "kycType": "1"
+  }
+    const resPayloadGen=await this.alchemyService.userStatus(payload);
+    throw new HttpException(resPayloadGen, HttpStatus.OK);
+  }
+
+  async alchemyOrder(userId: ObjectId, requestPayload:any): Promise<any> {
+    const user = await this.userModel.findOne({ _id: userId });
+    if (!user||!user.isEmailVerified) {
+      throw new HttpException(!user?'user not found':"user need login or create account", !user?HttpStatus.NOT_FOUND:HttpStatus.NOT_ACCEPTABLE);
+    }
+    const payload={
+      "side": requestPayload.side,
+      "merchantOrderNo":Math.floor(1000000000 + Math.random() * 9000000000),
+      "amount": requestPayload.amount,
+      "fiatCurrency": requestPayload.fiat,
+      "cryptoCurrency": requestPayload.crypto,
+      "depositType": 2,
+      "address": requestPayload.address,
+      "network": requestPayload.network,
+      "alpha2": "US",
+      "orderType": requestPayload.orderType,
+      "payWayCode": requestPayload.payWayCode,
+      "userAccountId": "111110",
+      "redirectUrl": process.env.ALCHEMY_PAY_REDIRECT_URL,
+      "callbackUrl": process.env.ALCHEMY_PAY_WEBHOOK_URL,
+      "memo":requestPayload.memo
+    }
+    const resPayloadGen=await this.alchemyService.orderCreate(payload,user.email);
+    throw new HttpException(resPayloadGen, HttpStatus.OK);
+  }
+
+  async alchemySellOrderCreate(userId: ObjectId, requestPayload:any): Promise<any> {
+    const user = await this.userModel.findOne({ _id: userId });
+    if (!user||!user.isEmailVerified) {
+      throw new HttpException(!user?'user not found':"user need login or create account", !user?HttpStatus.NOT_FOUND:HttpStatus.NOT_ACCEPTABLE);
+    }
+    const resPayloadGen=await this.alchemyService.sellOrderCreate(requestPayload,user.email);
+    throw new HttpException(resPayloadGen, HttpStatus.OK);
   }
 }

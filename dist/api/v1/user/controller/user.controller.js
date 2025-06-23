@@ -22,6 +22,7 @@ const swapAllbridgeDto_1 = require("../../bridge/dto/swapAllbridgeDto");
 const bridge_service_1 = require("../../bridge/services/bridge.service");
 const bridge_utils_1 = require("../../bridge/utils/bridge.utils");
 const bridgeUtilsDto_1 = require("../../bridge/dto/bridgeUtilsDto");
+const alchemy_dto_1 = require("../../alchemyPay/dto/alchemy.dto");
 let UserController = class UserController {
     constructor(userService, swapService, bridgeUtils) {
         this.userService = userService;
@@ -112,6 +113,21 @@ let UserController = class UserController {
     }
     async getSwapDetails(query) {
         return this.bridgeUtils.getSwapDetails(query.amount, query.chainType);
+    }
+    async getAlchemyQuotes(query, req) {
+        return this.userService.fetchAlchemyQuotes(req.user.sub, query);
+    }
+    async alchemyUserRegister(query, req) {
+        return this.userService.userRegisterForAlchemy(req.user.sub, query.businessSubType);
+    }
+    async alchemyKycStatus(req) {
+        return this.userService.userKycStatus(req.user.sub);
+    }
+    async orderCreate(query, req) {
+        return this.userService.alchemyOrder(req.user.sub, query);
+    }
+    async sellOrder(query, req) {
+        return this.userService.alchemySellOrderCreate(req.user.sub, query);
     }
 };
 __decorate([
@@ -242,6 +258,45 @@ __decorate([
     __metadata("design:paramtypes", [bridgeUtilsDto_1.bridgeUtilsDto]),
     __metadata("design:returntype", Promise)
 ], UserController.prototype, "getSwapDetails", null);
+__decorate([
+    (0, common_1.Post)('/alchemyQuotes'),
+    __param(0, (0, common_1.Body)()),
+    __param(1, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [alchemy_dto_1.conversionQuote, Object]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "getAlchemyQuotes", null);
+__decorate([
+    (0, common_1.Post)('/alchemyUserRegister'),
+    __param(0, (0, common_1.Body)()),
+    __param(1, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [alchemy_dto_1.alchemyUserKyc, Object]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "alchemyUserRegister", null);
+__decorate([
+    (0, common_1.Post)('/alchemyKycStatus'),
+    __param(0, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "alchemyKycStatus", null);
+__decorate([
+    (0, common_1.Post)('/alchemyCreateOrder'),
+    __param(0, (0, common_1.Body)()),
+    __param(1, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [alchemy_dto_1.alchemyCreateOrder, Object]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "orderCreate", null);
+__decorate([
+    (0, common_1.Post)('/alchemySellOrderCreate'),
+    __param(0, (0, common_1.Body)()),
+    __param(1, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [alchemy_dto_1.alchemySellOrderDto, Object]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "sellOrder", null);
 UserController = __decorate([
     (0, common_1.Controller)('/users'),
     __metadata("design:paramtypes", [user_service_1.UserService,

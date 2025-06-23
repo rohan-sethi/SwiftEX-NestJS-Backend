@@ -9,6 +9,7 @@ import { swapAllbridgeDto } from '../../bridge/dto/swapAllbridgeDto';
 import { SwapService } from '../../bridge/services/bridge.service';
 import { BridgeUtils } from '../../bridge/utils/bridge.utils';
 import { bridgeUtilsDto } from '../../bridge/dto/bridgeUtilsDto';
+import { alchemyCreateOrder, alchemySellOrderDto, alchemyUserKyc, conversionQuote } from '../../alchemyPay/dto/alchemy.dto';
 export declare class UserController {
     private readonly userService;
     private readonly swapService;
@@ -99,4 +100,9 @@ export declare class UserController {
     prepare_swap(body: swapAllbridgeDto): Promise<HttpException>;
     execute_swap(body: swapAllbridgeDto): Promise<HttpException>;
     getSwapDetails(query: bridgeUtilsDto): Promise<HttpException>;
+    getAlchemyQuotes(query: conversionQuote, req: any): Promise<any>;
+    alchemyUserRegister(query: alchemyUserKyc, req: any): Promise<any>;
+    alchemyKycStatus(req: any): Promise<any>;
+    orderCreate(query: alchemyCreateOrder, req: any): Promise<any>;
+    sellOrder(query: alchemySellOrderDto, req: any): Promise<any>;
 }

@@ -11,6 +11,7 @@ import { swapAllbridgeDto } from '../../bridge/dto/swapAllbridgeDto';
 import { SwapService } from '../../bridge/services/bridge.service';
 import { BridgeUtils } from '../../bridge/utils/bridge.utils';
 import { bridgeUtilsDto } from '../../bridge/dto/bridgeUtilsDto';
+import { alchemyCreateOrder, alchemySellOrderDto, alchemyUserKyc, conversionQuote } from '../../alchemyPay/dto/alchemy.dto';
 
 
 @Controller('/users')
@@ -162,6 +163,31 @@ export class UserController {
     @Post('/swapInfo')
     async getSwapDetails(@Body() query:bridgeUtilsDto) {
       return this.bridgeUtils.getSwapDetails(query.amount,query.chainType);
+    }
+
+    @Post('/alchemyQuotes')
+    async getAlchemyQuotes(@Body() query:conversionQuote,@Req() req: any,) {
+      return this.userService.fetchAlchemyQuotes(req.user.sub,query);
+    }
+
+    @Post('/alchemyUserRegister')
+    async alchemyUserRegister(@Body() query:alchemyUserKyc,@Req() req: any,) {
+      return this.userService.userRegisterForAlchemy(req.user.sub,query.businessSubType);
+    }
+
+    @Post('/alchemyKycStatus')
+    async alchemyKycStatus(@Req() req: any,) {
+      return this.userService.userKycStatus(req.user.sub);
+    }
+
+    @Post('/alchemyCreateOrder')
+    async orderCreate(@Body() query:alchemyCreateOrder,@Req() req: any,) {
+      return this.userService.alchemyOrder(req.user.sub,query);
+    }
+
+    @Post('/alchemySellOrderCreate')
+    async sellOrder(@Body() query:alchemySellOrderDto,@Req() req: any,) {
+      return this.userService.alchemySellOrderCreate(req.user.sub,query);
     }
   
 }

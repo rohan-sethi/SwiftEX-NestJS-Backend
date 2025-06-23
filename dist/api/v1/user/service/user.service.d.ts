@@ -1,27 +1,3 @@
-/// <reference types="mongoose/types/aggregate" />
-/// <reference types="mongoose/types/callback" />
-/// <reference types="mongoose/types/collection" />
-/// <reference types="mongoose/types/connection" />
-/// <reference types="mongoose/types/cursor" />
-/// <reference types="mongoose/types/document" />
-/// <reference types="mongoose/types/error" />
-/// <reference types="mongoose/types/expressions" />
-/// <reference types="mongoose/types/helpers" />
-/// <reference types="mongoose/types/middlewares" />
-/// <reference types="mongoose/types/indexes" />
-/// <reference types="mongoose/types/models" />
-/// <reference types="mongoose/types/mongooseoptions" />
-/// <reference types="mongoose/types/pipelinestage" />
-/// <reference types="mongoose/types/populate" />
-/// <reference types="mongoose/types/query" />
-/// <reference types="mongoose/types/schemaoptions" />
-/// <reference types="mongoose/types/schematypes" />
-/// <reference types="mongoose/types/session" />
-/// <reference types="mongoose/types/types" />
-/// <reference types="mongoose/types/utility" />
-/// <reference types="mongoose/types/validation" />
-/// <reference types="mongoose/types/virtuals" />
-/// <reference types="mongoose/types/inferschematype" />
 import { HttpStatus } from '@nestjs/common';
 import { Model, ObjectId } from 'mongoose';
 import { User } from '../schema/user.schema';
@@ -31,13 +7,17 @@ import { EmailService } from '../../utils/email.service';
 import { UserForgetDto } from '../../auth/dto/auth-credentials.dto';
 import { MailerService } from '@nestjs-modules/mailer';
 import { NotificationService } from '../../notification/service/notification.service';
+import { AlchemyService } from '../../alchemyPay/service/alchemy.service';
+import { SorobanHooksService } from '../../notification/service/sorobanHooks.service';
 export declare class UserService {
     private userModel;
     private readonly emailService;
     private readonly mailerService;
     private readonly notificationService;
+    private readonly alchemyService;
+    private readonly sorobanHooksService;
     private readonly logger;
-    constructor(userModel: Model<User>, emailService: EmailService, mailerService: MailerService, notificationService: NotificationService);
+    constructor(userModel: Model<User>, emailService: EmailService, mailerService: MailerService, notificationService: NotificationService, alchemyService: AlchemyService, sorobanHooksService: SorobanHooksService);
     guestRegister(CreateGuestUserDto: CreateGuestUserDto): Promise<{
         success: boolean;
         message: string;
@@ -117,4 +97,9 @@ export declare class UserService {
         upsertedId: import("bson").ObjectID;
     }>;
     userKycApply(userId: any): Promise<string>;
+    fetchAlchemyQuotes(userId: ObjectId, payload: any): Promise<any>;
+    userRegisterForAlchemy(userId: ObjectId, businessSubType: string): Promise<any>;
+    userKycStatus(userId: ObjectId): Promise<any>;
+    alchemyOrder(userId: ObjectId, requestPayload: any): Promise<any>;
+    alchemySellOrderCreate(userId: ObjectId, requestPayload: any): Promise<any>;
 }

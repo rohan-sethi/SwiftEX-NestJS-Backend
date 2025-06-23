@@ -47,12 +47,17 @@ const bcrypt = __importStar(require("bcrypt"));
 const Stellar = __importStar(require("stellar-sdk"));
 const mailer_1 = require("@nestjs-modules/mailer");
 const notification_service_1 = require("../../notification/service/notification.service");
+const alchemy_service_1 = require("../../alchemyPay/service/alchemy.service");
+const sorobanHooks_service_1 = require("../../notification/service/sorobanHooks.service");
+const sorobanHooksURL_1 = require("../../notification/utils/sorobanHooksURL");
 let UserService = UserService_1 = class UserService {
-    constructor(userModel, emailService, mailerService, notificationService) {
+    constructor(userModel, emailService, mailerService, notificationService, alchemyService, sorobanHooksService) {
         this.userModel = userModel;
         this.emailService = emailService;
         this.mailerService = mailerService;
         this.notificationService = notificationService;
+        this.alchemyService = alchemyService;
+        this.sorobanHooksService = sorobanHooksService;
         this.logger = new common_1.Logger(UserService_1.name);
         Stellar.Network.useTestNetwork();
     }
@@ -253,6 +258,8 @@ let UserService = UserService_1 = class UserService {
         if (!res) {
             return { success: false, message: "keys updates faild", status_code: common_1.HttpStatus.BAD_REQUEST };
         }
+        const response = await this.sorobanHooksService.addWalletWatcher(sorobanHooksURL_1.ADDWALLETWATCH, newPublicKey);
+        this.logger.log(response);
         return { success: true, message: "keys updates successfully", status_code: common_1.HttpStatus.ACCEPTED };
     }
     async findByEmailAndupdataPasscode(userId, passcode) {
@@ -326,6 +333,79 @@ let UserService = UserService_1 = class UserService {
         await this.userModel.updateOne({ _id: userId }, { isVerified: true });
         return 'success';
     }
+    async fetchAlchemyQuotes(userId, payload) {
+        const user = await this.userModel.findOne({ _id: userId });
+        if (!user) {
+            throw new common_1.HttpException('User not found', common_1.HttpStatus.NOT_FOUND);
+        }
+        const resPayloadGen = await this.alchemyService.fetchQuotes(payload);
+        throw new common_1.HttpException(resPayloadGen, common_1.HttpStatus.OK);
+    }
+    async userRegisterForAlchemy(userId, businessSubType) {
+        const user = await this.userModel.findOne({ _id: userId });
+        if (!user || !user.isEmailVerified) {
+            throw new common_1.HttpException(!user ? 'user not found' : "user need login or create account", !user ? common_1.HttpStatus.NOT_FOUND : common_1.HttpStatus.NOT_ACCEPTABLE);
+        }
+        const payload = {
+            "merchantNo": "00001",
+            "subMerchantNo": "00001",
+            "businessSubcategories": businessSubType,
+            "email": user.email,
+            "kycType": "1",
+            "kycPlatform": "sumsub",
+            "redirectUrl": "",
+            "callbackUrl": "",
+            "remark": "9999"
+        };
+        const resPayloadGen = await this.alchemyService.userRegister(payload);
+        throw new common_1.HttpException(resPayloadGen, common_1.HttpStatus.OK);
+    }
+    async userKycStatus(userId) {
+        const user = await this.userModel.findOne({ _id: userId });
+        if (!user || !user.isEmailVerified) {
+            throw new common_1.HttpException(!user ? 'user not found' : "user need login or create account", !user ? common_1.HttpStatus.NOT_FOUND : common_1.HttpStatus.NOT_ACCEPTABLE);
+        }
+        const payload = {
+            "email": user.email,
+            "kycPlatform": "sumsub",
+            "kycType": "1"
+        };
+        const resPayloadGen = await this.alchemyService.userStatus(payload);
+        throw new common_1.HttpException(resPayloadGen, common_1.HttpStatus.OK);
+    }
+    async alchemyOrder(userId, requestPayload) {
+        const user = await this.userModel.findOne({ _id: userId });
+        if (!user || !user.isEmailVerified) {
+            throw new common_1.HttpException(!user ? 'user not found' : "user need login or create account", !user ? common_1.HttpStatus.NOT_FOUND : common_1.HttpStatus.NOT_ACCEPTABLE);
+        }
+        const payload = {
+            "side": requestPayload.side,
+            "merchantOrderNo": Math.floor(1000000000 + Math.random() * 9000000000),
+            "amount": requestPayload.amount,
+            "fiatCurrency": requestPayload.fiat,
+            "cryptoCurrency": requestPayload.crypto,
+            "depositType": 2,
+            "address": requestPayload.address,
+            "network": requestPayload.network,
+            "alpha2": "US",
+            "orderType": requestPayload.orderType,
+            "payWayCode": requestPayload.payWayCode,
+            "userAccountId": "111110",
+            "redirectUrl": process.env.ALCHEMY_PAY_REDIRECT_URL,
+            "callbackUrl": process.env.ALCHEMY_PAY_WEBHOOK_URL,
+            "memo": requestPayload.memo
+        };
+        const resPayloadGen = await this.alchemyService.orderCreate(payload, user.email);
+        throw new common_1.HttpException(resPayloadGen, common_1.HttpStatus.OK);
+    }
+    async alchemySellOrderCreate(userId, requestPayload) {
+        const user = await this.userModel.findOne({ _id: userId });
+        if (!user || !user.isEmailVerified) {
+            throw new common_1.HttpException(!user ? 'user not found' : "user need login or create account", !user ? common_1.HttpStatus.NOT_FOUND : common_1.HttpStatus.NOT_ACCEPTABLE);
+        }
+        const resPayloadGen = await this.alchemyService.sellOrderCreate(requestPayload, user.email);
+        throw new common_1.HttpException(resPayloadGen, common_1.HttpStatus.OK);
+    }
 };
 UserService = UserService_1 = __decorate([
     (0, common_1.Injectable)(),
@@ -333,7 +413,9 @@ UserService = UserService_1 = __decorate([
     __metadata("design:paramtypes", [mongoose_2.Model,
         email_service_1.EmailService,
         mailer_1.MailerService,
-        notification_service_1.NotificationService])
+        notification_service_1.NotificationService,
+        alchemy_service_1.AlchemyService,
+        sorobanHooks_service_1.SorobanHooksService])
 ], UserService);
 exports.UserService = UserService;
 //# sourceMappingURL=user.service.js.map
