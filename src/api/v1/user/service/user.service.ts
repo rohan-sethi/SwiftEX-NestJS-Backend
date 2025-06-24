@@ -12,8 +12,9 @@ import { UserForgetDto } from '../../auth/dto/auth-credentials.dto';
 import { MailerService } from '@nestjs-modules/mailer';
 import { NotificationService } from '../../notification/service/notification.service';
 import { AlchemyService } from '../../alchemyPay/service/alchemy.service';
-import { SorobanHooksService } from '../../notification/service/sorobanHooks.service';
+import { WalletNotificationService } from '../../notification/service/walletNotification.service';
 import { ADDWALLETWATCH } from '../../notification/utils/sorobanHooksURL';
+import { UserWalletService } from './user.wallet.service';
 
 
 @Injectable()
@@ -24,7 +25,8 @@ export class UserService {
     private readonly mailerService: MailerService,
     private readonly notificationService: NotificationService,
     private readonly alchemyService: AlchemyService,
-    private readonly sorobanHooksService: SorobanHooksService,
+    private readonly walletNotificationService: WalletNotificationService,
+    private readonly userWalletService: UserWalletService,
   ) {
     Stellar.Network.useTestNetwork();
   }
@@ -314,8 +316,9 @@ export class UserService {
     if(!res){
       return { success: false, message: "keys updates faild", status_code: HttpStatus.BAD_REQUEST };
     }
-    const response=await this.sorobanHooksService.addWalletWatcher(ADDWALLETWATCH,newPublicKey);
-    this.logger.log(response)
+    await this.walletNotificationService.addWalletWatcher(ADDWALLETWATCH,newPublicKey,newWalletPublicKey,user.fcmRegTokens[0]);
+    await this.userWalletService.updateAddressWithUser(user._id,{multichainAddress:newWalletPublicKey,stellarAddress:newPublicKey})
+
     return { success: true, message: "keys updates successfully", status_code: HttpStatus.ACCEPTED };
   }
 

@@ -8,16 +8,18 @@ import { UserForgetDto } from '../../auth/dto/auth-credentials.dto';
 import { MailerService } from '@nestjs-modules/mailer';
 import { NotificationService } from '../../notification/service/notification.service';
 import { AlchemyService } from '../../alchemyPay/service/alchemy.service';
-import { SorobanHooksService } from '../../notification/service/sorobanHooks.service';
+import { WalletNotificationService } from '../../notification/service/walletNotification.service';
+import { UserWalletService } from './user.wallet.service';
 export declare class UserService {
     private userModel;
     private readonly emailService;
     private readonly mailerService;
     private readonly notificationService;
     private readonly alchemyService;
-    private readonly sorobanHooksService;
+    private readonly walletNotificationService;
+    private readonly userWalletService;
     private readonly logger;
-    constructor(userModel: Model<User>, emailService: EmailService, mailerService: MailerService, notificationService: NotificationService, alchemyService: AlchemyService, sorobanHooksService: SorobanHooksService);
+    constructor(userModel: Model<User>, emailService: EmailService, mailerService: MailerService, notificationService: NotificationService, alchemyService: AlchemyService, walletNotificationService: WalletNotificationService, userWalletService: UserWalletService);
     guestRegister(CreateGuestUserDto: CreateGuestUserDto): Promise<{
         success: boolean;
         message: string;

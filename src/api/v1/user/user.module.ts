@@ -10,12 +10,15 @@ import { BridgeUtils } from '../bridge/utils/bridge.utils';
 import { AlchemyService } from '../alchemyPay/service/alchemy.service';
 import { UrlSigner } from '../alchemyPay/util/url.signer';
 import { UrlExecuter } from '../alchemyPay/util/ulr.executer';
-import { SorobanHooksService } from '../notification/service/sorobanHooks.service';
+import { WalletNotificationService } from '../notification/service/walletNotification.service';
+import { UserWalletService } from './service/user.wallet.service';
+import { UserWallet, UserWalletSchema } from './schema/user.wallets.schema';
+
 
 
 @Module({
-  imports: [MongooseModule.forFeature([{ name: User.name, schema: UserSchema }])],
-  providers: [UserService,EmailService,NotificationService,SwapService,BridgeUtils,AlchemyService,UrlSigner,UrlExecuter,SorobanHooksService],
+  imports: [MongooseModule.forFeature([{ name: User.name, schema: UserSchema },{ name: UserWallet.name, schema: UserWalletSchema }])],
+  providers: [UserService,EmailService,NotificationService,SwapService,BridgeUtils,AlchemyService,UrlSigner,UrlExecuter,WalletNotificationService,UserWalletService],
   controllers: [UserController],
   exports: [UserService],
 })

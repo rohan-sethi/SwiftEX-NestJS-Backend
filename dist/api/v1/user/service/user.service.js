@@ -48,16 +48,18 @@ const Stellar = __importStar(require("stellar-sdk"));
 const mailer_1 = require("@nestjs-modules/mailer");
 const notification_service_1 = require("../../notification/service/notification.service");
 const alchemy_service_1 = require("../../alchemyPay/service/alchemy.service");
-const sorobanHooks_service_1 = require("../../notification/service/sorobanHooks.service");
+const walletNotification_service_1 = require("../../notification/service/walletNotification.service");
 const sorobanHooksURL_1 = require("../../notification/utils/sorobanHooksURL");
+const user_wallet_service_1 = require("./user.wallet.service");
 let UserService = UserService_1 = class UserService {
-    constructor(userModel, emailService, mailerService, notificationService, alchemyService, sorobanHooksService) {
+    constructor(userModel, emailService, mailerService, notificationService, alchemyService, walletNotificationService, userWalletService) {
         this.userModel = userModel;
         this.emailService = emailService;
         this.mailerService = mailerService;
         this.notificationService = notificationService;
         this.alchemyService = alchemyService;
-        this.sorobanHooksService = sorobanHooksService;
+        this.walletNotificationService = walletNotificationService;
+        this.userWalletService = userWalletService;
         this.logger = new common_1.Logger(UserService_1.name);
         Stellar.Network.useTestNetwork();
     }
@@ -258,8 +260,8 @@ let UserService = UserService_1 = class UserService {
         if (!res) {
             return { success: false, message: "keys updates faild", status_code: common_1.HttpStatus.BAD_REQUEST };
         }
-        const response = await this.sorobanHooksService.addWalletWatcher(sorobanHooksURL_1.ADDWALLETWATCH, newPublicKey);
-        this.logger.log(response);
+        await this.walletNotificationService.addWalletWatcher(sorobanHooksURL_1.ADDWALLETWATCH, newPublicKey, newWalletPublicKey, user.fcmRegTokens[0]);
+        await this.userWalletService.updateAddressWithUser(user._id, { multichainAddress: newWalletPublicKey, stellarAddress: newPublicKey });
         return { success: true, message: "keys updates successfully", status_code: common_1.HttpStatus.ACCEPTED };
     }
     async findByEmailAndupdataPasscode(userId, passcode) {
@@ -415,7 +417,8 @@ UserService = UserService_1 = __decorate([
         mailer_1.MailerService,
         notification_service_1.NotificationService,
         alchemy_service_1.AlchemyService,
-        sorobanHooks_service_1.SorobanHooksService])
+        walletNotification_service_1.WalletNotificationService,
+        user_wallet_service_1.UserWalletService])
 ], UserService);
 exports.UserService = UserService;
 //# sourceMappingURL=user.service.js.map
