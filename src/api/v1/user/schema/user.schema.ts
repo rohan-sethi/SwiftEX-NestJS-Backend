@@ -65,6 +65,9 @@ export class User extends Document {
 
   @Prop({ type: Object })
   DeviceInfo:Object;
+
+  @Prop({ required: false, default: null })
+  streamId?: string;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

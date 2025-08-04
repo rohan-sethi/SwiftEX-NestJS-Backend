@@ -25,6 +25,26 @@ export declare class AlchemyService {
     }>;
     sellOrderCreate(payload: any, userEmail: string): Promise<{
         status: boolean;
+        res: string;
+        servicePayload: {
+            appId: string;
+            timestamp: string;
+            type: string;
+            merchantOrderNo: number;
+            crypto: any;
+            network: any;
+            cryptoAmount: any;
+            fiat: any;
+            country: string;
+            email: string;
+            redirectUrl: string;
+            callbackUrl: string;
+            language: string;
+            showTable: string;
+        };
+    } | {
+        status: boolean;
         res: any;
+        servicePayload?: undefined;
     }>;
 }

@@ -3,6 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { MarketData } from '../schema/market-data.schema';
 import { Cron } from '@nestjs/schedule';
+import { transformMarketInfo } from '../../utils/transform.marketInfo';
 
 @Injectable()
 export class MarketDataService {
@@ -26,10 +27,10 @@ export class MarketDataService {
 
       if (response.ok) {
         const responseData = await response.json();
-        // console.log("====",responseData)
+        const transformedResponse = transformMarketInfo(responseData);
         await this.update_db();
         const document = new this.marketDataModel({
-          MarketData: responseData,
+          MarketData: transformedResponse,
         })
         await document.save()
           .then(savedDocument => {

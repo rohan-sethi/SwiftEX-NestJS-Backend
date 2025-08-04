@@ -34,6 +34,17 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
+var __rest = (this && this.__rest) || function (s, e) {
+    var t = {};
+    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
+        t[p] = s[p];
+    if (s != null && typeof Object.getOwnPropertySymbols === "function")
+        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
+            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
+                t[p[i]] = s[p[i]];
+        }
+    return t;
+};
 var UserService_1;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserService = void 0;
@@ -51,9 +62,12 @@ const alchemy_service_1 = require("../../alchemyPay/service/alchemy.service");
 const walletNotification_service_1 = require("../../notification/service/walletNotification.service");
 const sorobanHooksURL_1 = require("../../notification/utils/sorobanHooksURL");
 const user_wallet_service_1 = require("./user.wallet.service");
+const user_orders_schema_1 = require("../schema/user.orders.schema");
+const alchemyOrders_enum_1 = require("../../comman/alchemyOrders.enum");
 let UserService = UserService_1 = class UserService {
-    constructor(userModel, emailService, mailerService, notificationService, alchemyService, walletNotificationService, userWalletService) {
+    constructor(userModel, userOrder, emailService, mailerService, notificationService, alchemyService, walletNotificationService, userWalletService) {
         this.userModel = userModel;
+        this.userOrder = userOrder;
         this.emailService = emailService;
         this.mailerService = mailerService;
         this.notificationService = notificationService;
@@ -241,6 +255,13 @@ let UserService = UserService_1 = class UserService {
             const xdr = transaction.toEnvelope().toXDR("base64");
             await this.notificationService.sendNotification(user.fcmRegTokens[0], 'Activate', 'Congratulations! 5 XLM has been successfully added to your wallet.');
             this.logger.log('Success! Result:');
+            const sorobanRes = await this.walletNotificationService.addWalletWatcher(sorobanHooksURL_1.ADDWALLETWATCH, newPublicKey, user);
+            console.log('SorobanHook: ', sorobanRes);
+            if (newWalletPublicKey) {
+                const moralisRes = await this.walletNotificationService.addWalletToMoralis(newWalletPublicKey, user);
+                console.log('MoralisRes: ', moralisRes);
+            }
+            await this.userWalletService.updateAddressWithUser(user._id, { multichainAddress: newWalletPublicKey, stellarAddress: newPublicKey });
             return { success: true, message: "Funded successfully", resXdr: xdr, status_code: common_1.HttpStatus.ACCEPTED };
         }
         catch (error) {
@@ -260,7 +281,12 @@ let UserService = UserService_1 = class UserService {
         if (!res) {
             return { success: false, message: "keys updates faild", status_code: common_1.HttpStatus.BAD_REQUEST };
         }
-        await this.walletNotificationService.addWalletWatcher(sorobanHooksURL_1.ADDWALLETWATCH, newPublicKey, newWalletPublicKey, user.fcmRegTokens[0]);
+        const sorobanRes = await this.walletNotificationService.addWalletWatcher(sorobanHooksURL_1.ADDWALLETWATCH, newPublicKey, user);
+        console.log('SorobanHook: ', sorobanRes);
+        if (newWalletPublicKey) {
+            const moralisRes = await this.walletNotificationService.addWalletToMoralis(newWalletPublicKey, user);
+            console.log('MoralisRes: ', moralisRes);
+        }
         await this.userWalletService.updateAddressWithUser(user._id, { multichainAddress: newWalletPublicKey, stellarAddress: newPublicKey });
         return { success: true, message: "keys updates successfully", status_code: common_1.HttpStatus.ACCEPTED };
     }
@@ -398,6 +424,18 @@ let UserService = UserService_1 = class UserService {
             "memo": requestPayload.memo
         };
         const resPayloadGen = await this.alchemyService.orderCreate(payload, user.email);
+        const parsResponse = JSON.parse(resPayloadGen.res);
+        const createdBuyOrder = await this.userOrder.create({
+            userId: user._id,
+            email: user.email,
+            deviceInfo: user.DeviceInfo,
+            orderId: parsResponse.data.orderNo,
+            requsetdPayload: payload,
+            url: parsResponse.data.payUrl,
+            deviceFCM: user.fcmRegTokens[0],
+            orderType: alchemyOrders_enum_1.AlchemyOrder.ORDERBUY
+        });
+        this.logger.log("Created Buy Order.");
         throw new common_1.HttpException(resPayloadGen, common_1.HttpStatus.OK);
     }
     async alchemySellOrderCreate(userId, requestPayload) {
@@ -406,13 +444,61 @@ let UserService = UserService_1 = class UserService {
             throw new common_1.HttpException(!user ? 'user not found' : "user need login or create account", !user ? common_1.HttpStatus.NOT_FOUND : common_1.HttpStatus.NOT_ACCEPTABLE);
         }
         const resPayloadGen = await this.alchemyService.sellOrderCreate(requestPayload, user.email);
-        throw new common_1.HttpException(resPayloadGen, common_1.HttpStatus.OK);
+        const _a = resPayloadGen.servicePayload, { appId } = _a, finalpayload = __rest(_a, ["appId"]);
+        const createdSellOrder = await this.userOrder.create({
+            userId: user._id,
+            email: user.email,
+            deviceInfo: user.DeviceInfo,
+            orderId: finalpayload.merchantOrderNo,
+            requsetdPayload: finalpayload,
+            url: resPayloadGen.res,
+            deviceFCM: user.fcmRegTokens[0],
+            orderType: alchemyOrders_enum_1.AlchemyOrder.ORDERSELL
+        });
+        this.logger.log("Created Sell Order.");
+        const userResponse = {
+            "status": resPayloadGen.status,
+            "res": resPayloadGen.res
+        };
+        throw new common_1.HttpException(userResponse, common_1.HttpStatus.OK);
+    }
+    async getCreatedAlchemyOrders(userId) {
+        try {
+            const user = await this.userModel.findOne({ _id: userId });
+            if (!user || !user.isEmailVerified) {
+                throw new common_1.HttpException(!user ? 'user not found' : "user need login or create account", !user ? common_1.HttpStatus.NOT_FOUND : common_1.HttpStatus.NOT_ACCEPTABLE);
+            }
+            const collectRecords = await this.userOrder.find({ userId });
+            if (!collectRecords || collectRecords.length === 0) {
+                return {
+                    status: true,
+                    total: 0,
+                    records: [],
+                };
+            }
+            else {
+                return {
+                    status: true,
+                    total: collectRecords.length,
+                    records: collectRecords,
+                };
+            }
+        }
+        catch (error) {
+            return {
+                status: false,
+                total: 0,
+                records: [],
+            };
+        }
     }
 };
 UserService = UserService_1 = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, mongoose_1.InjectModel)(user_schema_1.User.name)),
+    __param(1, (0, mongoose_1.InjectModel)(user_orders_schema_1.UserOrder.name)),
     __metadata("design:paramtypes", [mongoose_2.Model,
+        mongoose_2.Model,
         email_service_1.EmailService,
         mailer_1.MailerService,
         notification_service_1.NotificationService,

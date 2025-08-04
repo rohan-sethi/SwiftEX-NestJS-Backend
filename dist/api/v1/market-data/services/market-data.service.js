@@ -19,6 +19,7 @@ const mongoose_1 = require("@nestjs/mongoose");
 const mongoose_2 = require("mongoose");
 const market_data_schema_1 = require("../schema/market-data.schema");
 const schedule_1 = require("@nestjs/schedule");
+const transform_marketInfo_1 = require("../../utils/transform.marketInfo");
 let MarketDataService = MarketDataService_1 = class MarketDataService {
     constructor(marketDataModel) {
         this.marketDataModel = marketDataModel;
@@ -37,9 +38,10 @@ let MarketDataService = MarketDataService_1 = class MarketDataService {
             });
             if (response.ok) {
                 const responseData = await response.json();
+                const transformedResponse = (0, transform_marketInfo_1.transformMarketInfo)(responseData);
                 await this.update_db();
                 const document = new this.marketDataModel({
-                    MarketData: responseData,
+                    MarketData: transformedResponse,
                 });
                 await document.save()
                     .then(savedDocument => {

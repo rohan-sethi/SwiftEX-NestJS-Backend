@@ -129,6 +129,9 @@ let UserController = class UserController {
     async sellOrder(query, req) {
         return this.userService.alchemySellOrderCreate(req.user.sub, query);
     }
+    async fetchOrders(req) {
+        return this.userService.getCreatedAlchemyOrders(req.user.sub);
+    }
 };
 __decorate([
     (0, common_1.Post)('/register'),
@@ -297,6 +300,13 @@ __decorate([
     __metadata("design:paramtypes", [alchemy_dto_1.alchemySellOrderDto, Object]),
     __metadata("design:returntype", Promise)
 ], UserController.prototype, "sellOrder", null);
+__decorate([
+    (0, common_1.Post)('/alchemyOrders'),
+    __param(0, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "fetchOrders", null);
 UserController = __decorate([
     (0, common_1.Controller)('/users'),
     __metadata("design:paramtypes", [user_service_1.UserService,

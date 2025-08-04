@@ -1,0 +1,35 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.transformMarketInfo = void 0;
+function transformMarketInfo(data) {
+    return data.map((item) => ({
+        id: item.id,
+        symbol: item.symbol,
+        name: item.name,
+        image: item.image,
+        currentPrice: item.current_price,
+        marketCap: item.market_cap,
+        marketCapRank: item.market_cap_rank,
+        fullyDilutedValuation: item.fully_diluted_valuation,
+        totalVolume: item.total_volume,
+        high24h: item.high_24h,
+        low24h: item.low_24h,
+        priceChange24h: item.price_change_24h,
+        priceChangePercentage24h: item.price_change_percentage_24h,
+        marketCapChange24h: item.market_cap_change_24h,
+        marketCapChangePercentage_24h: item.market_cap_change_percentage_24h,
+        circulatingSupply: item.circulating_supply,
+        totalSupply: item.total_supply,
+        maxSupply: item.max_supply,
+        ath: item.ath,
+        athChangePercentage: item.ath_change_percentage,
+        athDate: item.ath_date,
+        atl: item.atl,
+        atlChangePercentage: item.atl_change_percentage,
+        atlDate: item.atl_date,
+        roi: item.roi,
+        lastUpdated: item.last_updated,
+    }));
+}
+exports.transformMarketInfo = transformMarketInfo;
+//# sourceMappingURL=transform.marketInfo.js.map

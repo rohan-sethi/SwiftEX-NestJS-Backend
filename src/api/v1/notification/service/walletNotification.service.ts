@@ -1,16 +1,25 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
 import axios from 'axios';
 import * as crypto from 'crypto';
+import { Model } from 'mongoose';
+import Moralis from 'moralis';
+import { User } from '../../user/schema/user.schema';
 
 @Injectable()
-export class WalletNotificationService {
+export class WalletNotificationService implements OnModuleInit {
     private readonly logger = new Logger(WalletNotificationService.name);
 
-    constructor() { }
+    constructor(@InjectModel(User.name) private userModel: Model<User>) { }
+    async onModuleInit() {
+        await Moralis.start({
+            apiKey: process.env.MORALIS_API_KEY,
+        });
+    }
 
-    async addWalletWatcher(apiInfo: any, stellarWalletAddress: string,walletAddress:string,userFCM:string): Promise<any> {
+    async addWalletWatcher(apiInfo: any, stellarWalletAddress: string,userData:any): Promise<any> {
         try {
-            const encrypted =await this.encryptMessageToString(userFCM);
+            const encrypted =await this.encryptMessageToString(userData.fcmRegTokens[0]);
             let data = JSON.stringify({
                 "webhook_url": process.env.NOTIFICATION_WEBHOOK,
                 "chainType": process.env.SOROBANHOOKS_API_TYPE,
@@ -36,23 +45,73 @@ export class WalletNotificationService {
                     res: response?.data?.result
                 }
             } else {
-                this.logger.log('SorobanHooks Error API : ',{
-                    status: false,
-                    res: response?.data
-                });
                 return {
                     status: false,
                     res: response?.data?.message || false
                 }
             }
         } catch (error) {
-            this.logger.log('SorobanHooks Error: ',{
-                status: false,
-                res: error
-            });
             return {
                 status: false,
                 res: error?.response?.data?.message || false
+            }
+        }
+    }
+
+    async addWalletToMoralis(walletAddress: string, userDetils: any): Promise<any> {
+        try {
+            if (userDetils.streamId===null) {
+                console.log("called when streamId not avilable");
+                // creating new stream
+                const encrypted = await this.encryptMessageToString(userDetils.fcmRegTokens[0]);
+                const creatStreams = await Moralis.Streams.add({
+                    webhookUrl: process.env.NOTIFICATION_WEBHOOK,
+                    description: "user wallet",
+                    tag: encrypted,
+                    chains: ["0xaa36a7", "0x61"],
+                    includeNativeTxs: true,
+                });
+
+                const addressAddestoStream = await Moralis.Streams.addAddress({
+                    id: creatStreams.toJSON().id,
+                    address: [walletAddress],
+                });
+                const updateUserDB = await this.userModel.findOneAndUpdate({ _id: userDetils._id }, { $set: { streamId: creatStreams.toJSON().id } }, { new: true });
+                return {
+                    status: true,
+                    Stream_ID: creatStreams.toJSON().id,
+                    respo: addressAddestoStream,
+                    updateUserDB: updateUserDB
+                }
+            } else {
+                console.log("called when streamId avilable ---0");
+                const stream = await Moralis.Streams.getAddresses({ limit: 10, id: userDetils.streamId });
+                if (!stream || !stream.raw || stream.raw.total === 0) {
+                    return {
+                        status: false,
+                        respo: 'No addresses found in this stream.',
+                    }
+                }
+                const deleResponse = await Moralis.Streams.deleteAddress({
+                    id: userDetils.streamId,
+                    address: stream.raw.result[0].address,
+                });
+                const addingNewAddress = await Moralis.Streams.addAddress({
+                    id: userDetils.streamId,
+                    address: [walletAddress],
+                });
+                return {
+                    status: true,
+                    respo: addingNewAddress || "null",
+                    Stream_ID: userDetils.streamId,
+                    deleResponse: deleResponse,
+                    addingNewAddress: addingNewAddress
+                }
+            } 
+        } catch (error) {
+            return {
+                status: false,
+                respo: error || false
             }
         }
     }
@@ -75,12 +134,16 @@ export class WalletNotificationService {
         const encrypted = Buffer.concat([cipher.update(payload, 'utf8'), cipher.final()]);
         const authTag = cipher.getAuthTag();
 
-        const packed = [
-            encrypted.toString('base64'),
-            iv.toString('base64'),
-            authTag.toString('base64')
-        ].join('.');
+        // const packed = [
+        //     encrypted.toString('base64'),
+        //     iv.toString('base64'),
+        //     authTag.toString('base64')
+        // ].join('.');
 
+        // return Buffer.from(packed).toString('base64');
+
+        // new short method
+        const packed = Buffer.concat([iv,encrypted, authTag]);
         return Buffer.from(packed).toString('base64');
     }
 

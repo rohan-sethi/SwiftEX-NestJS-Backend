@@ -176,7 +176,8 @@ let AlchemyService = AlchemyService_1 = class AlchemyService {
             const finalUrl = urls_1.USERSELLORDER.SELLORDER + rawDataToSign + "&sign=" + onRampSignature;
             return {
                 "status": true,
-                "res": finalUrl
+                "res": finalUrl,
+                "servicePayload": paramsToSign
             };
         }
         catch (error) {

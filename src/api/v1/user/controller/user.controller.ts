@@ -190,4 +190,8 @@ export class UserController {
       return this.userService.alchemySellOrderCreate(req.user.sub,query);
     }
   
+    @Post('/alchemyOrders')
+    async fetchOrders(@Req() req: any,) {
+      return this.userService.getCreatedAlchemyOrders(req.user.sub);
+    }
 }

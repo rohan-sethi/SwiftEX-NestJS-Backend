@@ -43,6 +43,7 @@
     "ioredis": "^5.2.4",
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^6.8.0",
+    "moralis": "^2.27.2",
     "nodemailer": "^6.9.1",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",

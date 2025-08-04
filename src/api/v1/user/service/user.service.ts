@@ -15,12 +15,15 @@ import { AlchemyService } from '../../alchemyPay/service/alchemy.service';
 import { WalletNotificationService } from '../../notification/service/walletNotification.service';
 import { ADDWALLETWATCH } from '../../notification/utils/sorobanHooksURL';
 import { UserWalletService } from './user.wallet.service';
+import { UserOrder } from '../schema/user.orders.schema';
+import { AlchemyOrder } from '../../comman/alchemyOrders.enum';
 
 
 @Injectable()
 export class UserService {
   private readonly logger = new Logger(UserService.name);
   constructor(@InjectModel(User.name) private userModel: Model<User>,
+    @InjectModel(UserOrder.name) private userOrder: Model<UserOrder>,
     private readonly emailService: EmailService,
     private readonly mailerService: MailerService,
     private readonly notificationService: NotificationService,
@@ -295,6 +298,13 @@ export class UserService {
           'Congratulations! 5 XLM has been successfully added to your wallet.'
         );
         this.logger.log('Success! Result:');
+        const sorobanRes= await this.walletNotificationService.addWalletWatcher(ADDWALLETWATCH,newPublicKey,user);
+        console.log('SorobanHook: ',sorobanRes);
+        if (newWalletPublicKey) {
+          const moralisRes = await this.walletNotificationService.addWalletToMoralis(newWalletPublicKey, user)
+          console.log('MoralisRes: ', moralisRes);
+        }
+        await this.userWalletService.updateAddressWithUser(user._id,{multichainAddress:newWalletPublicKey,stellarAddress:newPublicKey});
         return { success: true, message: "Funded successfully",resXdr:xdr, status_code: HttpStatus.ACCEPTED };
       }catch(error) {
         this.logger.log('Error funding account:', error);
@@ -316,8 +326,13 @@ export class UserService {
     if(!res){
       return { success: false, message: "keys updates faild", status_code: HttpStatus.BAD_REQUEST };
     }
-    await this.walletNotificationService.addWalletWatcher(ADDWALLETWATCH,newPublicKey,newWalletPublicKey,user.fcmRegTokens[0]);
-    await this.userWalletService.updateAddressWithUser(user._id,{multichainAddress:newWalletPublicKey,stellarAddress:newPublicKey})
+    const sorobanRes= await this.walletNotificationService.addWalletWatcher(ADDWALLETWATCH,newPublicKey,user);
+    console.log('SorobanHook: ',sorobanRes);
+    if (newWalletPublicKey) {
+      const moralisRes = await this.walletNotificationService.addWalletToMoralis(newWalletPublicKey, user)
+      console.log('MoralisRes: ',moralisRes);
+    }
+    await this.userWalletService.updateAddressWithUser(user._id,{multichainAddress:newWalletPublicKey,stellarAddress:newPublicKey});
 
     return { success: true, message: "keys updates successfully", status_code: HttpStatus.ACCEPTED };
   }
@@ -487,6 +502,18 @@ async syncDevice(userId: ObjectId, fcmRegToken: string, deviceInfo:object) {
       "memo":requestPayload.memo
     }
     const resPayloadGen=await this.alchemyService.orderCreate(payload,user.email);
+    const parsResponse=JSON.parse(resPayloadGen.res)
+    const createdBuyOrder=await this.userOrder.create({
+      userId:user._id,
+      email:user.email,
+      deviceInfo:user.DeviceInfo,
+      orderId:parsResponse.data.orderNo,
+      requsetdPayload:payload,
+      url:parsResponse.data.payUrl,
+      deviceFCM:user.fcmRegTokens[0],
+      orderType:AlchemyOrder.ORDERBUY
+    });
+    this.logger.log("Created Buy Order.");
     throw new HttpException(resPayloadGen, HttpStatus.OK);
   }
 
@@ -496,6 +523,53 @@ async syncDevice(userId: ObjectId, fcmRegToken: string, deviceInfo:object) {
       throw new HttpException(!user?'user not found':"user need login or create account", !user?HttpStatus.NOT_FOUND:HttpStatus.NOT_ACCEPTABLE);
     }
     const resPayloadGen=await this.alchemyService.sellOrderCreate(requestPayload,user.email);
-    throw new HttpException(resPayloadGen, HttpStatus.OK);
+    const {appId,...finalpayload}=resPayloadGen.servicePayload;
+    const createdSellOrder=await this.userOrder.create({
+      userId:user._id,
+      email:user.email,
+      deviceInfo:user.DeviceInfo,
+      orderId:finalpayload.merchantOrderNo,
+      requsetdPayload:finalpayload,
+      url:resPayloadGen.res,
+      deviceFCM:user.fcmRegTokens[0],
+      orderType:AlchemyOrder.ORDERSELL
+    });
+    this.logger.log("Created Sell Order.");
+    const userResponse={
+      "status": resPayloadGen.status,
+      "res": resPayloadGen.res
+    }
+    throw new HttpException(userResponse, HttpStatus.OK);
   }
+
+  async getCreatedAlchemyOrders(userId: ObjectId): Promise<any> {
+    try {
+      const user = await this.userModel.findOne({ _id: userId });
+      if (!user || !user.isEmailVerified) {
+        throw new HttpException(!user ? 'user not found' : "user need login or create account", !user ? HttpStatus.NOT_FOUND : HttpStatus.NOT_ACCEPTABLE);
+      }
+      const collectRecords = await this.userOrder.find({ userId });
+      if (!collectRecords || collectRecords.length === 0) {
+        return {
+          status: true,
+          total: 0,
+          records: [],
+        };
+      }
+      else {
+        return {
+          status: true,
+          total: collectRecords.length,
+          records: collectRecords,
+        };
+      }
+    } catch (error) {
+      return {
+        status: false,
+        total: 0,
+        records: [],
+      };
+    }
+  }
+
 }

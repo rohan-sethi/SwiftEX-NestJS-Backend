@@ -10,8 +10,10 @@ import { NotificationService } from '../../notification/service/notification.ser
 import { AlchemyService } from '../../alchemyPay/service/alchemy.service';
 import { WalletNotificationService } from '../../notification/service/walletNotification.service';
 import { UserWalletService } from './user.wallet.service';
+import { UserOrder } from '../schema/user.orders.schema';
 export declare class UserService {
     private userModel;
+    private userOrder;
     private readonly emailService;
     private readonly mailerService;
     private readonly notificationService;
@@ -19,7 +21,7 @@ export declare class UserService {
     private readonly walletNotificationService;
     private readonly userWalletService;
     private readonly logger;
-    constructor(userModel: Model<User>, emailService: EmailService, mailerService: MailerService, notificationService: NotificationService, alchemyService: AlchemyService, walletNotificationService: WalletNotificationService, userWalletService: UserWalletService);
+    constructor(userModel: Model<User>, userOrder: Model<UserOrder>, emailService: EmailService, mailerService: MailerService, notificationService: NotificationService, alchemyService: AlchemyService, walletNotificationService: WalletNotificationService, userWalletService: UserWalletService);
     guestRegister(CreateGuestUserDto: CreateGuestUserDto): Promise<{
         success: boolean;
         message: string;
@@ -104,4 +106,5 @@ export declare class UserService {
     userKycStatus(userId: ObjectId): Promise<any>;
     alchemyOrder(userId: ObjectId, requestPayload: any): Promise<any>;
     alchemySellOrderCreate(userId: ObjectId, requestPayload: any): Promise<any>;
+    getCreatedAlchemyOrders(userId: ObjectId): Promise<any>;
 }

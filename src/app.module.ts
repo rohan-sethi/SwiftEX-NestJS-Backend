@@ -10,6 +10,8 @@ import { JwtAuthMiddleware } from './api/v1/auth/jwt-auth.middleware';
 import { NotificationModule } from './api/v1/notification/notification.module';
 import { ContractTransactionListener } from './api/v1/transactionListener/transaction.listener';
 import { ListenerModule } from './api/v1/transactionListener/transaction.module';
+import * as path from 'path';
+import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 
 @Module({
   imports: [
@@ -35,7 +37,18 @@ import { ListenerModule } from './api/v1/transactionListener/transaction.module'
             user: configService.get('EMAIL_ADD'),
             pass: configService.get('EMAIL_PASS'),
           },
-          tls: { rejectUnauthorized: false }
+          tls: { rejectUnauthorized: false },
+          defaults: {
+            from: '"SwiftEx" <' + process.env.EMAIL_ADD + '>',
+          },
+          preview: false,
+          template: {
+            dir: path.join(__dirname, '/../', '/templates/'),
+            adapter: new HandlebarsAdapter(),
+            options: {
+              strict: true,
+            },
+          },
         },
       }),
       inject: [ConfigService],

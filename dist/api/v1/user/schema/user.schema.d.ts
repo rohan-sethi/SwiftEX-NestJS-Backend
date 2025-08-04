@@ -21,5 +21,6 @@ export declare class User extends Document {
     SubscriptionId: mongoose.Schema.Types.ObjectId;
     SubscriptionExpire: string;
     DeviceInfo: Object;
+    streamId?: string;
 }
 export declare const UserSchema: mongoose.Schema<User, mongoose.Model<User, any, any, any, any>, {}, {}, {}, {}, mongoose.DefaultSchemaOptions, User>;

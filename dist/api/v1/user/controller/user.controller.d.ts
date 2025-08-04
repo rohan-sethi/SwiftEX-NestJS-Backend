@@ -105,4 +105,5 @@ export declare class UserController {
     alchemyKycStatus(req: any): Promise<any>;
     orderCreate(query: alchemyCreateOrder, req: any): Promise<any>;
     sellOrder(query: alchemySellOrderDto, req: any): Promise<any>;
+    fetchOrders(req: any): Promise<any>;
 }

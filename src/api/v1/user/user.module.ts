@@ -13,11 +13,12 @@ import { UrlExecuter } from '../alchemyPay/util/ulr.executer';
 import { WalletNotificationService } from '../notification/service/walletNotification.service';
 import { UserWalletService } from './service/user.wallet.service';
 import { UserWallet, UserWalletSchema } from './schema/user.wallets.schema';
+import { UserOrder, UserOrdersSchema } from './schema/user.orders.schema';
 
 
 
 @Module({
-  imports: [MongooseModule.forFeature([{ name: User.name, schema: UserSchema },{ name: UserWallet.name, schema: UserWalletSchema }])],
+  imports: [MongooseModule.forFeature([{ name: User.name, schema: UserSchema },{ name: UserWallet.name, schema: UserWalletSchema },{ name: UserOrder.name, schema: UserOrdersSchema }])],
   providers: [UserService,EmailService,NotificationService,SwapService,BridgeUtils,AlchemyService,UrlSigner,UrlExecuter,WalletNotificationService,UserWalletService],
   controllers: [UserController],
   exports: [UserService],
