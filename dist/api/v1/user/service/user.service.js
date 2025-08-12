@@ -375,8 +375,7 @@ let UserService = UserService_1 = class UserService {
             throw new common_1.HttpException(!user ? 'user not found' : "user need login or create account", !user ? common_1.HttpStatus.NOT_FOUND : common_1.HttpStatus.NOT_ACCEPTABLE);
         }
         const payload = {
-            "merchantNo": "00001",
-            "subMerchantNo": "00001",
+            "merchantNo": process.env.ALCHEMY_PAY_MERCHANT_NO,
             "businessSubcategories": businessSubType,
             "email": user.email,
             "kycType": "1",
@@ -389,6 +388,7 @@ let UserService = UserService_1 = class UserService {
         throw new common_1.HttpException(resPayloadGen, common_1.HttpStatus.OK);
     }
     async userKycStatus(userId) {
+        var _a;
         const user = await this.userModel.findOne({ _id: userId });
         if (!user || !user.isEmailVerified) {
             throw new common_1.HttpException(!user ? 'user not found' : "user need login or create account", !user ? common_1.HttpStatus.NOT_FOUND : common_1.HttpStatus.NOT_ACCEPTABLE);
@@ -399,6 +399,9 @@ let UserService = UserService_1 = class UserService {
             "kycType": "1"
         };
         const resPayloadGen = await this.alchemyService.userStatus(payload);
+        if (!resPayloadGen.status) {
+            throw new common_1.HttpException(((_a = resPayloadGen.res) === null || _a === void 0 ? void 0 : _a.msg) || "Error", common_1.HttpStatus.OK);
+        }
         throw new common_1.HttpException(resPayloadGen, common_1.HttpStatus.OK);
     }
     async alchemyOrder(userId, requestPayload) {
@@ -415,7 +418,7 @@ let UserService = UserService_1 = class UserService {
             "depositType": 2,
             "address": requestPayload.address,
             "network": requestPayload.network,
-            "alpha2": "US",
+            "alpha2": requestPayload.alpha2,
             "orderType": requestPayload.orderType,
             "payWayCode": requestPayload.payWayCode,
             "userAccountId": "111110",

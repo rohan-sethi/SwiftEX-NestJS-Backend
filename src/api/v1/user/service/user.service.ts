@@ -451,8 +451,8 @@ async syncDevice(userId: ObjectId, fcmRegToken: string, deviceInfo:object) {
       throw new HttpException(!user?'user not found':"user need login or create account", !user?HttpStatus.NOT_FOUND:HttpStatus.NOT_ACCEPTABLE);
     }
     const payload={
-      "merchantNo": "00001",
-      "subMerchantNo": "00001",
+      "merchantNo": process.env.ALCHEMY_PAY_MERCHANT_NO,
+      // "subMerchantNo": process.env.ALCHEMY_PAY_MERCHANT_NO,
       "businessSubcategories": businessSubType,
       "email": user.email,
       "kycType": "1",
@@ -476,6 +476,10 @@ async syncDevice(userId: ObjectId, fcmRegToken: string, deviceInfo:object) {
       "kycType": "1"
   }
     const resPayloadGen=await this.alchemyService.userStatus(payload);
+    if(!resPayloadGen.status)
+    {
+      throw new HttpException(resPayloadGen.res?.msg||"Error", HttpStatus.OK);
+    }
     throw new HttpException(resPayloadGen, HttpStatus.OK);
   }
 
@@ -493,7 +497,7 @@ async syncDevice(userId: ObjectId, fcmRegToken: string, deviceInfo:object) {
       "depositType": 2,
       "address": requestPayload.address,
       "network": requestPayload.network,
-      "alpha2": "US",
+      "alpha2": requestPayload.alpha2,
       "orderType": requestPayload.orderType,
       "payWayCode": requestPayload.payWayCode,
       "userAccountId": "111110",

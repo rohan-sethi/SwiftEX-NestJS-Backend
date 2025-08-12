@@ -50,6 +50,7 @@ let AlchemyService = AlchemyService_1 = class AlchemyService {
     async fetchQuotes(payload) {
         try {
             const resPayloadGen = await this.urlSigner.payloadGenrator(payload, urls_1.QUOTES.METHODTYPE, urls_1.QUOTES.REQUESTURL);
+            console.log(resPayloadGen);
             if (!resPayloadGen.status) {
                 throw new common_1.HttpException('fetching Quotes faild', common_1.HttpStatus.BAD_REQUEST);
             }
@@ -73,10 +74,12 @@ let AlchemyService = AlchemyService_1 = class AlchemyService {
     async userRegister(payload) {
         try {
             const resPayloadGen = await this.urlSigner.payloadGenrator(payload, urls_1.USERREGISTER.METHODTYPE, urls_1.USERREGISTER.REQUESTURL);
+            this.logger.warn("userRegister11: ", resPayloadGen, "----", payload, urls_1.USERREGISTER.METHODTYPE, urls_1.USERREGISTER.REQUESTURL);
             if (!resPayloadGen.status) {
                 throw new common_1.HttpException('alchemyUserRegister faild', common_1.HttpStatus.BAD_REQUEST);
             }
             const resUrlExe = await this.urlExecuter.alchemyUserRegister(resPayloadGen.timestamp, payload, resPayloadGen.sign, urls_1.USERREGISTER.METHODTYPE, urls_1.USERREGISTER.REQUESTURL);
+            this.logger.warn("userRegister222: ", resUrlExe, "----", resPayloadGen.timestamp, payload, resPayloadGen.sign, urls_1.USERREGISTER.METHODTYPE, urls_1.USERREGISTER.REQUESTURL);
             if (!resUrlExe.status) {
                 return {
                     "status": false,
@@ -100,10 +103,11 @@ let AlchemyService = AlchemyService_1 = class AlchemyService {
                 throw new common_1.HttpException('alchemyUserStatus faild', common_1.HttpStatus.BAD_REQUEST);
             }
             const resUrlExe = await this.urlExecuter.alchemyUserRegister(resPayloadGen.timestamp, payload, resPayloadGen.sign, urls_1.USERKYCSTATUS.METHODTYPE, urls_1.USERKYCSTATUS.REQUESTURL);
-            if (!resUrlExe.status) {
+            this.logger.warn("resUrlExe: ", resUrlExe);
+            if (typeof resUrlExe.status === "undefined" || !resUrlExe.status) {
                 return {
                     "status": false,
-                    "res": resUrlExe.res
+                    "res": JSON.parse(resUrlExe.res) || resUrlExe.res
                 };
             }
             return {
@@ -118,10 +122,12 @@ let AlchemyService = AlchemyService_1 = class AlchemyService {
     }
     async orderCreate(payload, userEmail) {
         const resPayloadGen = await this.urlSigner.payloadGenrator(payload, urls_1.ORDERCREATION.METHODTYPE, urls_1.ORDERCREATION.REQUESTURL);
+        console.log("step-1", resPayloadGen);
         if (!resPayloadGen.status) {
             throw new common_1.HttpException('alchemyOrderCreate faild', common_1.HttpStatus.BAD_REQUEST);
         }
         const resUrlExe = await this.urlExecuter.authRequest(resPayloadGen.timestamp, payload, resPayloadGen.sign, urls_1.ORDERCREATION.METHODTYPE, urls_1.ORDERCREATION.REQUESTURL, userEmail);
+        console.log("step-2", resUrlExe);
         if (!resUrlExe.status) {
             throw new common_1.HttpException({ "status": false, "res": resUrlExe.res }, common_1.HttpStatus.BAD_REQUEST);
         }
@@ -163,7 +169,7 @@ let AlchemyService = AlchemyService_1 = class AlchemyService {
                 network: payload === null || payload === void 0 ? void 0 : payload.network,
                 cryptoAmount: payload === null || payload === void 0 ? void 0 : payload.amount,
                 fiat: payload === null || payload === void 0 ? void 0 : payload.fiat,
-                country: "US",
+                country: "IN",
                 email: userEmail,
                 redirectUrl: process.env.ALCHEMYPAY_SELL_REDIRECT,
                 callbackUrl: process.env.ALCHEMYPAY_SELL_WEBHOOK,

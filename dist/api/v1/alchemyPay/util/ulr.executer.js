@@ -88,6 +88,7 @@ let UrlExecuter = UrlExecuter_1 = class UrlExecuter {
         var _a;
         try {
             const resAuthPayload = await this.urlSigner.payloadGenrator({ "email": userEmail }, urls_1.USERAUTHTOKEN.METHODTYPE, urls_1.USERAUTHTOKEN.REQUESTURL);
+            console.log("step-3", resAuthPayload);
             if (!resAuthPayload.status) {
                 return {
                     "status": false,
@@ -95,6 +96,7 @@ let UrlExecuter = UrlExecuter_1 = class UrlExecuter {
                 };
             }
             const authToken = await this.getAlchemyQuotes(resAuthPayload.timestamp, { "email": userEmail }, resAuthPayload.sign, urls_1.USERAUTHTOKEN.METHODTYPE, urls_1.USERAUTHTOKEN.REQUESTURL);
+            console.log("step-4", authToken);
             if (!authToken.status) {
                 return {
                     "status": false,
@@ -103,6 +105,7 @@ let UrlExecuter = UrlExecuter_1 = class UrlExecuter {
             }
             const authFinder = JSON.parse(authToken.res);
             let data = JSON.stringify(body);
+            console.log("step-5", authFinder);
             let config = {
                 method: method,
                 maxBodyLength: Infinity,
@@ -116,6 +119,7 @@ let UrlExecuter = UrlExecuter_1 = class UrlExecuter {
                 },
                 data: data
             };
+            console.log("step-6", config);
             const response = await axios_1.default.request(config);
             return {
                 "status": (_a = response === null || response === void 0 ? void 0 : response.data) === null || _a === void 0 ? void 0 : _a.success,

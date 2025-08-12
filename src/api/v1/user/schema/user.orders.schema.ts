@@ -27,7 +27,7 @@ export class UserOrder extends Document {
   @Prop({ type: Object, default:{} })
   webhookResponse:Object;
 
-  @Prop({ required: true })
+  @Prop({ required: false })
   deviceFCM:string;
 
   @Prop({ required: true })

@@ -18,6 +18,7 @@ export class AlchemyService {
     async fetchQuotes(payload:JSON){
         try {
             const resPayloadGen=await this.urlSigner.payloadGenrator(payload,QUOTES.METHODTYPE,QUOTES.REQUESTURL)
+            console.log(resPayloadGen)
              if(!resPayloadGen.status)
              {
                 throw new HttpException('fetching Quotes faild', HttpStatus.BAD_REQUEST);
@@ -44,11 +45,13 @@ export class AlchemyService {
     async userRegister(payload){
         try {
             const resPayloadGen=await this.urlSigner.payloadGenrator(payload,USERREGISTER.METHODTYPE,USERREGISTER.REQUESTURL)
+            this.logger.warn("userRegister11: ",resPayloadGen,"----",payload,USERREGISTER.METHODTYPE,USERREGISTER.REQUESTURL)
             if(!resPayloadGen.status)
                 {
                    throw new HttpException('alchemyUserRegister faild', HttpStatus.BAD_REQUEST);
                 }
                const resUrlExe=await this.urlExecuter.alchemyUserRegister(resPayloadGen.timestamp,payload,resPayloadGen.sign,USERREGISTER.METHODTYPE,USERREGISTER.REQUESTURL)
+               this.logger.warn("userRegister222: ",resUrlExe,"----",resPayloadGen.timestamp,payload,resPayloadGen.sign,USERREGISTER.METHODTYPE,USERREGISTER.REQUESTURL)
                if(!resUrlExe.status)
                {
                    return {
@@ -74,11 +77,12 @@ export class AlchemyService {
                    throw new HttpException('alchemyUserStatus faild', HttpStatus.BAD_REQUEST);
                 }
                const resUrlExe=await this.urlExecuter.alchemyUserRegister(resPayloadGen.timestamp,payload,resPayloadGen.sign,USERKYCSTATUS.METHODTYPE,USERKYCSTATUS.REQUESTURL)
-               if(!resUrlExe.status)
+               this.logger.warn("resUrlExe: ",resUrlExe)
+               if(typeof resUrlExe.status==="undefined"||!resUrlExe.status)
                {
                    return {
                        "status":false,
-                       "res":resUrlExe.res
+                       "res":JSON.parse(resUrlExe.res)||resUrlExe.res
                    }
                }
                return {
@@ -93,10 +97,12 @@ export class AlchemyService {
 
     async orderCreate(payload: any, userEmail: string) {
         const resPayloadGen = await this.urlSigner.payloadGenrator(payload, ORDERCREATION.METHODTYPE, ORDERCREATION.REQUESTURL)
+        console.log("step-1",resPayloadGen)
         if (!resPayloadGen.status) {
             throw new HttpException('alchemyOrderCreate faild', HttpStatus.BAD_REQUEST);
         }
         const resUrlExe = await this.urlExecuter.authRequest(resPayloadGen.timestamp, payload, resPayloadGen.sign, ORDERCREATION.METHODTYPE, ORDERCREATION.REQUESTURL, userEmail)
+        console.log("step-2",resUrlExe)
         if (!resUrlExe.status) {
             throw new HttpException({ "status": false, "res": resUrlExe.res}, HttpStatus.BAD_REQUEST);
         }
@@ -150,7 +156,7 @@ export class AlchemyService {
             network: payload?.network,
             cryptoAmount: payload?.amount,
             fiat: payload?.fiat,
-            country:"US",
+            country:"IN",
             email:userEmail,
             redirectUrl:process.env.ALCHEMYPAY_SELL_REDIRECT,
             callbackUrl:process.env.ALCHEMYPAY_SELL_WEBHOOK,

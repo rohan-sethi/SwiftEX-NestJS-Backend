@@ -76,6 +76,7 @@ export class UrlExecuter {
     async authRequest(timestamp, body, signKey,method,url,userEmail): Promise<any> {
         try {
             const resAuthPayload = await this.urlSigner.payloadGenrator({ "email": userEmail }, USERAUTHTOKEN.METHODTYPE, USERAUTHTOKEN.REQUESTURL)
+        console.log("step-3",resAuthPayload)
             if (!resAuthPayload.status) {
                 return {
                     "status":false,
@@ -83,6 +84,7 @@ export class UrlExecuter {
                 }
             }
             const authToken=await this.getAlchemyQuotes(resAuthPayload.timestamp,{ "email": userEmail },resAuthPayload.sign,USERAUTHTOKEN.METHODTYPE,USERAUTHTOKEN.REQUESTURL)
+            console.log("step-4",authToken)
             if (!authToken.status) {
                 return {
                     "status":false,
@@ -91,7 +93,7 @@ export class UrlExecuter {
             }
             const authFinder=JSON.parse(authToken.res);
             let data = JSON.stringify(body);
-
+            console.log("step-5",authFinder)
             let config = {
                 method: method,
                 maxBodyLength: Infinity,
@@ -106,6 +108,7 @@ export class UrlExecuter {
                 data: data
             };
 
+            console.log("step-6",config)
             const response=await axios.request(config)
             return {
                 "status":response?.data?.success,

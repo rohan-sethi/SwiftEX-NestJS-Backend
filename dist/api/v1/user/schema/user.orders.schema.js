@@ -70,7 +70,7 @@ __decorate([
     __metadata("design:type", Object)
 ], UserOrder.prototype, "webhookResponse", void 0);
 __decorate([
-    (0, mongoose_1.Prop)({ required: true }),
+    (0, mongoose_1.Prop)({ required: false }),
     __metadata("design:type", String)
 ], UserOrder.prototype, "deviceFCM", void 0);
 __decorate([
